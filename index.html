@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HogarOS — Portal</title>
+<style>
+  :root {
+    --fondo: #0f1117;
+    --superficie: #1a1d27;
+    --superficie2: #22263a;
+    --borde: #2e3347;
+    --texto: #e2e8f0;
+    --textotenue: #8892a4;
+    --azul: #4f8ef7;
+    --verde: #34d399;
+    --amarillo: #fbbf24;
+    --rojo: #f87171;
+    --morado: #a78bfa;
+    --naranja: #fb923c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--fondo); color: var(--texto); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
+
+  /* Cabecera */
+  header {
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borde);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .logo { font-size: 20px; font-weight: 800; color: var(--azul); letter-spacing: -0.5px; }
+  .logo span { color: var(--texto); }
+  .nav { display: flex; gap: 4px; margin-left: 24px; }
+  .nav-item {
+    padding: 6px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--textotenue);
+    transition: all .15s;
+  }
+  .nav-item:hover { background: var(--superficie2); color: var(--texto); }
+  .nav-item.activo { background: var(--superficie2); color: var(--texto); font-weight: 600; }
+  .espaciador { flex: 1; }
+  .hora { font-size: 13px; color: var(--textotenue); font-family: monospace; }
+
+  /* Bienvenida */
+  .bienvenida {
+    background: linear-gradient(135deg, #1a1d27 0%, #1e2235 100%);
+    border-bottom: 1px solid var(--borde);
+    padding: 28px 32px;
+  }
+  .bienvenida h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .bienvenida p { color: var(--textotenue); font-size: 13px; }
+  .fecha { color: var(--azul); font-weight: 600; }
+
+  /* Main */
+  main { padding: 28px 32px; max-width: 1300px; }
+
+  /* Sección */
+  .titulo-seccion {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--textotenue);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 14px;
+    margin-top: 28px;
+  }
+  .titulo-seccion:first-child { margin-top: 0; }
+
+  /* Módulos principales */
+  .cuadricula-modulos { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+
+  .modulo {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+  }
+  .modulo:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  .modulo.red:hover { border-color: var(--azul); }
+  .modulo.finanzas:hover { border-color: var(--verde); }
+
+  .modulo-cabecera {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--borde);
+  }
+  .modulo-icono-nombre { display: flex; align-items: center; gap: 12px; }
+  .modulo-icono {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .icono-red { background: rgba(79,142,247,.15); }
+  .icono-finanzas { background: rgba(52,211,153,.15); }
+
+  .modulo-titulo { font-size: 16px; font-weight: 700; }
+  .modulo-subtitulo { font-size: 11px; color: var(--textotenue); margin-top: 2px; }
+  .estado-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 5px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .badge-activo { background: rgba(52,211,153,.15); color: var(--verde); }
+  .badge-alerta { background: rgba(248,113,113,.15); color: var(--rojo); }
+
+  /* Widgets del módulo */
+  .modulo-widgets { padding: 14px 20px; display: flex; gap: 12px; }
+  .widget { flex: 1; background: var(--superficie2); border-radius: 8px; padding: 12px; }
+  .widget-valor { font-size: 22px; font-weight: 700; }
+  .widget-etiqueta { font-size: 10px; color: var(--textotenue); margin-top: 3px; text-transform: uppercase; letter-spacing: .05em; }
+
+  .modulo-footer {
+    padding: 10px 20px;
+    border-top: 1px solid var(--borde);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--textotenue);
+  }
+  .btn-abrir {
+    background: var(--superficie2);
+    border: 1px solid var(--borde);
+    color: var(--texto);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-abrir:hover { background: var(--borde); }
+
+  /* Alertas recientes */
+  .lista-alertas { display: flex; flex-direction: column; gap: 8px; }
+  .alerta-item {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+  }
+  .alerta-item.critica { border-left: 3px solid var(--rojo); }
+  .alerta-item.info { border-left: 3px solid var(--azul); }
+  .alerta-item.ok { border-left: 3px solid var(--verde); }
+  .alerta-texto { flex: 1; }
+  .alerta-tiempo { font-size: 11px; color: var(--textotenue); white-space: nowrap; }
+
+  /* Accesos rápidos */
+  .cuadricula-accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .acceso {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    text-align: center;
+  }
+  .acceso:hover { background: var(--superficie2); border-color: var(--azul); }
+  .acceso-icono { font-size: 24px; margin-bottom: 8px; }
+  .acceso-nombre { font-size: 12px; font-weight: 600; }
+  .acceso-desc { font-size: 11px; color: var(--textotenue); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Hogar<span>OS</span></div>
+  <nav class="nav">
+    <div class="nav-item activo">🏠 Inicio</div>
+    <div class="nav-item">🔍 Red</div>
+    <div class="nav-item">💰 Finanzas</div>
+  </nav>
+  <div class="espaciador"></div>
+  <div class="hora" id="reloj">—</div>
+</header>
+
+<div class="bienvenida">
+  <h1>Buenas tardes 👋</h1>
+  <p>Hoy es <span class="fecha" id="fecha-hoy">—</span> · Todo funcionando correctamente</p>
+</div>
+
+<main>
+  <div class="titulo-seccion">Módulos</div>
+  <div class="cuadricula-modulos">
+
+    <!-- NetSentinel -->
+    <div class="modulo red">
+      <div class="modulo-cabecera">
+        <div class="modulo-icono-nombre">
+          <div class="modulo-icono icono-red">🔍</div>
+          <div>
+            <div class="modulo-titulo">NetSentinel</div>
+            <div class="modulo-subtitulo">Monitor de red local</div>
+          </div>
+        </div>
+        <span class="estado-badge badge-alerta">⚠ 2 nuevos</span>
+      </div>
+      <div class="modulo-widgets">
+        <div class="widget">
+          <div class="widget-valor" style="color:var(--azul)">20</div>
+          <div class="widget-etiqueta">Dispositivos activos</div>
+        </div>
+        <div class="widget">
+          <div class="widget-valor" style="color:var(--verde)">15</div>
+          <div class="widget-etiqueta">Confiables</div>
+        </div>
+        <div class="widget">
+          <div class="widget-valor" style="color:var(--rojo)">2</div>
+          <div class="widget-etiqueta">Desconocidos</div>
+        </div>
+      </div>
+      <div class="modulo-footer">
+        <span>Último scan: hace 23 min</span>
+        <button class="btn-abrir">Abrir →</button>
+      </div>
+    </div>
+
+    <!-- FiDo -->
+    <div class="modulo finanzas">
+      <div class="modulo-cabecera">
+        <div class="modulo-icono-nombre">
+          <div class="modulo-icono icono-finanzas">💰</div>
+          <div>
+            <div class="modulo-titulo">FiDo</div>
+            <div class="modulo-subtitulo">Finanzas domésticas</div>
+          </div>
+        </div>
+        <span class="estado-badge badge-activo">✔ Al día</span>
+      </div>
+      <div class="modulo-widgets">
+        <div class="widget">
+          <div class="widget-valor" style="color:var(--verde)">+2.340€</div>
+          <div class="widget-etiqueta">Ingresos mes</div>
+        </div>
+        <div class="widget">
+          <div class="widget-valor" style="color:var(--rojo)">-1.187€</div>
+          <div class="widget-etiqueta">Gastos mes</div>
+        </div>
+        <div class="widget">
+          <div class="widget-valor" style="color:var(--amarillo)">+1.153€</div>
+          <div class="widget-etiqueta">Balance</div>
+        </div>
+      </div>
+      <div class="modulo-footer">
+        <span>Actualizado: hace 2h</span>
+        <button class="btn-abrir">Abrir →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="titulo-seccion">Alertas recientes</div>
+  <div class="lista-alertas">
+    <div class="alerta-item critica">
+      <span>⚠️</span>
+      <div class="alerta-texto"><strong>Red:</strong> Dispositivo desconocido detectado — 192.168.31.13 (Redmi-Note-9-Pro)</div>
+      <span class="alerta-tiempo">hace 23 min</span>
+    </div>
+    <div class="alerta-item critica">
+      <span>⚠️</span>
+      <div class="alerta-texto"><strong>Red:</strong> Dispositivo desconocido detectado — 192.168.31.158 (Liteon Technology)</div>
+      <span class="alerta-tiempo">hace 23 min</span>
+    </div>
+    <div class="alerta-item info">
+      <span>💰</span>
+      <div class="alerta-texto"><strong>FiDo:</strong> 3 nuevos movimientos importados desde Revolut</div>
+      <span class="alerta-tiempo">hace 2h</span>
+    </div>
+    <div class="alerta-item ok">
+      <span>✅</span>
+      <div class="alerta-texto"><strong>Red:</strong> Escaneo completado — 20 dispositivos activos, sin cambios</div>
+      <span class="alerta-tiempo">hace 4h</span>
+    </div>
+  </div>
+
+  <div class="titulo-seccion">Accesos rápidos</div>
+  <div class="cuadricula-accesos">
+    <div class="acceso">
+      <div class="acceso-icono">📡</div>
+      <div class="acceso-nombre">Escanear red</div>
+      <div class="acceso-desc">Lanzar ahora</div>
+    </div>
+    <div class="acceso">
+      <div class="acceso-icono">📋</div>
+      <div class="acceso-nombre">Clasificar</div>
+      <div class="acceso-desc">2 pendientes</div>
+    </div>
+    <div class="acceso">
+      <div class="acceso-icono">📥</div>
+      <div class="acceso-nombre">Importar</div>
+      <div class="acceso-desc">Extracto bancario</div>
+    </div>
+    <div class="acceso">
+      <div class="acceso-icono">📊</div>
+      <div class="acceso-nombre">Informe</div>
+      <div class="acceso-desc">Resumen mensual</div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function actualizarReloj() {
+    const ahora = new Date();
+    document.getElementById('reloj').textContent = ahora.toLocaleTimeString('es-ES');
+    document.getElementById('fecha-hoy').textContent = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  actualizarReloj();
+  setInterval(actualizarReloj, 1000);
+</script>
+</body>
+</html>
