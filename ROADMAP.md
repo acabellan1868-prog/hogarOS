@@ -114,23 +114,22 @@ FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
 ### Despliegue en VM 101 (Debian 12)
 
 El código se clona en la VM 101 donde corre Docker.
-Los datos persistentes van en `/mnt/datos/` (ya en uso por FiDo y otros servicios).
+Se sigue la convención ya establecida con FiDo:
 
 ```
-/opt/hogar/          ← código fuente (git clones)
-├── hogarOS/
-├── netsentinel/
-└── FiDo/
-
-/mnt/datos/          ← volúmenes Docker (datos persistentes)
-├── fido/            ← ya existe ✅
-└── netsentinel/     ← a crear
+/mnt/datos/
+├── fido-build/        ← código FiDo        (ya existe ✅)
+├── fido/              ← datos FiDo (fido.db) (ya existe ✅)
+├── hogarOS/           ← código hogarOS      (a clonar)
+├── netsentinel-build/ ← código NetSentinel  (a clonar)
+└── netsentinel/       ← datos NetSentinel   (a crear)
 ```
 
-- [ ] Crear `/opt/hogar/` en la VM 101
-- [ ] Clonar los tres repos en `/opt/hogar/`
-- [ ] Ejecutar `./hogarOS/actualizar.sh` para verificar que el script funciona
-- [ ] Ejecutar `docker compose up -d` desde `/opt/hogar/hogarOS/`
+- [ ] Clonar hogarOS en `/mnt/datos/hogarOS/`
+- [ ] Clonar netsentinel en `/mnt/datos/netsentinel-build/`
+- [ ] Crear `/mnt/datos/netsentinel/` para datos persistentes
+- [ ] Actualizar `actualizar.sh` con las rutas correctas de `/mnt/datos/`
+- [ ] Ejecutar `docker compose up -d` desde `/mnt/datos/hogarOS/`
 - [ ] Probar acceso desde la red local: `http://192.168.31.131`
 - [ ] Configurar reinicio automático (`restart: unless-stopped`)
 

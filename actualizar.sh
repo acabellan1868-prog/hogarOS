@@ -8,8 +8,8 @@
 
 set -e
 
-DIRECTORIO_BASE="$(cd "$(dirname "$0")/.." && pwd)"
-PROYECTOS=("hogarOS" "netsentinel" "FiDo")
+DIRECTORIO_BASE="/mnt/datos"
+PROYECTOS=("hogarOS" "netsentinel-build" "fido-build")
 REINICIAR=false
 
 if [[ "$1" == "--reiniciar" ]]; then
@@ -46,6 +46,7 @@ if [ "$REINICIAR" = true ]; then
   echo "► Reiniciando contenedores Docker..."
   cd "$DIRECTORIO_BASE/hogarOS"
   docker compose restart
+  echo "  Ejecutado desde: $DIRECTORIO_BASE/hogarOS"
   echo "  Contenedores reiniciados."
 fi
 
