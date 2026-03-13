@@ -1,7 +1,7 @@
 # HogarOS — Brainstorming y definición del proyecto
 
 > Documento vivo. Todo lo que se define en las sesiones de trabajo se añade aquí.
-> Última actualización: 2026-03-13 (sesión 2)
+> Última actualización: 2026-03-13 (sesión 3)
 
 ---
 
@@ -199,6 +199,66 @@ Una vez el portal esté operativo, se pueden añadir nuevos módulos fácilmente
 | Clima | Temperatura/humedad de sensores |
 | Tareas | Lista de tareas domésticas compartidas |
 | Energía | Consumo eléctrico desde enchufes Meross |
+
+---
+
+## Design System
+
+### Decisiones tomadas
+
+| Decisión | Elección |
+|---|---|
+| Paleta | Índigo y Arena |
+| Tipografía | System UI (fuente del sistema operativo) |
+| Bordes | Poco redondeados — `border-radius: 4px` |
+| Modos | Claro y oscuro (toggle) |
+
+### Principio
+Todas las apps (hogarOS, NetSentinel, FiDo, futuras) comparten el mismo design system para dar sensación de entorno coherente. Cada app puede tener sus peculiaridades, pero la base visual es la misma.
+
+### Cómo se comparte
+hogarOS sirve un fichero CSS compartido (`/static/hogar.css`) que todas las apps cargan. Si se cambia un color o estilo base, se actualiza en todas automáticamente.
+
+### Paleta — Índigo y Arena
+
+**Modo claro:**
+```css
+--fondo:          #F5F0E8;   /* arena cálido */
+--fondo-tarjeta:  #FDF9F3;   /* blanco roto */
+--fondo-header:   #1E1B2E;   /* índigo oscuro */
+--texto:          #1E1B2E;
+--texto-suave:    rgba(30, 27, 46, 0.5);
+--acento:         #6C63A8;   /* índigo medio */
+--acento-hover:   #5A5296;
+--alerta-fondo:   #EDE8F8;
+--boton-sec:      #EAE4D8;
+```
+
+**Modo oscuro:**
+```css
+--fondo:          #13111E;
+--fondo-tarjeta:  #1E1B2E;
+--fondo-header:   #1E1B2E;
+--texto:          #D4CEEE;
+--texto-suave:    rgba(212, 206, 238, 0.5);
+--acento:         #8B82C4;
+--acento-hover:   #9D95D0;
+--alerta-fondo:   #26223A;
+--boton-sec:      #2A2640;
+```
+
+### Tipografía — System UI
+```css
+--fuente: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+```
+Sin dependencias externas. Usa la fuente del sistema operativo — nítida y de carga instantánea.
+
+### Bordes y forma
+```css
+--radio-sm:  4px;   /* tarjetas, botones, inputs */
+--radio-md:  6px;   /* modales, paneles */
+--radio-lg:  8px;   /* contenedores grandes */
+```
 
 ---
 
