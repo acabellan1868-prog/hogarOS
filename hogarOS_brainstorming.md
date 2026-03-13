@@ -188,17 +188,43 @@ services:
 
 ---
 
+## Integración con Home Assistant
+
+El usuario ya tiene Home Assistant en funcionamiento para domótica. No se duplica — se integra.
+
+### Estrategia: dos niveles
+
+**Nivel 1 — Enlace directo (fase inicial)**
+La tarjeta "Domótica" en el dashboard simplemente enlaza a Home Assistant. Cero trabajo técnico, integración inmediata.
+
+**Nivel 2 — Widget con datos reales (fase futura)**
+hogarOS consulta la API REST de Home Assistant para mostrar un resumen en el dashboard:
+```
+HA API → GET /api/states  →  { temperatura, luces_encendidas, alarma, ... }
+```
+La tarjeta mostraría datos clave (temperatura salón, luces activas, estado alarma) y el click lleva a HA para el control completo.
+
+### Plan
+- **Ahora:** Nivel 1 — enlace directo a Home Assistant
+- **Futuro:** Nivel 2 — widget con datos via API REST de HA (muy fácil de consumir cuando llegue el momento)
+
+### Datos candidatos para el widget HA
+- Temperatura interior (salón u otras estancias)
+- Nº de luces / enchufes encendidos
+- Estado de la alarma
+- Consumo eléctrico en tiempo real
+
+---
+
 ## Ideas futuras de expansión
 
 Una vez el portal esté operativo, se pueden añadir nuevos módulos fácilmente:
 
-| Módulo | Función |
-|---|---|
-| Domótica | Estado de dispositivos Meross/Aqara |
-| Inventario | Lista de productos del hogar |
-| Clima | Temperatura/humedad de sensores |
-| Tareas | Lista de tareas domésticas compartidas |
-| Energía | Consumo eléctrico desde enchufes Meross |
+| Módulo | Función | Notas |
+|---|---|---|
+| Domótica | Estado dispositivos, clima, energía | Via Home Assistant (ya existe) |
+| Inventario | Lista de productos del hogar | — |
+| Tareas | Lista de tareas domésticas compartidas | — |
 
 ---
 
