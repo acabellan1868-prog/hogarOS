@@ -111,9 +111,26 @@ FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
 - [ ] Configurar variables de entorno y volúmenes
 - [ ] Verificar comunicación entre contenedores en local
 
-### Despliegue en Proxmox
-- [ ] Clonar el repositorio hogarOS en el servidor Proxmox
-- [ ] Ejecutar `docker compose up -d` y verificar que todo arranca
+### Despliegue en VM 101 (Debian 12)
+
+El código se clona en la VM 101 donde corre Docker.
+Los datos persistentes van en `/mnt/datos/` (ya en uso por FiDo y otros servicios).
+
+```
+/opt/hogar/          ← código fuente (git clones)
+├── hogarOS/
+├── netsentinel/
+└── FiDo/
+
+/mnt/datos/          ← volúmenes Docker (datos persistentes)
+├── fido/            ← ya existe ✅
+└── netsentinel/     ← a crear
+```
+
+- [ ] Crear `/opt/hogar/` en la VM 101
+- [ ] Clonar los tres repos en `/opt/hogar/`
+- [ ] Ejecutar `./hogarOS/actualizar.sh` para verificar que el script funciona
+- [ ] Ejecutar `docker compose up -d` desde `/opt/hogar/hogarOS/`
 - [ ] Probar acceso desde la red local: `http://192.168.31.131`
 - [ ] Configurar reinicio automático (`restart: unless-stopped`)
 
