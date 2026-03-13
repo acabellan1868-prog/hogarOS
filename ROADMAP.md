@@ -8,16 +8,32 @@
 ## Fase 0 — Preparación de repositorios
 
 - [ ] Crear repositorio `netsentinel` en GitHub (`acabellan1868-prog/netsentinel`)
-- [ ] Vincular el código local de NetSentinel (`E:\Documentos\Desarrollo\claude\network-monitor\`) al nuevo repo
 - [ ] Verificar que el repositorio `FiDo` está actualizado en GitHub
+
+> **Nota:** El código actual de NetSentinel (`network-monitor/`) es una versión muy básica sin Docker ni frontend.
+> Se construye desde cero en la Fase 1. Sirve solo como referencia de la lógica de escaneo existente.
 
 ---
 
-## Fase 1 — APIs de resumen
+## Fase 1 — NetSentinel: construcción desde cero
 
-Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
+NetSentinel no tiene Docker ni frontend. Se construye como app completa e independiente.
 
-### NetSentinel
+### Estructura objetivo
+```
+netsentinel/
+├── src/               ← lógica de escaneo (Node.js + nmap)
+├── frontend/          ← interfaz web propia (HTML/CSS/JS)
+├── Dockerfile
+├── docker-compose.yml ← para desarrollo/pruebas independiente
+└── README.md
+```
+
+### Tareas
+- [ ] Definir y crear la estructura del proyecto
+- [ ] Migrar/reescribir la lógica de escaneo existente
+- [ ] Crear frontend propio (aplicando el design system de hogarOS)
+- [ ] Dockerizar la aplicación
 - [ ] Implementar `GET /api/resumen` que devuelva:
   ```json
   {
@@ -28,6 +44,11 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
   }
   ```
 - [ ] Verificar que el endpoint responde correctamente
+- [ ] Probar la app de forma independiente antes de integrar en hogarOS
+
+## Fase 2 — FiDo: endpoint de resumen
+
+FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
 
 ### FiDo
 - [ ] Implementar `GET /api/resumen` que devuelva:
@@ -43,7 +64,7 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
 
 ---
 
-## Fase 2 — Design System (hogar.css)
+## Fase 3 — Design System (hogar.css)
 
 - [ ] Crear `portal/static/hogar.css` con todas las variables CSS del design system:
   - Paleta Índigo y Arena (modo claro y oscuro)
@@ -58,7 +79,7 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
 
 ---
 
-## Fase 3 — Portal HTML
+## Fase 4 — Portal HTML
 
 - [ ] Crear `portal/index.html` con la estructura principal:
   - Header con logo hogarOS y navegación
@@ -73,7 +94,7 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
 
 ---
 
-## Fase 4 — Infraestructura
+## Fase 5 — Infraestructura
 
 ### Nginx
 - [ ] Crear `nginx.conf` con las reglas de reverse proxy:
@@ -98,7 +119,7 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
 
 ---
 
-## Fase 5 — Pulido y estabilización
+## Fase 6 — Pulido y estabilización
 
 - [ ] Probar en móvil (diseño responsive)
 - [ ] Ajustar tiempos de refresco de los widgets
@@ -107,7 +128,7 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
 
 ---
 
-## Fase 6 — Futuro (sin fecha)
+## Fase 7 — Futuro (sin fecha)
 
 - [ ] **Home Assistant Nivel 2**: widget con datos reales via API REST de HA
   - Temperatura interior
@@ -125,13 +146,13 @@ Cada app debe exponer un endpoint `/api/resumen` que el portal pueda consultar.
 ```
 Fase 0 (repos)
     ↓
-Fase 1 (APIs)  +  Fase 2 (CSS)
-         ↓              ↓
-         Fase 3 (Portal HTML)
-                ↓
-         Fase 4 (Infraestructura)
-                ↓
-         Fase 5 (Pulido)
-                ↓
-         Fase 6 (Futuro)
+Fase 1 (NetSentinel desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
+                              ↓
+                    Fase 4 (Portal HTML)
+                              ↓
+                    Fase 5 (Infraestructura)
+                              ↓
+                    Fase 6 (Pulido)
+                              ↓
+                    Fase 7 (Futuro)
 ```
