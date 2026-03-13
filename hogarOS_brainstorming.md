@@ -208,10 +208,13 @@ Una vez el portal esté operativo, se pueden añadir nuevos módulos fácilmente
 
 | Decisión | Elección |
 |---|---|
-| Paleta | Índigo y Arena |
-| Tipografía | System UI (fuente del sistema operativo) |
+| Paleta | **Índigo y Arena** (opción 3) |
+| Tipografía | **System UI** (fuente del sistema operativo) |
 | Bordes | Poco redondeados — `border-radius: 4px` |
 | Modos | Claro y oscuro (toggle) |
+
+> Las 4 paletas candidatas están disponibles de forma interactiva (con toggle claro/oscuro) en [`demo-paletas.html`](demo-paletas.html).
+> Las 3 tipografías comparadas sobre la paleta elegida están en [`demo-tipografias.html`](demo-tipografias.html).
 
 ### Principio
 Todas las apps (hogarOS, NetSentinel, FiDo, futuras) comparten el mismo design system para dar sensación de entorno coherente. Cada app puede tener sus peculiaridades, pero la base visual es la misma.

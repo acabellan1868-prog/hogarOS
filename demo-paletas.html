@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HogarOS — Demo de paletas</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #111; padding: 2rem; }
+
+    h1 { color: #fff; text-align: center; margin-bottom: 2rem; font-size: 1.4rem; letter-spacing: 0.05em; }
+
+    .paletas { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+    .paleta { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+    .paleta-nombre { background: #222; color: #aaa; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.5rem 1rem; }
+
+    .modo-tabs { display: flex; }
+    .modo-tab {
+      flex: 1; padding: 0.4rem; font-size: 0.75rem; text-align: center;
+      cursor: pointer; border: none; font-family: inherit;
+    }
+    .modo-tab.activo { font-weight: 600; }
+
+    .demo {
+      padding: 1.2rem;
+      display: none;
+    }
+    .demo.visible { display: block; }
+
+    .demo-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;
+      font-size: 0.8rem; font-weight: 600;
+    }
+    .demo-header-nav { display: flex; gap: 0.5rem; }
+    .demo-header-nav span {
+      font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; opacity: 0.7;
+    }
+
+    .demo-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .demo-card {
+      padding: 0.7rem; border-radius: 8px;
+      font-size: 0.7rem;
+    }
+    .demo-card-titulo { font-weight: 600; margin-bottom: 0.3rem; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
+    .demo-card-valor { font-size: 1.2rem; font-weight: 700; }
+    .demo-card-sub { font-size: 0.62rem; opacity: 0.5; margin-top: 0.1rem; }
+
+    .demo-alerta {
+      padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.7rem;
+      margin-bottom: 0.4rem; border-left: 3px solid;
+    }
+
+    .demo-boton {
+      display: inline-block; padding: 0.4rem 0.9rem; border-radius: 6px;
+      font-size: 0.72rem; font-weight: 600; cursor: pointer; border: none;
+      font-family: inherit; margin-right: 0.4rem;
+    }
+
+    /* ========== PALETA 1: Pizarra Azul ========== */
+    /* CLARO */
+    .p1-claro .demo { background: #F0F4F8; color: #1A2B3C; }
+    .p1-claro .demo-header { background: #1A2B3C; color: #fff; }
+    .p1-claro .demo-header-nav span { background: rgba(255,255,255,0.1); color: #fff; }
+    .p1-claro .demo-card { background: #fff; color: #1A2B3C; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .p1-claro .acento { color: #4A90D9; }
+    .p1-claro .demo-alerta { background: #EBF3FC; border-color: #4A90D9; color: #1A2B3C; }
+    .p1-claro .demo-boton-primario { background: #4A90D9; color: #fff; }
+    .p1-claro .demo-boton-secundario { background: #E2EAF4; color: #1A2B3C; }
+    /* OSCURO */
+    .p1-oscuro .demo { background: #0D1B2A; color: #C8D8E8; }
+    .p1-oscuro .demo-header { background: #162436; color: #C8D8E8; }
+    .p1-oscuro .demo-header-nav span { background: rgba(255,255,255,0.08); color: #C8D8E8; }
+    .p1-oscuro .demo-card { background: #162436; color: #C8D8E8; }
+    .p1-oscuro .acento { color: #5BA3E8; }
+    .p1-oscuro .demo-alerta { background: #162F45; border-color: #5BA3E8; color: #C8D8E8; }
+    .p1-oscuro .demo-boton-primario { background: #5BA3E8; color: #0D1B2A; }
+    .p1-oscuro .demo-boton-secundario { background: #1E3248; color: #C8D8E8; }
+    .p1-claro .tab-cl { background: #4A90D9; color: #fff; }
+    .p1-claro .tab-os { background: #1A2B3C; color: #aaa; }
+    .p1-oscuro .tab-cl { background: #162436; color: #aaa; }
+    .p1-oscuro .tab-os { background: #4A90D9; color: #fff; }
+
+    /* ========== PALETA 2: Verde Salvia ========== */
+    .p2-claro .demo { background: #F2F7F4; color: #1C3028; }
+    .p2-claro .demo-header { background: #2D5242; color: #fff; }
+    .p2-claro .demo-header-nav span { background: rgba(255,255,255,0.1); color: #fff; }
+    .p2-claro .demo-card { background: #fff; color: #1C3028; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .p2-claro .acento { color: #6A9E7F; }
+    .p2-claro .demo-alerta { background: #E8F2EC; border-color: #6A9E7F; color: #1C3028; }
+    .p2-claro .demo-boton-primario { background: #6A9E7F; color: #fff; }
+    .p2-claro .demo-boton-secundario { background: #DCF0E5; color: #1C3028; }
+    .p2-oscuro .demo { background: #0E1F18; color: #B8D4C4; }
+    .p2-oscuro .demo-header { background: #162B21; color: #B8D4C4; }
+    .p2-oscuro .demo-header-nav span { background: rgba(255,255,255,0.08); color: #B8D4C4; }
+    .p2-oscuro .demo-card { background: #162B21; color: #B8D4C4; }
+    .p2-oscuro .acento { color: #7DBD96; }
+    .p2-oscuro .demo-alerta { background: #1A3628; border-color: #7DBD96; color: #B8D4C4; }
+    .p2-oscuro .demo-boton-primario { background: #7DBD96; color: #0E1F18; }
+    .p2-oscuro .demo-boton-secundario { background: #1E3D2C; color: #B8D4C4; }
+    .p2-claro .tab-cl { background: #6A9E7F; color: #fff; }
+    .p2-claro .tab-os { background: #2D5242; color: #aaa; }
+    .p2-oscuro .tab-cl { background: #162B21; color: #aaa; }
+    .p2-oscuro .tab-os { background: #6A9E7F; color: #fff; }
+
+    /* ========== PALETA 3: Índigo y Arena ========== */
+    .p3-claro .demo { background: #F5F0E8; color: #1E1B2E; }
+    .p3-claro .demo-header { background: #1E1B2E; color: #F5F0E8; }
+    .p3-claro .demo-header-nav span { background: rgba(255,255,255,0.1); color: #F5F0E8; }
+    .p3-claro .demo-card { background: #FDF9F3; color: #1E1B2E; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .p3-claro .acento { color: #6C63A8; }
+    .p3-claro .demo-alerta { background: #EDE8F8; border-color: #6C63A8; color: #1E1B2E; }
+    .p3-claro .demo-boton-primario { background: #6C63A8; color: #fff; }
+    .p3-claro .demo-boton-secundario { background: #EAE4D8; color: #1E1B2E; }
+    .p3-oscuro .demo { background: #13111E; color: #D4CEEE; }
+    .p3-oscuro .demo-header { background: #1E1B2E; color: #D4CEEE; }
+    .p3-oscuro .demo-header-nav span { background: rgba(255,255,255,0.08); color: #D4CEEE; }
+    .p3-oscuro .demo-card { background: #1E1B2E; color: #D4CEEE; }
+    .p3-oscuro .acento { color: #8B82C4; }
+    .p3-oscuro .demo-alerta { background: #26223A; border-color: #8B82C4; color: #D4CEEE; }
+    .p3-oscuro .demo-boton-primario { background: #8B82C4; color: #13111E; }
+    .p3-oscuro .demo-boton-secundario { background: #2A2640; color: #D4CEEE; }
+    .p3-claro .tab-cl { background: #6C63A8; color: #fff; }
+    .p3-claro .tab-os { background: #1E1B2E; color: #aaa; }
+    .p3-oscuro .tab-cl { background: #1E1B2E; color: #aaa; }
+    .p3-oscuro .tab-os { background: #6C63A8; color: #fff; }
+
+    /* ========== PALETA 4: Carbón y Naranja ========== */
+    .p4-claro .demo { background: #F4F4F6; color: #1C1C1E; }
+    .p4-claro .demo-header { background: #1C1C1E; color: #fff; }
+    .p4-claro .demo-header-nav span { background: rgba(255,255,255,0.1); color: #fff; }
+    .p4-claro .demo-card { background: #fff; color: #1C1C1E; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .p4-claro .acento { color: #E8943A; }
+    .p4-claro .demo-alerta { background: #FDF0E4; border-color: #E8943A; color: #1C1C1E; }
+    .p4-claro .demo-boton-primario { background: #E8943A; color: #fff; }
+    .p4-claro .demo-boton-secundario { background: #EBEBED; color: #1C1C1E; }
+    .p4-oscuro .demo { background: #111113; color: #D4D4D8; }
+    .p4-oscuro .demo-header { background: #1C1C1E; color: #D4D4D8; }
+    .p4-oscuro .demo-header-nav span { background: rgba(255,255,255,0.08); color: #D4D4D8; }
+    .p4-oscuro .demo-card { background: #1C1C1E; color: #D4D4D8; }
+    .p4-oscuro .acento { color: #F0A855; }
+    .p4-oscuro .demo-alerta { background: #2A2018; border-color: #F0A855; color: #D4D4D8; }
+    .p4-oscuro .demo-boton-primario { background: #F0A855; color: #111113; }
+    .p4-oscuro .demo-boton-secundario { background: #2A2A2E; color: #D4D4D8; }
+    .p4-claro .tab-cl { background: #E8943A; color: #fff; }
+    .p4-claro .tab-os { background: #1C1C1E; color: #aaa; }
+    .p4-oscuro .tab-cl { background: #1C1C1E; color: #aaa; }
+    .p4-oscuro .tab-os { background: #E8943A; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <h1>HogarOS — Comparativa de paletas</h1>
+
+  <div class="paletas">
+
+    <!-- PALETA 1 -->
+    <div class="paleta p1-claro" id="p1">
+      <div class="paleta-nombre">1 — Pizarra Azul</div>
+      <div class="modo-tabs">
+        <button class="modo-tab tab-cl activo" onclick="cambiarModo('p1','claro')">Claro</button>
+        <button class="modo-tab tab-os" onclick="cambiarModo('p1','oscuro')">Oscuro</button>
+      </div>
+      <div class="demo visible">
+        <div class="demo-header">
+          <span>🏠 HogarOS</span>
+          <div class="demo-header-nav">
+            <span>Red</span><span>Finanzas</span>
+          </div>
+        </div>
+        <div class="demo-cards">
+          <div class="demo-card">
+            <div class="demo-card-titulo">Dispositivos</div>
+            <div class="demo-card-valor acento">12</div>
+            <div class="demo-card-sub">0 alertas · hace 3 min</div>
+          </div>
+          <div class="demo-card">
+            <div class="demo-card-titulo">Balance</div>
+            <div class="demo-card-valor acento">+842€</div>
+            <div class="demo-card-sub">Marzo 2026</div>
+          </div>
+        </div>
+        <div class="demo-alerta">Escaneo completado sin incidencias</div>
+        <div style="margin-top:0.8rem">
+          <button class="demo-boton demo-boton-primario">Escanear red</button>
+          <button class="demo-boton demo-boton-secundario">Ver informe</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PALETA 2 -->
+    <div class="paleta p2-claro" id="p2">
+      <div class="paleta-nombre">2 — Verde Salvia</div>
+      <div class="modo-tabs">
+        <button class="modo-tab tab-cl activo" onclick="cambiarModo('p2','claro')">Claro</button>
+        <button class="modo-tab tab-os" onclick="cambiarModo('p2','oscuro')">Oscuro</button>
+      </div>
+      <div class="demo visible">
+        <div class="demo-header">
+          <span>🏠 HogarOS</span>
+          <div class="demo-header-nav">
+            <span>Red</span><span>Finanzas</span>
+          </div>
+        </div>
+        <div class="demo-cards">
+          <div class="demo-card">
+            <div class="demo-card-titulo">Dispositivos</div>
+            <div class="demo-card-valor acento">12</div>
+            <div class="demo-card-sub">0 alertas · hace 3 min</div>
+          </div>
+          <div class="demo-card">
+            <div class="demo-card-titulo">Balance</div>
+            <div class="demo-card-valor acento">+842€</div>
+            <div class="demo-card-sub">Marzo 2026</div>
+          </div>
+        </div>
+        <div class="demo-alerta">Escaneo completado sin incidencias</div>
+        <div style="margin-top:0.8rem">
+          <button class="demo-boton demo-boton-primario">Escanear red</button>
+          <button class="demo-boton demo-boton-secundario">Ver informe</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PALETA 3 -->
+    <div class="paleta p3-claro" id="p3">
+      <div class="paleta-nombre">3 — Índigo y Arena</div>
+      <div class="modo-tabs">
+        <button class="modo-tab tab-cl activo" onclick="cambiarModo('p3','claro')">Claro</button>
+        <button class="modo-tab tab-os" onclick="cambiarModo('p3','oscuro')">Oscuro</button>
+      </div>
+      <div class="demo visible">
+        <div class="demo-header">
+          <span>🏠 HogarOS</span>
+          <div class="demo-header-nav">
+            <span>Red</span><span>Finanzas</span>
+          </div>
+        </div>
+        <div class="demo-cards">
+          <div class="demo-card">
+            <div class="demo-card-titulo">Dispositivos</div>
+            <div class="demo-card-valor acento">12</div>
+            <div class="demo-card-sub">0 alertas · hace 3 min</div>
+          </div>
+          <div class="demo-card">
+            <div class="demo-card-titulo">Balance</div>
+            <div class="demo-card-valor acento">+842€</div>
+            <div class="demo-card-sub">Marzo 2026</div>
+          </div>
+        </div>
+        <div class="demo-alerta">Escaneo completado sin incidencias</div>
+        <div style="margin-top:0.8rem">
+          <button class="demo-boton demo-boton-primario">Escanear red</button>
+          <button class="demo-boton demo-boton-secundario">Ver informe</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PALETA 4 -->
+    <div class="paleta p4-claro" id="p4">
+      <div class="paleta-nombre">4 — Carbón y Naranja</div>
+      <div class="modo-tabs">
+        <button class="modo-tab tab-cl activo" onclick="cambiarModo('p4','claro')">Claro</button>
+        <button class="modo-tab tab-os" onclick="cambiarModo('p4','oscuro')">Oscuro</button>
+      </div>
+      <div class="demo visible">
+        <div class="demo-header">
+          <span>🏠 HogarOS</span>
+          <div class="demo-header-nav">
+            <span>Red</span><span>Finanzas</span>
+          </div>
+        </div>
+        <div class="demo-cards">
+          <div class="demo-card">
+            <div class="demo-card-titulo">Dispositivos</div>
+            <div class="demo-card-valor acento">12</div>
+            <div class="demo-card-sub">0 alertas · hace 3 min</div>
+          </div>
+          <div class="demo-card">
+            <div class="demo-card-titulo">Balance</div>
+            <div class="demo-card-valor acento">+842€</div>
+            <div class="demo-card-sub">Marzo 2026</div>
+          </div>
+        </div>
+        <div class="demo-alerta">Escaneo completado sin incidencias</div>
+        <div style="margin-top:0.8rem">
+          <button class="demo-boton demo-boton-primario">Escanear red</button>
+          <button class="demo-boton demo-boton-secundario">Ver informe</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function cambiarModo(paleta, modo) {
+      const el = document.getElementById(paleta);
+      el.className = el.className.replace(/p\d-(claro|oscuro)/, `${paleta}-${modo}`);
+      el.querySelectorAll('.modo-tab').forEach(t => t.classList.remove('activo'));
+      el.querySelector(modo === 'claro' ? '.tab-cl' : '.tab-os').classList.add('activo');
+    }
+  </script>
+
+</body>
+</html>
