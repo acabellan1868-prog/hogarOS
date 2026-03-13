@@ -1,8 +1,7 @@
-# HogarOS — Portal de Gestión Doméstica
+# HogarOS — Brainstorming y definición del proyecto
 
-Portal unificado para gestionar los servicios domésticos desde una única interfaz web, desplegado como contenedor Docker en servidor Proxmox.
-
-![Mockup del portal](captura-portal.png)
+> Documento vivo. Todo lo que se define en las sesiones de trabajo se añade aquí.
+> Última actualización: 2026-03-13 (sesión 2)
 
 ---
 
@@ -14,17 +13,7 @@ En lugar de recordar distintas IPs y puertos (`192.168.31.131:3000` para la red,
 
 ---
 
-## Arquitectura propuesta
-
-```
-hogar/
-├── portal/              ← Nginx: reverse proxy + página de inicio
-├── netsentinel/         ← Node.js (puerto interno 3000)
-├── fido/                ← FastAPI / Python (puerto interno 8080)
-└── docker-compose.yml   ← Un único compose para todo
-```
-
-### Flujo de peticiones
+## Arquitectura
 
 ```
 Usuario → http://192.168.31.131
@@ -40,22 +29,22 @@ Cada aplicación mantiene su **independencia total** — pueden desplegarse y ac
 
 ---
 
-## Aplicaciones integradas
+## Módulos integrados
 
-### 🔍 NetSentinel
-- **Stack:** Node.js, nmap, JSON
-- **Función:** Escaneo periódico de la red local (192.168.31.0/24), detección de dispositivos desconocidos, alertas por Telegram
+### NetSentinel
+- **Stack:** Node.js 20, nmap
 - **Repositorio:** `acabellan1868-prog/netsentinel`
+- **Función:** Escaneo periódico de la red local (192.168.31.0/24), detección de dispositivos desconocidos, alertas por Telegram
 - **Datos que expone al portal:**
   - Nº de dispositivos activos
   - Nº de dispositivos confiables
   - Nº de dispositivos desconocidos (alertas)
   - Timestamp del último escaneo
 
-### 💰 FiDo
-- **Stack:** Python, FastAPI, SQLite
-- **Función:** Gestión de finanzas domésticas — importación de extractos bancarios (CaixaBank, Revolut, Santander), categorización automática, panel de movimientos
+### FiDo
+- **Stack:** Python 3.12, FastAPI, SQLite
 - **Repositorio:** `acabellan1868-prog/FiDo`
+- **Función:** Gestión de finanzas domésticas — importación de extractos bancarios (CaixaBank, Revolut, Santander), categorización automática, panel de movimientos
 - **Datos que expone al portal:**
   - Ingresos del mes actual
   - Gastos del mes actual
@@ -73,9 +62,9 @@ Cada app tiene una tarjeta con sus métricas clave en tiempo real (obtenidas ví
 
 ### 2. Feed de alertas unificado
 Un único listado cronológico con eventos de todas las apps:
-- ⚠️ Dispositivos desconocidos detectados en la red
-- 💰 Nuevos movimientos importados en FiDo
-- ✅ Confirmaciones de escaneos sin incidencias
+- Dispositivos desconocidos detectados en la red
+- Nuevos movimientos importados en FiDo
+- Confirmaciones de escaneos sin incidencias
 
 ### 3. Accesos rápidos
 Botones de acción frecuente sin necesidad de entrar a cada app:
@@ -86,7 +75,67 @@ Botones de acción frecuente sin necesidad de entrar a cada app:
 
 ---
 
+## Estructura de repositorios
+
+**Decisión tomada: repos totalmente independientes, sin submodules ni subcarpetas**
+
+Cada app vive en su propio repo y tiene su propio ciclo de vida. hogarOS **no contiene código de las otras apps** — solo sabe dónde están (IP/puerto) para redirigir tráfico y consultar sus APIs.
+
+```
+acabellan1868-prog/
+├── hogarOS       ← portal + nginx + docker-compose
+├── netsentinel   ← app independiente (pendiente crear repo en GitHub)
+└── FiDo          ← app independiente (ya existe)
+```
+
+El repo hogarOS solo contiene:
+```
+hogarOS/
+├── portal/              ← Frontend del dashboard (HTML/CSS/JS vanilla)
+├── nginx.conf           ← Config del reverse proxy
+├── docker-compose.yml   ← Referencias a imágenes externas, no builds locales
+├── README.md
+└── roadmap.md
+```
+
+---
+
+## Contrato entre apps y portal (API REST)
+
+Cada app expone un endpoint `/api/resumen` que hogarOS consume para el dashboard. Si se quieren mostrar más datos, se amplía el endpoint de la app correspondiente — hogarOS no cambia su arquitectura.
+
+```
+NetSentinel  →  GET /api/resumen  →  { dispositivos, alertas, ultimo_escaneo }
+FiDo         →  GET /api/resumen  →  { ingresos, gastos, balance, mes }
+```
+
+Añadir una nueva app al portal en el futuro:
+1. La nueva app expone `/api/resumen`
+2. Añadir una línea en `nginx.conf`
+3. Añadir una tarjeta en el portal HTML
+
+---
+
+## Contenedores
+
+Un contenedor por servicio, orquestados con docker-compose. Cada contenedor es independiente — FiDo puede correr sin hogarOS, igual que lo hace ahora.
+
+```
+Sin hogarOS:  192.168.31.131:8080  → FiDo        ✅
+              192.168.31.131:3000  → NetSentinel  ✅
+
+Con hogarOS:  192.168.31.131/           → Portal      ✅
+              192.168.31.131/finanzas/  → FiDo        ✅
+              192.168.31.131/red/       → NetSentinel  ✅
+```
+
+Si hogarOS cae, las apps siguen funcionando — solo se pierde el portal central.
+
+---
+
 ## docker-compose.yml propuesto
+
+El compose de hogarOS referencia imágenes ya construidas de cada app (no hace build del código fuente):
 
 ```yaml
 services:
@@ -99,28 +148,21 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./portal:/usr/share/nginx/html:ro
-    depends_on:
-      - netsentinel
-      - fido
     restart: unless-stopped
 
   netsentinel:
-    build: ./netsentinel
+    image: ghcr.io/acabellan1868-prog/netsentinel:latest
     container_name: netsentinel
-    network_mode: host          # necesario para ARP scan
+    network_mode: host
     cap_add:
       - NET_RAW
       - NET_ADMIN
-    volumes:
-      - ./netsentinel/config.json:/app/config.json:ro
-      - ./netsentinel/devices.json:/app/devices.json
-      - ./netsentinel/logs:/app/logs
-    restart: unless-stopped
     environment:
       - TZ=Europe/Madrid
+    restart: unless-stopped
 
   fido:
-    build: ./fido
+    image: ghcr.io/acabellan1868-prog/fido:latest
     container_name: fido
     volumes:
       - /mnt/datos/fido:/app/data
@@ -130,38 +172,18 @@ services:
     restart: unless-stopped
 ```
 
-> **Nota:** NetSentinel usa `network_mode: host` para poder hacer ARP scans en la LAN. En ese modo no puede estar bajo el mismo bridge de Docker que Nginx, por lo que se comunican a través de `localhost`.
+> **Nota:** NetSentinel usa `network_mode: host` para ARP scans en la LAN. Se comunica con Nginx a través de `localhost`.
 
 ---
 
-## Estructura de repositorios
+## Pendientes (próximos pasos)
 
-Hay dos enfoques posibles:
-
-### Opción A — Monorepo
-```
-hogar-os/
-├── portal/          ← HTML/CSS/JS del dashboard
-├── netsentinel/     ← git submodule o copia
-├── fido/            ← git submodule o copia
-└── docker-compose.yml
-```
-
-### Opción B — Repos independientes + compose externo
-Cada app en su propio repositorio, y un repo `hogar-os` solo con el `docker-compose.yml`, la config de Nginx y el portal HTML.
-
-**Recomendación:** Opción B — más limpia, cada app se puede actualizar y versionar de forma independiente.
-
----
-
-## Próximos pasos
-
-- [ ] Crear repositorio `hogar-os` en GitHub
-- [ ] Adaptar `docker-compose.yml` con los tres servicios
-- [ ] Configurar Nginx como reverse proxy
+- [ ] Crear repositorio `netsentinel` en GitHub
 - [ ] Construir portal HTML con widgets reales (consumiendo las APIs de cada app)
 - [ ] Añadir endpoint `/api/resumen` en NetSentinel (ya tiene `/api/estado`)
 - [ ] Añadir endpoint `/api/resumen` en FiDo (resumen del mes actual)
+- [ ] Configurar Nginx como reverse proxy
+- [ ] Adaptar `docker-compose.yml` con los tres servicios
 - [ ] Desplegar en Proxmox y verificar comunicación entre contenedores
 
 ---
@@ -172,11 +194,11 @@ Una vez el portal esté operativo, se pueden añadir nuevos módulos fácilmente
 
 | Módulo | Función |
 |---|---|
-| 🏠 Domótica | Estado de dispositivos Meross/Aqara |
-| 📦 Inventario | Lista de productos del hogar |
-| 🌡️ Clima | Temperatura/humedad de sensores |
-| 📅 Tareas | Lista de tareas domésticas compartidas |
-| 🔋 Energía | Consumo eléctrico desde enchufes Meross |
+| Domótica | Estado de dispositivos Meross/Aqara |
+| Inventario | Lista de productos del hogar |
+| Clima | Temperatura/humedad de sensores |
+| Tareas | Lista de tareas domésticas compartidas |
+| Energía | Consumo eléctrico desde enchufes Meross |
 
 ---
 
