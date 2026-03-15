@@ -45,7 +45,8 @@ redo/
 ### Tareas
 - [ ] 🤖 Definir y crear la estructura del proyecto
 - [ ] 🤖 Migrar/reescribir la lógica de escaneo existente
-- [ ] 🤖 Integrar notificaciones via NTFY (topic: `hogaros-alertas`)
+- [ ] 🤖 Integrar notificaciones via NTFY (topic: `hogaros-3ca6f61b`)
+- [ ] 🤖 Implementar escaneos periódicos con APScheduler
 - [ ] 🤖 Crear frontend propio (aplicando el design system de hogarOS)
 - [ ] 🤖 Dockerizar la aplicación
 - [ ] 🤖 Implementar `GET /api/resumen` que devuelva:
@@ -158,7 +159,30 @@ Se sigue la convención ya establecida con FiDo:
 
 ---
 
-## Fase 7 — Futuro (sin fecha)
+## Fase 7 — Estrategia de backups
+
+Prioridad inmediata tras el despliegue. No solo bases de datos — backup integral de todo el entorno.
+
+### Alcance
+
+| Qué | Cómo | Frecuencia prevista |
+|-----|------|---------------------|
+| VMs Proxmox | Snapshots/backups programados de Proxmox | Semanal |
+| Volúmenes Docker (`/mnt/datos/`) | Script de copia a destino externo (NAS, disco, nube) | Diario |
+| Bases de datos SQLite | `sqlite3 <db> ".backup <destino>"` | Diario |
+| Código fuente | Ya en GitHub (repos) | Automático con cada push |
+
+### Tareas
+- [ ] 🤖 Diseñar estrategia de backup integral
+- [ ] 🤖 Crear script de backup automatizado para volúmenes y bases de datos
+- [ ] 👤 Configurar backups programados de VMs en Proxmox
+- [ ] 👤 Definir destino de los backups (NAS, disco externo, nube)
+- [ ] 👤 Programar cron de ejecución del script de backup
+- [ ] 👤 Verificar restauración de un backup (prueba de recuperación)
+
+---
+
+## Fase 8 — Futuro (sin fecha)
 
 - [ ] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA
   - Temperatura interior
@@ -168,7 +192,8 @@ Se sigue la convención ya establecida con FiDo:
 - [ ] 🤖 Módulo Inventario del hogar
 - [ ] 🤖 Módulo Tareas domésticas compartidas
 - [ ] 🤖 Notificaciones push en el portal
-- [ ] 👤 Instalar app NTFY en el móvil y suscribirse al topic `hogaros-alertas`
+- [ ] 👤 Instalar app NTFY en el móvil y suscribirse al topic `hogaros-3ca6f61b`
+- [ ] 🤖 Self-hosting de ntfy en la VM (mayor privacidad)
 
 ---
 
@@ -185,5 +210,7 @@ Fase 1 (ReDo desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
                               ↓
                     Fase 6 (Pulido)
                               ↓
-                    Fase 7 (Futuro)
+                    Fase 7 (Backups)  ← prioridad post-despliegue
+                              ↓
+                    Fase 8 (Futuro)
 ```

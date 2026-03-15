@@ -227,8 +227,11 @@ Se usa **NTFY** como sistema de notificaciones push para el móvil. Cada app pub
 | Parámetro | Valor |
 |-----------|-------|
 | Servidor | `ntfy.sh` (público) |
-| Topic | `hogaros-alertas` |
-| URL completa | `https://ntfy.sh/hogaros-alertas` |
+| Topic | `hogaros-3ca6f61b` |
+| URL completa | `https://ntfy.sh/hogaros-3ca6f61b` |
+
+> **Seguridad:** Se usa un nombre de topic aleatorio para evitar que terceros puedan leer o publicar alertas falsas.
+> En el futuro se valorará self-hosting de ntfy en la propia VM para control total.
 
 ### Uso actual
 - **ReDo** publica alertas de dispositivos desconocidos detectados en la red y resultados de escaneos
@@ -236,11 +239,42 @@ Se usa **NTFY** como sistema de notificaciones push para el móvil. Cada app pub
 ### Uso futuro
 - **FiDo** podría publicar alertas de presupuesto superado, movimientos sospechosos, etc.
 - Cualquier nueva app del ecosistema usa el mismo topic, identificándose con un título/tag distinto
+- Self-hosting de ntfy en la VM para mayor privacidad y control
 
 ### Suscripción en el móvil
 1. Instalar la app **NTFY** (Android/iOS)
-2. Suscribirse al topic `hogaros-alertas`
+2. Suscribirse al topic `hogaros-3ca6f61b`
 3. Recibir notificaciones push de todas las apps de hogarOS
+
+---
+
+## Escaneos periódicos — APScheduler
+
+### Decisión tomada
+
+ReDo necesita lanzar escaneos de red automáticamente cada X minutos. Se usa **APScheduler** (librería Python) dentro del propio proceso FastAPI.
+
+- Todo queda dentro del contenedor, sin dependencias externas
+- Se configura el intervalo via variable de entorno (ej. `REDO_SCAN_INTERVAL=5` para cada 5 minutos)
+- El scheduler arranca con FastAPI y se detiene al parar el contenedor
+- Permite también escaneos manuales via `POST /api/escanear`
+
+---
+
+## Estrategia de backups
+
+### Decisión tomada
+
+Los backups son críticos y deben cubrir **todo el entorno**, no solo las bases de datos. Se diseñará una estrategia integral una vez que hogarOS esté desplegado y funcionando.
+
+### Alcance previsto
+- **VMs de Proxmox** — snapshots/backups programados de las máquinas virtuales
+- **Volúmenes Docker** — backup de `/mnt/datos/` completo (incluye datos de FiDo, ReDo, etc.)
+- **Bases de datos SQLite** — dumps periódicos (via `sqlite3 .backup`)
+- **Configuración** — repos en GitHub ya actúan como backup del código
+
+### Estado actual
+Se realizan copias manuales esporádicas. Esta fase se abordará como prioridad tras el despliegue.
 
 ---
 
