@@ -32,7 +32,7 @@ Cada aplicación mantiene su **independencia total** — pueden desplegarse y ac
 ## Módulos integrados
 
 ### ReDo (Red Doméstica)
-- **Stack:** Node.js 20, nmap
+- **Stack:** Python 3.12, FastAPI, python-nmap, SQLite
 - **Repositorio:** `acabellan1868-prog/redo`
 - **Función:** Escaneo periódico de la red local (192.168.31.0/24), detección de dispositivos desconocidos, gestión de dispositivos conectados, alertas via NTFY
 - **Datos que expone al portal:**
@@ -327,5 +327,5 @@ Sin dependencias externas. Usa la fuente del sistema operativo — nítida y de 
 | Contenedores | Docker + Compose |
 | Reverse proxy | Nginx Alpine |
 | Portal frontend | HTML + CSS + JS vanilla (sin frameworks) |
-| ReDo | Node.js 20, nmap |
+| ReDo | Python 3.12, FastAPI, python-nmap, SQLite |
 | FiDo | Python 3.12, FastAPI, SQLite |

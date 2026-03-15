@@ -29,8 +29,14 @@ ReDo no tiene Docker ni frontend. Se construye como app completa e independiente
 ### Estructura objetivo
 ```
 redo/
-├── src/               ← lógica de escaneo (Node.js + nmap)
+├── app/               ← lógica de escaneo (Python + python-nmap)
+│   ├── main.py        ← FastAPI app
+│   ├── scanner.py     ← lógica de escaneo con python-nmap
+│   ├── notifier.py    ← integración NTFY
+│   ├── models.py      ← modelos SQLite
+│   └── config.py      ← configuración
 ├── frontend/          ← interfaz web propia (HTML/CSS/JS)
+├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml ← para desarrollo/pruebas independiente
 └── README.md
