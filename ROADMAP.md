@@ -46,6 +46,7 @@ redo/
 - [ ] 🤖 Definir y crear la estructura del proyecto
 - [ ] 🤖 Migrar/reescribir la lógica de escaneo existente
 - [ ] 🤖 Integrar notificaciones via NTFY (topic: `hogaros-3ca6f61b`)
+- [ ] 👤 Suscribirse al topic `hogaros-3ca6f61b` en la app NTFY del móvil
 - [ ] 🤖 Implementar escaneos periódicos con APScheduler
 - [ ] 🤖 Crear frontend propio (aplicando el design system de hogarOS)
 - [ ] 🤖 Dockerizar la aplicación
@@ -192,7 +193,6 @@ Prioridad inmediata tras el despliegue. No solo bases de datos — backup integr
 - [ ] 🤖 Módulo Inventario del hogar
 - [ ] 🤖 Módulo Tareas domésticas compartidas
 - [ ] 🤖 Notificaciones push en el portal
-- [ ] 👤 Instalar app NTFY en el móvil y suscribirse al topic `hogaros-3ca6f61b`
 - [ ] 🤖 Self-hosting de ntfy en la VM (mayor privacidad)
 
 ---
