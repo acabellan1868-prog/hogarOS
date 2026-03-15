@@ -14,7 +14,7 @@
 
 ## Fase 0 — Preparación de repositorios
 
-- [ ] 👤 Crear repositorio `redo` en GitHub (`acabellan1868-prog/redo`)
+- [x] 👤 Crear repositorio `ReDo` en GitHub (`acabellan1868-prog/ReDo`)
 - [ ] 👤 Verificar que el repositorio `FiDo` está actualizado en GitHub
 
 > **Nota:** El código actual de ReDo (`network-monitor/`) es una versión muy básica sin Docker ni frontend.

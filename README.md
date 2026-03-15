@@ -14,7 +14,7 @@ HogarOS es un portal *self-hosted* que integra las herramientas de gestión dom�
 
 | Módulo | Stack | Función |
 |---|---|---|
-| 🔍 [ReDo](https://github.com/acabellan1868-prog/redo) | Python · FastAPI · nmap | Red doméstica, detección de intrusos, alertas NTFY |
+| 🔍 [ReDo](https://github.com/acabellan1868-prog/ReDo) | Python · FastAPI · nmap | Red doméstica, detección de intrusos, alertas NTFY |
 | 💰 [FiDo](https://github.com/acabellan1868-prog/FiDo) | Python · FastAPI · SQLite | Finanzas domésticas, extractos bancarios, categorización |
 
 ---

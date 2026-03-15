@@ -33,7 +33,7 @@ Cada aplicación mantiene su **independencia total** — pueden desplegarse y ac
 
 ### ReDo (Red Doméstica)
 - **Stack:** Python 3.12, FastAPI, python-nmap, SQLite
-- **Repositorio:** `acabellan1868-prog/redo`
+- **Repositorio:** `acabellan1868-prog/ReDo`
 - **Función:** Escaneo periódico de la red local (192.168.31.0/24), detección de dispositivos desconocidos, gestión de dispositivos conectados, alertas via NTFY
 - **Datos que expone al portal:**
   - Nº de dispositivos activos
@@ -151,7 +151,7 @@ services:
     restart: unless-stopped
 
   redo:
-    image: ghcr.io/acabellan1868-prog/redo:latest
+    image: ghcr.io/acabellan1868-prog/ReDo:latest
     container_name: redo
     network_mode: host
     cap_add:
