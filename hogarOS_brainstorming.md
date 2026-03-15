@@ -1,13 +1,13 @@
 # HogarOS — Brainstorming y definición del proyecto
 
 > Documento vivo. Todo lo que se define en las sesiones de trabajo se añade aquí.
-> Última actualización: 2026-03-13 (sesión 3)
+> Última actualización: 2026-03-15 (sesión 4)
 
 ---
 
 ## Idea y origen
 
-Durante el desarrollo de **NetSentinel** (monitor de red local) y teniendo ya en funcionamiento **FiDo** (gestión de finanzas domésticas), surgió la idea de unificar ambas herramientas en un único portal accesible desde la red local.
+Durante el desarrollo de **ReDo** (red doméstica) y teniendo ya en funcionamiento **FiDo** (gestión de finanzas domésticas), surgió la idea de unificar ambas herramientas en un único portal accesible desde la red local.
 
 En lugar de recordar distintas IPs y puertos (`192.168.31.131:3000` para la red, `192.168.31.131:8080` para finanzas), un portal central tipo _home dashboard_ concentra todo bajo una única URL y ofrece una visión global del estado del hogar.
 
@@ -21,7 +21,7 @@ Usuario → http://192.168.31.131
               ▼
            Nginx (80)
            ├── /          → Portal (inicio con widgets)
-           ├── /red/      → NetSentinel
+           ├── /red/      → ReDo
            └── /finanzas/ → FiDo
 ```
 
@@ -31,10 +31,10 @@ Cada aplicación mantiene su **independencia total** — pueden desplegarse y ac
 
 ## Módulos integrados
 
-### NetSentinel
+### ReDo (Red Doméstica)
 - **Stack:** Node.js 20, nmap
-- **Repositorio:** `acabellan1868-prog/netsentinel`
-- **Función:** Escaneo periódico de la red local (192.168.31.0/24), detección de dispositivos desconocidos, alertas por Telegram
+- **Repositorio:** `acabellan1868-prog/redo`
+- **Función:** Escaneo periódico de la red local (192.168.31.0/24), detección de dispositivos desconocidos, gestión de dispositivos conectados, alertas via NTFY
 - **Datos que expone al portal:**
   - Nº de dispositivos activos
   - Nº de dispositivos confiables
@@ -62,7 +62,7 @@ Cada app tiene una tarjeta con sus métricas clave en tiempo real (obtenidas ví
 
 ### 2. Feed de alertas unificado
 Un único listado cronológico con eventos de todas las apps:
-- Dispositivos desconocidos detectados en la red
+- Dispositivos desconocidos detectados en la red (también notificados via NTFY)
 - Nuevos movimientos importados en FiDo
 - Confirmaciones de escaneos sin incidencias
 
@@ -84,7 +84,7 @@ Cada app vive en su propio repo y tiene su propio ciclo de vida. hogarOS **no co
 ```
 acabellan1868-prog/
 ├── hogarOS       ← portal + nginx + docker-compose
-├── netsentinel   ← app independiente (pendiente crear repo en GitHub)
+├── redo          ← app independiente (pendiente crear repo en GitHub)
 └── FiDo          ← app independiente (ya existe)
 ```
 
@@ -105,8 +105,8 @@ hogarOS/
 Cada app expone un endpoint `/api/resumen` que hogarOS consume para el dashboard. Si se quieren mostrar más datos, se amplía el endpoint de la app correspondiente — hogarOS no cambia su arquitectura.
 
 ```
-NetSentinel  →  GET /api/resumen  →  { dispositivos, alertas, ultimo_escaneo }
-FiDo         →  GET /api/resumen  →  { ingresos, gastos, balance, mes }
+ReDo  →  GET /api/resumen  →  { dispositivos, alertas, ultimo_escaneo }
+FiDo  →  GET /api/resumen  →  { ingresos, gastos, balance, mes }
 ```
 
 Añadir una nueva app al portal en el futuro:
@@ -121,12 +121,12 @@ Añadir una nueva app al portal en el futuro:
 Un contenedor por servicio, orquestados con docker-compose. Cada contenedor es independiente — FiDo puede correr sin hogarOS, igual que lo hace ahora.
 
 ```
-Sin hogarOS:  192.168.31.131:8080  → FiDo        ✅
-              192.168.31.131:3000  → NetSentinel  ✅
+Sin hogarOS:  192.168.31.131:8080  → FiDo   ✅
+              192.168.31.131:3000  → ReDo   ✅
 
-Con hogarOS:  192.168.31.131/           → Portal      ✅
-              192.168.31.131/finanzas/  → FiDo        ✅
-              192.168.31.131/red/       → NetSentinel  ✅
+Con hogarOS:  192.168.31.131/           → Portal  ✅
+              192.168.31.131/finanzas/  → FiDo    ✅
+              192.168.31.131/red/       → ReDo    ✅
 ```
 
 Si hogarOS cae, las apps siguen funcionando — solo se pierde el portal central.
@@ -150,9 +150,9 @@ services:
       - ./portal:/usr/share/nginx/html:ro
     restart: unless-stopped
 
-  netsentinel:
-    image: ghcr.io/acabellan1868-prog/netsentinel:latest
-    container_name: netsentinel
+  redo:
+    image: ghcr.io/acabellan1868-prog/redo:latest
+    container_name: redo
     network_mode: host
     cap_add:
       - NET_RAW
@@ -172,15 +172,15 @@ services:
     restart: unless-stopped
 ```
 
-> **Nota:** NetSentinel usa `network_mode: host` para ARP scans en la LAN. Se comunica con Nginx a través de `localhost`.
+> **Nota:** ReDo usa `network_mode: host` para ARP scans en la LAN. Se comunica con Nginx a través de `localhost`.
 
 ---
 
 ## Pendientes (próximos pasos)
 
-- [ ] Crear repositorio `netsentinel` en GitHub
+- [ ] Crear repositorio `redo` en GitHub
 - [ ] Construir portal HTML con widgets reales (consumiendo las APIs de cada app)
-- [ ] Añadir endpoint `/api/resumen` en NetSentinel (ya tiene `/api/estado`)
+- [ ] Añadir endpoint `/api/resumen` en ReDo (ya tiene `/api/estado`)
 - [ ] Añadir endpoint `/api/resumen` en FiDo (resumen del mes actual)
 - [ ] Configurar Nginx como reverse proxy
 - [ ] Adaptar `docker-compose.yml` con los tres servicios
@@ -216,6 +216,34 @@ La tarjeta mostraría datos clave (temperatura salón, luces activas, estado ala
 
 ---
 
+## Notificaciones — NTFY
+
+### Decisión tomada
+
+Se usa **NTFY** como sistema de notificaciones push para el móvil. Cada app publica en un topic compartido y el usuario se suscribe desde la app NTFY en el móvil.
+
+### Configuración
+
+| Parámetro | Valor |
+|-----------|-------|
+| Servidor | `ntfy.sh` (público) |
+| Topic | `hogaros-alertas` |
+| URL completa | `https://ntfy.sh/hogaros-alertas` |
+
+### Uso actual
+- **ReDo** publica alertas de dispositivos desconocidos detectados en la red y resultados de escaneos
+
+### Uso futuro
+- **FiDo** podría publicar alertas de presupuesto superado, movimientos sospechosos, etc.
+- Cualquier nueva app del ecosistema usa el mismo topic, identificándose con un título/tag distinto
+
+### Suscripción en el móvil
+1. Instalar la app **NTFY** (Android/iOS)
+2. Suscribirse al topic `hogaros-alertas`
+3. Recibir notificaciones push de todas las apps de hogarOS
+
+---
+
 ## Ideas futuras de expansión
 
 Una vez el portal esté operativo, se pueden añadir nuevos módulos fácilmente:
@@ -243,7 +271,7 @@ Una vez el portal esté operativo, se pueden añadir nuevos módulos fácilmente
 > Las 3 tipografías comparadas sobre la paleta elegida están en [`demo-tipografias.html`](demo-tipografias.html).
 
 ### Principio
-Todas las apps (hogarOS, NetSentinel, FiDo, futuras) comparten el mismo design system para dar sensación de entorno coherente. Cada app puede tener sus peculiaridades, pero la base visual es la misma.
+Todas las apps (hogarOS, ReDo, FiDo, futuras) comparten el mismo design system para dar sensación de entorno coherente. Cada app puede tener sus peculiaridades, pero la base visual es la misma.
 
 ### Cómo se comparte
 hogarOS sirve un fichero CSS compartido (`/static/hogar.css`) que todas las apps cargan. Si se cambia un color o estilo base, se actualiza en todas automáticamente.
@@ -299,5 +327,5 @@ Sin dependencias externas. Usa la fuente del sistema operativo — nítida y de 
 | Contenedores | Docker + Compose |
 | Reverse proxy | Nginx Alpine |
 | Portal frontend | HTML + CSS + JS vanilla (sin frameworks) |
-| NetSentinel | Node.js 20, nmap |
+| ReDo | Node.js 20, nmap |
 | FiDo | Python 3.12, FastAPI, SQLite |

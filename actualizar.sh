@@ -9,7 +9,7 @@
 set -e
 
 DIRECTORIO_BASE="/mnt/datos"
-PROYECTOS=("hogarOS" "netsentinel-build" "fido-build")
+PROYECTOS=("hogarOS" "redo-build" "fido-build")
 REINICIAR=false
 
 if [[ "$1" == "--reiniciar" ]]; then

@@ -14,7 +14,7 @@ HogarOS es un portal *self-hosted* que integra las herramientas de gestión dom�
 
 | Módulo | Stack | Función |
 |---|---|---|
-| 🔍 [NetSentinel](https://github.com/acabellan1868-prog/netsentinel) | Node.js · nmap | Monitor de red local, detección de intrusos, alertas Telegram |
+| 🔍 [ReDo](https://github.com/acabellan1868-prog/redo) | Node.js · nmap | Red doméstica, detección de intrusos, alertas NTFY |
 | 💰 [FiDo](https://github.com/acabellan1868-prog/FiDo) | Python · FastAPI · SQLite | Finanzas domésticas, extractos bancarios, categorización |
 
 ---
@@ -27,7 +27,7 @@ Usuario → http://192.168.31.131
                 ▼
              Nginx (80)
              ├── /          → Portal (dashboard con widgets)
-             ├── /red/      → NetSentinel
+             ├── /red/      → ReDo
              └── /finanzas/ → FiDo
 ```
 
@@ -61,7 +61,7 @@ hogarOS/
 └── roadmap.md           ← Arquitectura detallada y plan de desarrollo
 ```
 
-> NetSentinel y FiDo viven en sus propios repositorios y se referencian como dependencias en el compose.
+> ReDo y FiDo viven en sus propios repositorios y se referencian como dependencias en el compose.
 
 ---
 
@@ -73,5 +73,5 @@ hogarOS/
 | Contenedores | Docker + Compose |
 | Reverse proxy | Nginx Alpine |
 | Frontend | HTML · CSS · JS vanilla |
-| NetSentinel | Node.js 20 · nmap |
+| ReDo | Node.js 20 · nmap |
 | FiDo | Python 3.12 · FastAPI · SQLite |

@@ -1,27 +1,27 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: fase de diseño y planificación completada.
-> Última actualización: 2026-03-13
+> Última actualización: 2026-03-15
 
 ---
 
 ## Fase 0 — Preparación de repositorios
 
-- [ ] Crear repositorio `netsentinel` en GitHub (`acabellan1868-prog/netsentinel`)
+- [ ] Crear repositorio `redo` en GitHub (`acabellan1868-prog/redo`)
 - [ ] Verificar que el repositorio `FiDo` está actualizado en GitHub
 
-> **Nota:** El código actual de NetSentinel (`network-monitor/`) es una versión muy básica sin Docker ni frontend.
+> **Nota:** El código actual de ReDo (`network-monitor/`) es una versión muy básica sin Docker ni frontend.
 > Se construye desde cero en la Fase 1. Sirve solo como referencia de la lógica de escaneo existente.
 
 ---
 
-## Fase 1 — NetSentinel: construcción desde cero
+## Fase 1 — ReDo: construcción desde cero
 
-NetSentinel no tiene Docker ni frontend. Se construye como app completa e independiente.
+ReDo no tiene Docker ni frontend. Se construye como app completa e independiente.
 
 ### Estructura objetivo
 ```
-netsentinel/
+redo/
 ├── src/               ← lógica de escaneo (Node.js + nmap)
 ├── frontend/          ← interfaz web propia (HTML/CSS/JS)
 ├── Dockerfile
@@ -32,6 +32,7 @@ netsentinel/
 ### Tareas
 - [ ] Definir y crear la estructura del proyecto
 - [ ] Migrar/reescribir la lógica de escaneo existente
+- [ ] Integrar notificaciones via NTFY (topic: `hogaros-alertas`)
 - [ ] Crear frontend propio (aplicando el design system de hogarOS)
 - [ ] Dockerizar la aplicación
 - [ ] Implementar `GET /api/resumen` que devuelva:
@@ -86,7 +87,7 @@ FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
   - Grid de tarjetas de módulos
   - Feed de alertas unificado
   - Sección de accesos rápidos
-- [ ] Tarjeta NetSentinel: consumir `/api/resumen` de NetSentinel y mostrar datos en tiempo real
+- [ ] Tarjeta ReDo: consumir `/api/resumen` de ReDo y mostrar datos en tiempo real
 - [ ] Tarjeta FiDo: consumir `/api/resumen` de FiDo y mostrar datos en tiempo real
 - [ ] Tarjeta Home Assistant: enlace directo (Nivel 1)
 - [ ] Implementar toggle claro/oscuro con persistencia en localStorage
@@ -99,14 +100,14 @@ FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
 ### Nginx
 - [ ] Crear `nginx.conf` con las reglas de reverse proxy:
   - `/` → portal HTML estático
-  - `/red/` → NetSentinel
+  - `/red/` → ReDo
   - `/finanzas/` → FiDo
   - `/static/` → ficheros compartidos (hogar.css, etc.)
 
 ### Docker Compose
 - [ ] Crear `docker-compose.yml` con los tres servicios:
   - `hogar-portal` (Nginx)
-  - `netsentinel` (imagen externa)
+  - `redo` (imagen externa)
   - `fido` (imagen externa)
 - [ ] Configurar variables de entorno y volúmenes
 - [ ] Verificar comunicación entre contenedores en local
@@ -121,13 +122,13 @@ Se sigue la convención ya establecida con FiDo:
 ├── fido-build/        ← código FiDo        (ya existe ✅)
 ├── fido/              ← datos FiDo (fido.db) (ya existe ✅)
 ├── hogarOS/           ← código hogarOS      (a clonar)
-├── netsentinel-build/ ← código NetSentinel  (a clonar)
-└── netsentinel/       ← datos NetSentinel   (a crear)
+├── redo-build/ ← código ReDo  (a clonar)
+└── redo/       ← datos ReDo   (a crear)
 ```
 
 - [ ] Clonar hogarOS en `/mnt/datos/hogarOS/`
-- [ ] Clonar netsentinel en `/mnt/datos/netsentinel-build/`
-- [ ] Crear `/mnt/datos/netsentinel/` para datos persistentes
+- [ ] Clonar redo en `/mnt/datos/redo-build/`
+- [ ] Crear `/mnt/datos/redo/` para datos persistentes
 - [ ] Actualizar `actualizar.sh` con las rutas correctas de `/mnt/datos/`
 - [ ] Ejecutar `docker compose up -d` desde `/mnt/datos/hogarOS/`
 - [ ] Probar acceso desde la red local: `http://192.168.31.131`
@@ -162,7 +163,7 @@ Se sigue la convención ya establecida con FiDo:
 ```
 Fase 0 (repos)
     ↓
-Fase 1 (NetSentinel desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
+Fase 1 (ReDo desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
                               ↓
                     Fase 4 (Portal HTML)
                               ↓
