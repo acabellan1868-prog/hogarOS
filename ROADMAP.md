@@ -120,44 +120,52 @@ Completado 2026-03-16.
 
 ---
 
-## Fase 5 — Infraestructura (parcialmente ✅)
+## Fase 5 — Infraestructura ✅
+
+Completado 2026-03-17.
 
 ### Nginx
 - [x] 🤖 Crear `nginx.conf` con las reglas de reverse proxy:
   - `/` → portal HTML estático
-  - `/red/` → ReDo
-  - `/finanzas/` → FiDo
+  - `/red/` → ReDo (host.docker.internal:8083)
+  - `/finanzas/` → FiDo (fido:8080 red Docker interna)
   - `/static/` → ficheros compartidos (hogar.css, etc.)
+- [x] 🤖 Añadir `sub_filter` para reescribir rutas absolutas en HTML/JS de las apps
 
 ### Docker Compose
 - [x] 🤖 Crear `docker-compose.yml` con los tres servicios:
-  - `hogar-portal` (Nginx)
-  - `redo` (build desde /mnt/datos/redo-build)
-  - `fido` (build desde /mnt/datos/fido-build)
+  - `hogar-portal` (Nginx + extra_hosts para alcanzar host)
+  - `redo` (build desde /mnt/datos/redo-build, network_mode: host)
+  - `fido` (build desde /mnt/datos/fido-build, puerto 8082:8080)
 - [x] 🤖 Configurar variables de entorno y volúmenes
 - [x] 🤖 Configurar reinicio automático (`restart: unless-stopped`)
-- [ ] 👤 Verificar comunicación entre contenedores en local
+- [x] 👤 Verificar comunicación entre contenedores
+
+### Ajustes de despliegue
+- [x] 🤖 Cambiar ReDo de puerto 8081 a 8083 (conflicto con Nextcloud)
+- [x] 🤖 Hacer puerto de ReDo configurable via variable `REDO_PORT`
+- [x] 🤖 FiDo: autodetectar prefijo en api.js para funcionar bajo reverse proxy
+- [x] 🤖 FiDo: rutas relativas en index.html (estilos.css, api.js, app.js)
+- [x] 🤖 Portal: corregir URL de Home Assistant (192.168.31.132:8123)
+- [x] 👤 Eliminar stack FiDo de Portainer (ahora lo gestiona hogarOS)
 
 ### Despliegue en VM 101 (Debian 12)
 
-El código se clona en la VM 101 donde corre Docker.
-Se sigue la convención ya establecida con FiDo:
-
 ```
 /mnt/datos/
-├── fido-build/        ← código FiDo        (ya existe ✅)
-├── fido/              ← datos FiDo (fido.db) (ya existe ✅)
-├── hogarOS/           ← código hogarOS      (a clonar)
-├── redo-build/        ← código ReDo         (a clonar)
-└── redo/              ← datos ReDo          (a crear)
+├── fido-build/        ← código FiDo        ✅
+├── fido/              ← datos FiDo (fido.db) ✅
+├── hogarOS/           ← código hogarOS      ✅
+├── redo-build/        ← código ReDo         ✅
+└── redo/              ← datos ReDo          ✅
 ```
 
-- [ ] 👤 Clonar hogarOS en `/mnt/datos/hogarOS/`
-- [ ] 👤 Clonar redo en `/mnt/datos/redo-build/`
-- [ ] 👤 Crear `/mnt/datos/redo/` para datos persistentes
-- [x] 🤖 Actualizar `actualizar.sh` con las rutas correctas de `/mnt/datos/` (ya estaba correcto)
-- [ ] 👤 Ejecutar `docker compose up -d` desde `/mnt/datos/hogarOS/`
-- [ ] 👤 Probar acceso desde la red local: `http://192.168.31.131`
+- [x] 👤 Clonar hogarOS en `/mnt/datos/hogarOS/`
+- [x] 👤 Clonar redo en `/mnt/datos/redo-build/`
+- [x] 👤 Crear `/mnt/datos/redo/` para datos persistentes
+- [x] 🤖 Mejorar `actualizar.sh`: pull + down + build + up en un solo comando
+- [x] 👤 Ejecutar `docker compose up -d` desde `/mnt/datos/hogarOS/`
+- [x] 👤 Probar acceso desde la red local: `http://192.168.31.131` ✅
 
 ---
 
