@@ -6,6 +6,8 @@ services:
     container_name: hogar-portal
     ports:
       - "80:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./portal:/usr/share/nginx/html:ro
@@ -39,7 +41,7 @@ services:
     build: /mnt/datos/fido-build
     container_name: fido
     ports:
-      - "8080:8080"
+      - "8082:8080"
     volumes:
       - /mnt/datos/fido:/app/data
     environment:

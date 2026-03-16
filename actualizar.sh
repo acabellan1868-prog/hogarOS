@@ -1,54 +1,66 @@
 #!/bin/bash
 
-# actualizar.sh — Actualiza todos los proyectos de hogarOS desde GitHub
-# Uso: ./actualizar.sh [--reiniciar]
+# actualizar.sh — Actualiza hogarOS y todas sus apps desde GitHub
 #
-# Sin argumentos: solo hace pull de los repos
-# Con --reiniciar: hace pull y reinicia los contenedores Docker
+# Qué hace:
+#   1. Descarga los últimos cambios de GitHub (git pull) en los 3 repos
+#   2. Para todos los contenedores
+#   3. Reconstruye las imágenes (por si cambió código de ReDo o FiDo)
+#   4. Levanta todo de nuevo
+#
+# Uso: ./actualizar.sh
+# Ejecutar desde cualquier sitio — las rutas son absolutas.
 
 set -e
 
 DIRECTORIO_BASE="/mnt/datos"
 PROYECTOS=("hogarOS" "redo-build" "fido-build")
-REINICIAR=false
-
-if [[ "$1" == "--reiniciar" ]]; then
-  REINICIAR=true
-fi
 
 echo "================================================"
-echo "  hogarOS — Actualizando proyectos"
-echo "  Base: $DIRECTORIO_BASE"
+echo "  hogarOS — Actualizando ecosistema"
+echo "  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "================================================"
+
+# ── Paso 1: Descargar cambios de GitHub ──
+echo ""
+echo "── Paso 1/4: Descargando cambios de GitHub ──"
 
 for proyecto in "${PROYECTOS[@]}"; do
   ruta="$DIRECTORIO_BASE/$proyecto"
 
   if [ -d "$ruta/.git" ]; then
     echo ""
-    echo "► $proyecto"
+    echo "  ► $proyecto"
     cd "$ruta"
     rama_actual=$(git branch --show-current)
-    git pull origin "$rama_actual"
+    git pull origin "$rama_actual" 2>&1 | sed 's/^/    /'
   else
     echo ""
-    echo "⚠ $proyecto — directorio no encontrado o no es un repo git: $ruta"
+    echo "  ⚠ $proyecto — no encontrado en $ruta"
   fi
 done
 
+# ── Paso 2: Parar contenedores ──
+echo ""
+echo "── Paso 2/4: Parando contenedores ──"
+cd "$DIRECTORIO_BASE/hogarOS"
+docker compose down 2>&1 | sed 's/^/    /'
+
+# ── Paso 3: Reconstruir imágenes ──
+echo ""
+echo "── Paso 3/4: Reconstruyendo imágenes ──"
+docker compose build 2>&1 | sed 's/^/    /'
+
+# ── Paso 4: Levantar contenedores ──
+echo ""
+echo "── Paso 4/4: Levantando contenedores ──"
+docker compose up -d 2>&1 | sed 's/^/    /'
+
+# ── Resultado ──
 echo ""
 echo "================================================"
-echo "  Pull completado"
+echo "  ✓ Actualización completada"
+echo "  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "================================================"
-
-if [ "$REINICIAR" = true ]; then
-  echo ""
-  echo "► Reiniciando contenedores Docker..."
-  cd "$DIRECTORIO_BASE/hogarOS"
-  docker compose restart
-  echo "  Ejecutado desde: $DIRECTORIO_BASE/hogarOS"
-  echo "  Contenedores reiniciados."
-fi
-
 echo ""
-echo "✓ Listo"
+docker compose ps
