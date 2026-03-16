@@ -22,35 +22,41 @@
 
 ---
 
-## Fase 1 — ReDo: construcción desde cero
+## Fase 1 — ReDo: construcción desde cero ✅
 
-ReDo no tiene Docker ni frontend. Se construye como app completa e independiente.
+ReDo construido como app completa e independiente. Completado 2026-03-15.
 
-### Estructura objetivo
+### Estructura final
 ```
-redo/
-├── app/               ← lógica de escaneo (Python + python-nmap)
-│   ├── main.py        ← FastAPI app
-│   ├── scanner.py     ← lógica de escaneo con python-nmap
-│   ├── notifier.py    ← integración NTFY
-│   ├── models.py      ← modelos SQLite
-│   └── config.py      ← configuración
-├── frontend/          ← interfaz web propia (HTML/CSS/JS)
+ReDo/
+├── app/
+│   ├── principal.py     ← FastAPI app
+│   ├── escaner.py       ← lógica de escaneo con python-nmap
+│   ├── notificador.py   ← integración NTFY
+│   ├── modelos.py       ← modelos Pydantic
+│   ├── bd.py            ← acceso a SQLite
+│   ├── config.py        ← configuración
+│   ├── esquema.sql      ← esquema de la BD
+│   └── rutas/
+│       ├── resumen.py
+│       ├── dispositivos.py
+│       └── escaneos.py
+├── static/index.html    ← frontend
 ├── requirements.txt
 ├── Dockerfile
-├── docker-compose.yml ← para desarrollo/pruebas independiente
+├── docker-compose.yml
 └── README.md
 ```
 
 ### Tareas
-- [ ] 🤖 Definir y crear la estructura del proyecto
-- [ ] 🤖 Migrar/reescribir la lógica de escaneo existente
-- [ ] 🤖 Integrar notificaciones via NTFY (topic: `hogaros-3ca6f61b`)
+- [x] 🤖 Definir y crear la estructura del proyecto
+- [x] 🤖 Migrar/reescribir la lógica de escaneo existente
+- [x] 🤖 Integrar notificaciones via NTFY (topic: `hogaros-3ca6f61b`)
 - [ ] 👤 Suscribirse al topic `hogaros-3ca6f61b` en la app NTFY del móvil
-- [ ] 🤖 Implementar escaneos periódicos con APScheduler
-- [ ] 🤖 Crear frontend propio (aplicando el design system de hogarOS)
-- [ ] 🤖 Dockerizar la aplicación
-- [ ] 🤖 Implementar `GET /api/resumen` que devuelva:
+- [x] 🤖 Implementar escaneos periódicos con APScheduler
+- [x] 🤖 Crear frontend propio (aplicando el design system de hogarOS)
+- [x] 🤖 Dockerizar la aplicación
+- [x] 🤖 Implementar `GET /api/resumen` que devuelva:
   ```json
   {
     "dispositivos_activos": 12,
@@ -59,15 +65,15 @@ redo/
     "ultimo_escaneo": "2026-03-13T18:30:00"
   }
   ```
-- [ ] 🤖 Verificar que el endpoint responde correctamente
+- [x] 🤖 Verificar que el endpoint responde correctamente
 - [ ] 👤 Probar la app de forma independiente antes de integrar en hogarOS
 
-## Fase 2 — FiDo: endpoint de resumen
+## Fase 2 — FiDo: endpoint de resumen ✅
 
-FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
+FiDo ya está en Docker y funcionando. Endpoint añadido. Completado 2026-03-16.
 
 ### FiDo
-- [ ] 🤖 Implementar `GET /api/resumen` que devuelva:
+- [x] 🤖 Implementar `GET /api/resumen` que devuelva:
   ```json
   {
     "mes": "Marzo 2026",
@@ -76,17 +82,19 @@ FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
     "balance": 841.50
   }
   ```
-- [ ] 🤖 Verificar que el endpoint responde correctamente
+- [x] 🤖 Verificar que el endpoint responde correctamente
 
 ---
 
-## Fase 3 — Design System (hogar.css)
+## Fase 3 — Design System (hogar.css) ✅
 
-- [ ] 🤖 Crear `portal/static/hogar.css` con todas las variables CSS del design system:
+Completado 2026-03-16.
+
+- [x] 🤖 Crear `portal/static/hogar.css` con todas las variables CSS del design system:
   - Paleta Índigo y Arena (modo claro y oscuro)
   - Tipografía System UI
   - Variables de border-radius, espaciado, sombras
-- [ ] 🤖 Crear componentes base documentados:
+- [x] 🤖 Crear componentes base documentados:
   - Header con navegación entre apps
   - Tarjeta de módulo
   - Botones (primario y secundario)
@@ -95,36 +103,39 @@ FiDo ya está en Docker y funcionando. Solo hay que añadir el endpoint.
 
 ---
 
-## Fase 4 — Portal HTML
+## Fase 4 — Portal HTML ✅
 
-- [ ] 🤖 Crear `portal/index.html` con la estructura principal:
+Completado 2026-03-16.
+
+- [x] 🤖 Crear `portal/index.html` con la estructura principal:
   - Header con logo hogarOS y navegación
   - Grid de tarjetas de módulos
   - Feed de alertas unificado
   - Sección de accesos rápidos
-- [ ] 🤖 Tarjeta ReDo: consumir `/api/resumen` de ReDo y mostrar datos en tiempo real
-- [ ] 🤖 Tarjeta FiDo: consumir `/api/resumen` de FiDo y mostrar datos en tiempo real
-- [ ] 🤖 Tarjeta Home Assistant: enlace directo (Nivel 1)
-- [ ] 🤖 Implementar toggle claro/oscuro con persistencia en localStorage
-- [ ] 🤖 Manejo de errores: mostrar estado "sin conexión" si una app no responde
+- [x] 🤖 Tarjeta ReDo: consumir `/api/resumen` de ReDo y mostrar datos en tiempo real
+- [x] 🤖 Tarjeta FiDo: consumir `/api/resumen` de FiDo y mostrar datos en tiempo real
+- [x] 🤖 Tarjeta Home Assistant: enlace directo (Nivel 1)
+- [x] 🤖 Implementar toggle claro/oscuro con persistencia en localStorage
+- [x] 🤖 Manejo de errores: mostrar estado "sin conexión" si una app no responde
 
 ---
 
-## Fase 5 — Infraestructura
+## Fase 5 — Infraestructura (parcialmente ✅)
 
 ### Nginx
-- [ ] 🤖 Crear `nginx.conf` con las reglas de reverse proxy:
+- [x] 🤖 Crear `nginx.conf` con las reglas de reverse proxy:
   - `/` → portal HTML estático
   - `/red/` → ReDo
   - `/finanzas/` → FiDo
   - `/static/` → ficheros compartidos (hogar.css, etc.)
 
 ### Docker Compose
-- [ ] 🤖 Crear `docker-compose.yml` con los tres servicios:
+- [x] 🤖 Crear `docker-compose.yml` con los tres servicios:
   - `hogar-portal` (Nginx)
-  - `redo` (imagen externa)
-  - `fido` (imagen externa)
-- [ ] 🤖 Configurar variables de entorno y volúmenes
+  - `redo` (build desde /mnt/datos/redo-build)
+  - `fido` (build desde /mnt/datos/fido-build)
+- [x] 🤖 Configurar variables de entorno y volúmenes
+- [x] 🤖 Configurar reinicio automático (`restart: unless-stopped`)
 - [ ] 👤 Verificar comunicación entre contenedores en local
 
 ### Despliegue en VM 101 (Debian 12)
@@ -144,10 +155,9 @@ Se sigue la convención ya establecida con FiDo:
 - [ ] 👤 Clonar hogarOS en `/mnt/datos/hogarOS/`
 - [ ] 👤 Clonar redo en `/mnt/datos/redo-build/`
 - [ ] 👤 Crear `/mnt/datos/redo/` para datos persistentes
-- [ ] 🤖 Actualizar `actualizar.sh` con las rutas correctas de `/mnt/datos/`
+- [x] 🤖 Actualizar `actualizar.sh` con las rutas correctas de `/mnt/datos/` (ya estaba correcto)
 - [ ] 👤 Ejecutar `docker compose up -d` desde `/mnt/datos/hogarOS/`
 - [ ] 👤 Probar acceso desde la red local: `http://192.168.31.131`
-- [ ] 🤖 Configurar reinicio automático (`restart: unless-stopped`)
 
 ---
 

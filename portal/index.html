@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HogarOS</title>
+  <link rel="stylesheet" href="/static/hogar.css">
+  <style>
+    /* Estilos específicos del portal (no del design system) */
+    .portal-seccion {
+      margin-bottom: var(--gap-xl);
+    }
+
+    .portal-seccion__titulo {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--texto-suave);
+      margin-bottom: var(--gap-md);
+    }
+
+    /* Tarjeta ReDo — sub-métricas */
+    .redo-metricas {
+      display: flex;
+      gap: var(--gap-lg);
+      margin-top: var(--gap-sm);
+    }
+
+    .redo-metrica {
+      text-align: center;
+    }
+
+    .redo-metrica__valor {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .redo-metrica__label {
+      font-size: 0.72rem;
+      color: var(--texto-suave);
+    }
+
+    .redo-metrica--ok .redo-metrica__valor { color: var(--exito); }
+    .redo-metrica--alerta .redo-metrica__valor { color: var(--error); }
+
+    /* Tarjeta FiDo — sub-métricas */
+    .fido-metricas {
+      display: flex;
+      gap: var(--gap-lg);
+      margin-top: var(--gap-sm);
+    }
+
+    .fido-metrica {
+      text-align: center;
+    }
+
+    .fido-metrica__valor {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .fido-metrica__label {
+      font-size: 0.72rem;
+      color: var(--texto-suave);
+    }
+
+    .fido-metrica--ingreso .fido-metrica__valor { color: var(--exito); }
+    .fido-metrica--gasto .fido-metrica__valor { color: var(--error); }
+
+    /* Feed de alertas */
+    .alertas-lista {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-sm);
+    }
+
+    /* Accesos rápidos */
+    .accesos-rapidos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+    }
+
+    /* Spinner de carga */
+    .cargando {
+      color: var(--texto-suave);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======== HEADER ======== -->
+  <header class="hogar-header">
+    <a href="/" class="hogar-header__logo">HogarOS</a>
+    <nav class="hogar-header__nav">
+      <a href="/red/" class="hogar-header__enlace">Red</a>
+      <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
+      <a href="http://192.168.31.131:8123" class="hogar-header__enlace" target="_blank">Domotica</a>
+      <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
+    </nav>
+  </header>
+
+  <!-- ======== CONTENIDO ======== -->
+  <main class="hogar-contenedor">
+
+    <!-- Tarjetas de módulos -->
+    <section class="portal-seccion">
+      <h2 class="portal-seccion__titulo">Modulos</h2>
+
+      <div class="hogar-grid">
+
+        <!-- TARJETA REDO -->
+        <div class="hogar-tarjeta" id="tarjetaRedo">
+          <div class="hogar-tarjeta__cabecera">
+            <span class="hogar-tarjeta__titulo">Red Domestica</span>
+            <span class="hogar-tarjeta__icono">&#128268;</span>
+          </div>
+          <div id="redoContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
+          <a href="/red/" class="hogar-tarjeta__enlace">Abrir ReDo &rarr;</a>
+        </div>
+
+        <!-- TARJETA FIDO -->
+        <div class="hogar-tarjeta" id="tarjetaFido">
+          <div class="hogar-tarjeta__cabecera">
+            <span class="hogar-tarjeta__titulo">Finanzas Domesticas</span>
+            <span class="hogar-tarjeta__icono">&#128176;</span>
+          </div>
+          <div id="fidoContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
+          <a href="/finanzas/" class="hogar-tarjeta__enlace">Abrir FiDo &rarr;</a>
+        </div>
+
+        <!-- TARJETA HOME ASSISTANT (Nivel 1 — enlace directo) -->
+        <div class="hogar-tarjeta">
+          <div class="hogar-tarjeta__cabecera">
+            <span class="hogar-tarjeta__titulo">Domotica</span>
+            <span class="hogar-tarjeta__icono">&#127968;</span>
+          </div>
+          <div class="hogar-tarjeta__valor" style="font-size:1.2rem; color: var(--texto);">
+            Home Assistant
+          </div>
+          <div class="hogar-tarjeta__detalle">Control de luces, clima y dispositivos</div>
+          <a href="http://192.168.31.131:8123" class="hogar-tarjeta__enlace" target="_blank">Abrir Home Assistant &rarr;</a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Feed de alertas -->
+    <section class="portal-seccion">
+      <h2 class="portal-seccion__titulo">Alertas recientes</h2>
+      <div class="alertas-lista" id="alertas">
+        <span class="cargando">Cargando alertas...</span>
+      </div>
+    </section>
+
+    <!-- Accesos rápidos -->
+    <section class="portal-seccion">
+      <h2 class="portal-seccion__titulo">Accesos rapidos</h2>
+      <div class="accesos-rapidos">
+        <button class="hogar-boton hogar-boton--primario" id="btnEscanear">Escanear red</button>
+        <a href="/red/#dispositivos" class="hogar-boton hogar-boton--secundario">Clasificar dispositivos</a>
+        <a href="/finanzas/#importar" class="hogar-boton hogar-boton--secundario">Importar extracto</a>
+        <a href="/finanzas/#panel" class="hogar-boton hogar-boton--secundario">Informe mensual</a>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ============================================================
+       Configuración — URLs base de las apps
+       ============================================================ */
+    const REDO_API  = "/red/api";
+    const FIDO_API  = "/finanzas/api";
+
+    /* ============================================================
+       Toggle tema claro/oscuro con persistencia
+       ============================================================ */
+    (function initTema() {
+      var guardado = localStorage.getItem("hogar-tema");
+      if (guardado === "oscuro") {
+        document.documentElement.setAttribute("data-tema", "oscuro");
+      }
+      actualizarIconoTema();
+    })();
+
+    document.getElementById("btnTema").addEventListener("click", function() {
+      var actual = document.documentElement.getAttribute("data-tema");
+      if (actual === "oscuro") {
+        document.documentElement.removeAttribute("data-tema");
+        localStorage.setItem("hogar-tema", "claro");
+      } else {
+        document.documentElement.setAttribute("data-tema", "oscuro");
+        localStorage.setItem("hogar-tema", "oscuro");
+      }
+      actualizarIconoTema();
+    });
+
+    function actualizarIconoTema() {
+      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
+      document.getElementById("btnTema").textContent = oscuro ? "\u2600" : "\u263E";
+    }
+
+    /* ============================================================
+       Cargar datos de ReDo
+       ============================================================ */
+    function cargarRedo() {
+      fetch(REDO_API + "/resumen")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var contenedor = document.getElementById("redoContenido");
+          var desconocidos = d.dispositivos_desconocidos || 0;
+
+          contenedor.innerHTML =
+            '<div class="hogar-tarjeta__valor">' + d.dispositivos_activos + '</div>' +
+            '<div class="hogar-tarjeta__detalle">dispositivos activos</div>' +
+            '<div class="redo-metricas">' +
+              '<div class="redo-metrica redo-metrica--ok">' +
+                '<div class="redo-metrica__valor">' + d.dispositivos_confiables + '</div>' +
+                '<div class="redo-metrica__label">confiables</div>' +
+              '</div>' +
+              '<div class="redo-metrica ' + (desconocidos > 0 ? 'redo-metrica--alerta' : 'redo-metrica--ok') + '">' +
+                '<div class="redo-metrica__valor">' + desconocidos + '</div>' +
+                '<div class="redo-metrica__label">desconocidos</div>' +
+              '</div>' +
+            '</div>' +
+            (d.ultimo_escaneo
+              ? '<div class="hogar-tarjeta__detalle">Ultimo escaneo: ' + formatearFecha(d.ultimo_escaneo) + '</div>'
+              : '');
+
+          document.getElementById("tarjetaRedo").classList.remove("hogar-tarjeta--offline");
+
+          // Alimentar alertas desde ReDo
+          if (desconocidos > 0) {
+            agregarAlerta("error", desconocidos + " dispositivo(s) desconocido(s) en la red", d.ultimo_escaneo);
+          } else if (d.ultimo_escaneo) {
+            agregarAlerta("exito", "Escaneo completado sin incidencias", d.ultimo_escaneo);
+          }
+        })
+        .catch(function() {
+          document.getElementById("redoContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con ReDo</span>';
+          document.getElementById("tarjetaRedo").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
+       Cargar datos de FiDo
+       ============================================================ */
+    function cargarFido() {
+      fetch(FIDO_API + "/resumen")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var contenedor = document.getElementById("fidoContenido");
+
+          contenedor.innerHTML =
+            '<div class="hogar-tarjeta__valor">' + formatearEuros(d.balance) + '</div>' +
+            '<div class="hogar-tarjeta__detalle">' + d.mes + '</div>' +
+            '<div class="fido-metricas">' +
+              '<div class="fido-metrica fido-metrica--ingreso">' +
+                '<div class="fido-metrica__valor">+' + formatearEuros(d.ingresos) + '</div>' +
+                '<div class="fido-metrica__label">ingresos</div>' +
+              '</div>' +
+              '<div class="fido-metrica fido-metrica--gasto">' +
+                '<div class="fido-metrica__valor">-' + formatearEuros(d.gastos) + '</div>' +
+                '<div class="fido-metrica__label">gastos</div>' +
+              '</div>' +
+            '</div>';
+
+          document.getElementById("tarjetaFido").classList.remove("hogar-tarjeta--offline");
+        })
+        .catch(function() {
+          document.getElementById("fidoContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con FiDo</span>';
+          document.getElementById("tarjetaFido").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
+       Escaneo manual
+       ============================================================ */
+    document.getElementById("btnEscanear").addEventListener("click", function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = "Escaneando...";
+
+      fetch(REDO_API + "/escanear", { method: "POST" })
+        .then(function() {
+          btn.textContent = "Escaneo lanzado";
+          setTimeout(function() {
+            btn.disabled = false;
+            btn.textContent = "Escanear red";
+            cargarRedo();
+          }, 5000);
+        })
+        .catch(function() {
+          btn.disabled = false;
+          btn.textContent = "Escanear red";
+          agregarAlerta("error", "No se pudo lanzar el escaneo — ReDo no responde");
+        });
+    });
+
+    /* ============================================================
+       Feed de alertas
+       ============================================================ */
+    var alertasInicializado = false;
+
+    function agregarAlerta(tipo, mensaje, fecha) {
+      var contenedor = document.getElementById("alertas");
+      if (!alertasInicializado) {
+        contenedor.innerHTML = "";
+        alertasInicializado = true;
+      }
+
+      var div = document.createElement("div");
+      div.className = "hogar-alerta hogar-alerta--" + tipo;
+      div.innerHTML = mensaje +
+        (fecha ? '<div class="hogar-alerta__tiempo">' + formatearFecha(fecha) + '</div>' : '');
+      contenedor.prepend(div);
+    }
+
+    /* ============================================================
+       Helpers
+       ============================================================ */
+    function formatearEuros(cantidad) {
+      return Number(cantidad).toLocaleString("es-ES", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + " \u20AC";
+    }
+
+    function formatearFecha(iso) {
+      if (!iso) return "";
+      try {
+        var d = new Date(iso);
+        return d.toLocaleString("es-ES", {
+          day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+        });
+      } catch(e) {
+        return iso;
+      }
+    }
+
+    /* ============================================================
+       Inicialización y refresco periódico
+       ============================================================ */
+    cargarRedo();
+    cargarFido();
+
+    // Refrescar cada 60 segundos
+    setInterval(function() {
+      cargarRedo();
+      cargarFido();
+    }, 60000);
+  </script>
+
+</body>
+</html>
