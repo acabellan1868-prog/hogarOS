@@ -68,6 +68,58 @@
     .fido-metrica--ingreso .fido-metrica__valor { color: var(--exito); }
     .fido-metrica--gasto .fido-metrica__valor { color: var(--error); }
 
+    /* Tarjeta Home Assistant */
+    .ha-exterior {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-sm);
+      margin-bottom: var(--gap-sm);
+    }
+
+    .ha-exterior__temp {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--indigo);
+    }
+
+    .ha-exterior__rango {
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+    }
+
+    .ha-interior {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px var(--gap-md);
+      margin-bottom: var(--gap-sm);
+    }
+
+    .ha-interior__item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      padding: 2px 0;
+    }
+
+    .ha-interior__nombre {
+      color: var(--texto-suave);
+    }
+
+    .ha-interior__valor {
+      font-weight: 600;
+    }
+
+    .ha-luces {
+      font-size: 0.85rem;
+      margin-top: var(--gap-sm);
+      padding-top: var(--gap-sm);
+      border-top: 1px solid var(--borde);
+    }
+
+    .ha-luces__resumen {
+      font-weight: 600;
+    }
+
     /* Feed de alertas */
     .alertas-lista {
       display: flex;
@@ -136,16 +188,15 @@
           <a href="/finanzas/" class="hogar-tarjeta__enlace">Abrir FiDo &rarr;</a>
         </div>
 
-        <!-- TARJETA HOME ASSISTANT (Nivel 1 — enlace directo) -->
-        <div class="hogar-tarjeta">
+        <!-- TARJETA HOME ASSISTANT (Nivel 2 — datos reales) -->
+        <div class="hogar-tarjeta" id="tarjetaHA">
           <div class="hogar-tarjeta__cabecera">
             <span class="hogar-tarjeta__titulo">Domotica</span>
             <span class="hogar-tarjeta__icono">&#127968;</span>
           </div>
-          <div class="hogar-tarjeta__valor" style="font-size:1.2rem; color: var(--texto);">
-            Home Assistant
+          <div id="haContenido">
+            <span class="cargando">Cargando...</span>
           </div>
-          <div class="hogar-tarjeta__detalle">Control de luces, clima y dispositivos</div>
           <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">Abrir Home Assistant &rarr;</a>
         </div>
 
@@ -284,6 +335,97 @@
     }
 
     /* ============================================================
+       Cargar datos de Home Assistant
+       ============================================================ */
+    var HA_API = "/domotica/api";
+
+    // Entidades de temperatura interior (entity_id → nombre corto)
+    var HA_TEMP_INTERIOR = {
+      "sensor.0xa4c138d70bcefd09_temperature": "Salon",
+      "sensor.temperature_158d0004255510": "Cocina",
+      "sensor.temperature_158d00042554e2": "Estudio",
+      "sensor.temperature_158d00018730b3": "Hab. Antonio",
+      "sensor.temperature_158d000425161b": "Dormitorio"
+    };
+
+    // Entidades de luces/enchufes (entity_id → nombre corto)
+    var HA_LUCES = {
+      "light.smart_bulb_msl120d_main_channel": "Bombilla",
+      "switch.0xa4c138c23ca59c24": "Cocina",
+      "switch.0xa4c138d738bb72c1_left": "Salon izq.",
+      "switch.0xa4c138d738bb72c1_right": "Salon der.",
+      "switch.0xa4c1385fa998b01e": "Entrada",
+      "switch.0xa4c1384e3242935e": "Pasillo",
+      "switch.enchufe_001_lavadero_mss310_main_channel": "Lavadero",
+      "switch.enchufe_002_antonio_mss310_main_channel": "Enchufe Antonio",
+      "switch.enchufe_003_cocina_mss310_main_channel": "Enchufe Cocina"
+    };
+
+    function cargarHA() {
+      fetch(HA_API + "/states")
+        .then(function(r) { return r.json(); })
+        .then(function(estados) {
+          // Indexar por entity_id
+          var mapa = {};
+          estados.forEach(function(e) { mapa[e.entity_id] = e; });
+
+          // --- Temperatura exterior ---
+          var extTemp = mapa["sensor.huelva_f_montenegro_huelva_temperature"];
+          var extMax  = mapa["sensor.huelva_f_montenegro_huelva_daily_max_temperature"];
+          var extMin  = mapa["sensor.huelva_f_montenegro_huelva_daily_min_temperature"];
+
+          var htmlExterior = "";
+          if (extTemp && extTemp.state !== "unavailable") {
+            htmlExterior =
+              '<div class="ha-exterior">' +
+                '<span class="ha-exterior__temp">' + extTemp.state + '&deg;C</span>' +
+                '<span class="ha-exterior__rango">Exterior' +
+                  (extMax ? ' &uarr;' + extMax.state + '&deg;' : '') +
+                  (extMin ? ' &darr;' + extMin.state + '&deg;' : '') +
+                '</span>' +
+              '</div>';
+          }
+
+          // --- Temperaturas interiores ---
+          var htmlInterior = '<div class="ha-interior">';
+          Object.keys(HA_TEMP_INTERIOR).forEach(function(eid) {
+            var e = mapa[eid];
+            var val = (e && e.state !== "unavailable") ? e.state + "&deg;C" : "--";
+            htmlInterior +=
+              '<div class="ha-interior__item">' +
+                '<span class="ha-interior__nombre">' + HA_TEMP_INTERIOR[eid] + '</span>' +
+                '<span class="ha-interior__valor">' + val + '</span>' +
+              '</div>';
+          });
+          htmlInterior += '</div>';
+
+          // --- Luces y enchufes ---
+          var totalLuces = 0;
+          var encendidas = 0;
+          Object.keys(HA_LUCES).forEach(function(eid) {
+            var e = mapa[eid];
+            if (e && e.state !== "unavailable") {
+              totalLuces++;
+              if (e.state === "on") encendidas++;
+            }
+          });
+
+          var htmlLuces =
+            '<div class="ha-luces">' +
+              '&#128161; <span class="ha-luces__resumen">' + encendidas + ' de ' + totalLuces + ' encendidos</span>' +
+            '</div>';
+
+          document.getElementById("haContenido").innerHTML = htmlExterior + htmlInterior + htmlLuces;
+          document.getElementById("tarjetaHA").classList.remove("hogar-tarjeta--offline");
+        })
+        .catch(function() {
+          document.getElementById("haContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con Home Assistant</span>';
+          document.getElementById("tarjetaHA").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
        Escaneo manual
        ============================================================ */
     document.getElementById("btnEscanear").addEventListener("click", function() {
@@ -353,11 +495,13 @@
        ============================================================ */
     cargarRedo();
     cargarFido();
+    cargarHA();
 
     // Refrescar cada 60 segundos
     setInterval(function() {
       cargarRedo();
       cargarFido();
+      cargarHA();
     }, 60000);
   </script>
 

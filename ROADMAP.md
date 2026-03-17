@@ -169,12 +169,14 @@ Completado 2026-03-17.
 
 ---
 
-## Fase 6 — Pulido y estabilización
+## Fase 6 — Pulido y estabilización ✅
 
-- [ ] 👤 Probar en móvil (diseño responsive)
-- [ ] 🤖 Ajustar tiempos de refresco de los widgets
-- [ ] 🤖 Documentar en README cómo añadir una nueva app al portal
-- [ ] 🤖 Actualizar README con capturas del portal en funcionamiento
+Completado 2026-03-17.
+
+- [x] 👤 Probar en móvil (diseño responsive) ✅
+- [x] 🤖 Ajustar tiempos de refresco de los widgets (60s, adecuado para uso doméstico)
+- [x] 🤖 Documentar en README cómo añadir una nueva app al portal
+- [x] 🤖 Actualizar README con captura real del portal en funcionamiento
 
 ---
 
@@ -211,7 +213,7 @@ Prioridad inmediata tras el despliegue. No solo bases de datos — backup integr
 - [ ] 🤖 Módulo Inventario del hogar
 - [ ] 🤖 Módulo Tareas domésticas compartidas
 - [ ] 🤖 Notificaciones push en el portal
-- [ ] 🤖 Self-hosting de ntfy en la VM (mayor privacidad)
+- ~~Self-hosting de ntfy en la VM~~ — Descartado: ntfy.sh público es suficiente y evita depender de Tailscale
 
 ---
 
