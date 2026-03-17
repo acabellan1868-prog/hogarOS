@@ -205,11 +205,12 @@ Prioridad inmediata tras el despliegue. No solo bases de datos — backup integr
 
 ## Fase 8 — Futuro (sin fecha)
 
-- [ ] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA
-  - Temperatura interior
-  - Luces/enchufes activos
-  - Estado alarma
-  - Consumo eléctrico
+- [x] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA (completado 2026-03-17)
+  - [x] Temperatura exterior (actual + max/min, Meteoclimatic)
+  - [x] Temperaturas interiores por habitación (Xiaomi Aqara + MQTT)
+  - [x] Luces/enchufes activos (conteo encendidos)
+  - [ ] Estado alarma
+  - [ ] Consumo eléctrico
 - [ ] 🤖 Módulo Inventario del hogar
 - [ ] 🤖 Módulo Tareas domésticas compartidas
 - [ ] 🤖 Notificaciones push en el portal
