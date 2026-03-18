@@ -485,3 +485,13 @@ hogarOS/
     ├── lanzador.html         ← ahora carga desde /api/lanzador
     └── admin-lanzador.html   ← CRUD de grupos y enlaces
 ```
+
+### Acceso a la administración
+
+**Decisión:** El enlace "Gestionar" que estaba en el header de navegación se reemplazó por un **botón flotante (FAB)** con icono "+" en la esquina inferior derecha de la página del lanzador. Razones:
+
+- El header queda más limpio — solo contiene secciones principales (Inicio, Red, Finanzas, Domótica, Lanzador)
+- El FAB es un patrón UX conocido y queda discreto pero siempre accesible
+- Solo aparece en `lanzador.html`, no en el resto del portal
+
+Estilo: círculo de 48px con color acento (índigo), escala al 110% en hover, `position: fixed` abajo a la derecha.
