@@ -1,0 +1,16 @@
+{
+  "name": "HogarOS",
+  "short_name": "HogarOS",
+  "description": "Portal doméstico unificado",
+  "icons": [
+    {
+      "src": "/static/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1E1B2E",
+  "background_color": "#F5F0E8"
+}
