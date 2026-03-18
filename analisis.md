@@ -1,7 +1,7 @@
 # HogarOS — Brainstorming y definición del proyecto
 
 > Documento vivo. Todo lo que se define en las sesiones de trabajo se añade aquí.
-> Última actualización: 2026-03-15 (sesión 4)
+> Última actualización: 2026-03-18 (sesión 5)
 
 ---
 
@@ -363,3 +363,52 @@ Sin dependencias externas. Usa la fuente del sistema operativo — nítida y de 
 | Portal frontend | HTML + CSS + JS vanilla (sin frameworks) |
 | ReDo | Python 3.12, FastAPI, python-nmap, SQLite |
 | FiDo | Python 3.12, FastAPI, SQLite |
+
+---
+
+## Lanzador de aplicaciones (sesión 5 — 2026-03-18)
+
+### Motivación
+
+El usuario usa **Dashy** únicamente como lanzador de aplicaciones (enlaces agrupados con icono y descripción). Dado que hogarOS ya tiene portal, design system y nginx, tiene sentido integrar esa funcionalidad y eliminar el contenedor de Dashy.
+
+### Decisión
+
+Crear una página `/lanzador/` independiente del dashboard principal, enlazada desde el header del portal. El dashboard (`/`) sigue siendo el panel de métricas; el lanzador es la página de navegación a servicios.
+
+### Estructura de datos (de dashy_conf.yml)
+
+Los grupos actuales de Dashy a migrar:
+
+| Grupo | Nº enlaces |
+|---|---|
+| Servicios Externos | 5 (ChatGPT, Grok, Gemini, Claude, TailScale) |
+| PRODUCCIÓN (Dell 7050) | 12 (ProxMox, Portainer, Heimdall, HA, NodeRed, NextCloud, Jupyter, N8N, Planka, DockMon, FiDo, hogarOS) |
+| DESARROLLO | 6 (ProxMox, Portainer, NodeRed, MLDonkey, HA, Heimdall) |
+| CUSTOM | descartado (widgets crypto — no aplica en hogarOS) |
+
+Cada enlace tiene: `título`, `descripción`, `icono`, `url`, `target` (nueva pestaña o misma).
+
+### Iconos
+
+Dashy usa tres sistemas de iconos. En hogarOS se resuelven así:
+
+| Prefijo Dashy | Sistema | Solución en hogarOS |
+|---|---|---|
+| `fa fa-*` | Font Awesome | Font Awesome CDN (ya usado en el portal) |
+| `si-*` | Simple Icons | `https://cdn.simpleicons.org/<nombre>` |
+| `hl-*` | Homarr icons | URL directa: `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/<nombre>.svg` |
+| Emoji | Emoji | Directo en HTML |
+
+### Status check
+
+**Decisión: no implementar en esta fase.** El status check desde el navegador tiene problemas de CORS para servicios externos (ChatGPT, Grok, etc.) y no siempre funciona para internos. Se deja como mejora futura.
+
+**Mejora futura:** Endpoint proxy en nginx o backend que haga el check server-side y devuelva el estado, evitando los problemas de CORS.
+
+### Implementación
+
+- `portal/lanzador.html` — página del lanzador (HTML/CSS/JS vanilla, usando hogar.css)
+- Los grupos y enlaces se definen directamente en el HTML (sin fichero de configuración externo por ahora)
+- El header del lanzador incluye navegación de vuelta al portal principal
+- Diseño: grid de tarjetas por grupo, igual que el resto del portal

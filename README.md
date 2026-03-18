@@ -199,7 +199,7 @@ hogarOS/
 ├── docker-compose.yml       ← Orquestación de servicios
 ├── actualizar.sh            ← Script de actualización (pull + build + up)
 ├── ROADMAP.md               ← Plan de desarrollo con fases
-├── hogarOS_brainstorming.md ← Decisiones de diseño originales
+├── analisis.md              ← Análisis y decisiones de diseño
 └── README.md                ← Este archivo
 ```
 

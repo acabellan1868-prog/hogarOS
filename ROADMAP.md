@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: fase de diseño y planificación completada.
-> Última actualización: 2026-03-15
+> Última actualización: 2026-03-18
 
 ### Leyenda
 
@@ -52,7 +52,7 @@ ReDo/
 - [x] 🤖 Definir y crear la estructura del proyecto
 - [x] 🤖 Migrar/reescribir la lógica de escaneo existente
 - [x] 🤖 Integrar notificaciones via NTFY (topic: `hogaros-3ca6f61b`)
-- [ ] 👤 Suscribirse al topic `hogaros-3ca6f61b` en la app NTFY del móvil
+- [x] 👤 Suscribirse al topic `hogaros-3ca6f61b` en la app NTFY del móvil
 - [x] 🤖 Implementar escaneos periódicos con APScheduler
 - [x] 🤖 Crear frontend propio (aplicando el design system de hogarOS)
 - [x] 🤖 Dockerizar la aplicación
@@ -203,7 +203,25 @@ Prioridad inmediata tras el despliegue. No solo bases de datos — backup integr
 
 ---
 
-## Fase 8 — Futuro (sin fecha)
+## Fase 8 — Lanzador de aplicaciones
+
+Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md` para el análisis completo.
+
+- [ ] 🤖 Crear `portal/lanzador.html` con los grupos de enlaces de Dashy migrados:
+  - Servicios Externos (ChatGPT, Grok, Gemini, Claude, TailScale)
+  - PRODUCCIÓN Dell 7050 (ProxMox, Portainer, Heimdall, HA, NodeRed, NextCloud, Jupyter, N8N, Planka, DockMon, FiDo, hogarOS)
+  - DESARROLLO (ProxMox, Portainer, NodeRed, MLDonkey, HA, Heimdall)
+- [ ] 🤖 Iconos vía Font Awesome, Simple Icons CDN y Homarr icons CDN
+- [ ] 🤖 Enlazar el lanzador desde el header del portal principal
+- [ ] 👤 Verificar que todos los enlaces funcionan correctamente
+- [ ] 👤 Dar de baja el contenedor de Dashy en Docker
+
+### Mejoras futuras del lanzador
+- [ ] 🤖 Status check server-side (proxy nginx o endpoint backend) para evitar problemas de CORS
+
+---
+
+## Fase 9 — Futuro (sin fecha)
 
 - [x] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA (completado 2026-03-17)
   - [x] Temperatura exterior (actual + max/min, Meteoclimatic)
