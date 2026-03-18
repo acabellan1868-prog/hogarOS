@@ -216,6 +216,15 @@ Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md`
 - [ ] 👤 Verificar que todos los enlaces funcionan correctamente
 - [ ] 👤 Dar de baja el contenedor de Dashy en Docker
 
+### Gestión dinámica (Fase 8b)
+- [x] 🤖 Crear `hogar-api/` — microservicio FastAPI con `GET /api/lanzador` y `PUT /api/lanzador`
+- [x] 🤖 Refactorizar `portal/lanzador.html` para cargar config desde la API
+- [x] 🤖 Crear `portal/admin-lanzador.html` — CRUD de grupos y enlaces sin tocar código
+- [x] 🤖 Actualizar `nginx.conf` — nueva ruta `/api/lanzador` → `hogar-api`
+- [x] 🤖 Actualizar `docker-compose.yml` — nuevo servicio `hogar-api`
+- [ ] 👤 Crear `/mnt/datos/hogar-api/` en la VM y ejecutar `actualizar.sh`
+- [ ] 👤 Dar de baja el contenedor de Dashy en Docker
+
 ### Mejoras futuras del lanzador
 - [ ] 🤖 Status check server-side (proxy nginx o endpoint backend) para evitar problemas de CORS
 

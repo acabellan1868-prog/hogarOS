@@ -66,6 +66,7 @@
     .lanzador-icono--emoji {
       background: var(--alerta-fondo);
       font-size: 1.3rem;
+      padding: 0;
     }
 
     .lanzador-nombre {
@@ -80,6 +81,28 @@
       font-size: 0.75rem;
       color: var(--texto-suave);
       margin-top: 2px;
+    }
+
+    .lanzador-estado {
+      text-align: center;
+      padding: var(--gap-xl);
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+
+    .lanzador-admin-link {
+      font-size: 0.75rem;
+      color: var(--texto-suave);
+      text-decoration: none;
+      margin-left: auto;
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radio-sm);
+      transition: background var(--transicion), color var(--transicion);
+    }
+
+    .lanzador-admin-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
     }
 
     @media (max-width: 600px) {
@@ -100,271 +123,29 @@
       <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
       <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">Domotica</a>
       <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">Lanzador</a>
+      <a href="/admin-lanzador.html" class="lanzador-admin-link" title="Gestionar enlaces">&#9881;</a>
       <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
     </nav>
   </header>
 
-  <main class="hogar-contenedor">
-
-    <!-- ======== SERVICIOS EXTERNOS ======== -->
-    <section class="lanzador-seccion">
-      <h2 class="lanzador-seccion__titulo">Servicios Externos</h2>
-      <div class="lanzador-grid">
-
-        <a href="https://chatgpt.com/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/openai" alt="ChatGPT">
-          </div>
-          <div>
-            <span class="lanzador-nombre">ChatGPT</span>
-          </div>
-        </a>
-
-        <a href="https://grok.com/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grok.svg" alt="Grok">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Grok</span>
-          </div>
-        </a>
-
-        <a href="https://gemini.google.com/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/googlegemini" alt="Gemini">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Gemini</span>
-          </div>
-        </a>
-
-        <a href="https://claude.ai" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/anthropic" alt="Claude">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Claude</span>
-          </div>
-        </a>
-
-        <a href="https://login.tailscale.com/admin/machines" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/tailscale" alt="TailScale">
-          </div>
-          <div>
-            <span class="lanzador-nombre">TailScale</span>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- ======== PRODUCCIÓN ======== -->
-    <section class="lanzador-seccion">
-      <h2 class="lanzador-seccion__titulo">Produccion — Dell 7050</h2>
-      <div class="lanzador-grid">
-
-        <a href="http://192.168.31.103:8006/#v1:0:18:4::::::::" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/proxmox" alt="ProxMox">
-          </div>
-          <div>
-            <span class="lanzador-nombre">ProxMox</span>
-            <span class="lanzador-desc">Dell 7050</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:9000/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/portainer" alt="Portainer">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Portainer</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:8091/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/heimdall.svg" alt="Heimdall">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Heimdall</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.132:8123" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/home-assistant.svg" alt="Home Assistant">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Home Assistant</span>
-            <span class="lanzador-desc">MV</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:1880/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/nodered" alt="NodeRed">
-          </div>
-          <div>
-            <span class="lanzador-nombre">NodeRed</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:8081/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/nextcloud" alt="NextCloud">
-          </div>
-          <div>
-            <span class="lanzador-nombre">NextCloud</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:8888/lab" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/jupyter" alt="Jupyter">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Jupyter Lab</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:5678/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/n8n" alt="N8N">
-          </div>
-          <div>
-            <span class="lanzador-nombre">N8N</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:3010/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/planka.svg" alt="Planka">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Planka</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="https://192.168.31.131:8002" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/docker" alt="DockMon">
-          </div>
-          <div>
-            <span class="lanzador-nombre">DockMon</span>
-            <span class="lanzador-desc">MV Debian 12</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131:8082/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono lanzador-icono--emoji">&#128176;</div>
-          <div>
-            <span class="lanzador-nombre">FiDo</span>
-            <span class="lanzador-desc">Finanzas Domesticas</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.131" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono lanzador-icono--emoji">&#127968;</div>
-          <div>
-            <span class="lanzador-nombre">hogarOS</span>
-            <span class="lanzador-desc">Portal</span>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-    <!-- ======== DESARROLLO ======== -->
-    <section class="lanzador-seccion">
-      <h2 class="lanzador-seccion__titulo">Desarrollo — Optiplex 3070</h2>
-      <div class="lanzador-grid">
-
-        <a href="https://192.168.31.101:8006/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/proxmox" alt="ProxMox">
-          </div>
-          <div>
-            <span class="lanzador-nombre">ProxMox</span>
-            <span class="lanzador-desc">Optiplex 3070</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.111:9000/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/portainer" alt="Portainer">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Portainer</span>
-            <span class="lanzador-desc">LXC</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.111:1880" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/nodered" alt="NodeRed">
-          </div>
-          <div>
-            <span class="lanzador-nombre">NodeRed</span>
-            <span class="lanzador-desc">LXC</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.111:4081/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.simpleicons.org/transmission" alt="MLDonkey">
-          </div>
-          <div>
-            <span class="lanzador-nombre">MLDonkey</span>
-            <span class="lanzador-desc">LXC</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.111:8123/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/home-assistant.svg" alt="Home Assistant">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Home Assistant</span>
-            <span class="lanzador-desc">LXC</span>
-          </div>
-        </a>
-
-        <a href="http://192.168.31.111:8091/" class="lanzador-enlace" target="_blank">
-          <div class="lanzador-icono">
-            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/heimdall.svg" alt="Heimdall">
-          </div>
-          <div>
-            <span class="lanzador-nombre">Heimdall</span>
-            <span class="lanzador-desc">LXC</span>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
+  <main class="hogar-contenedor" id="contenido">
+    <div class="lanzador-estado">Cargando...</div>
   </main>
 
   <script>
+    /* ============================================================
+       Tema
+       ============================================================ */
     (function initTema() {
-      var guardado = localStorage.getItem("hogar-tema");
-      if (guardado === "oscuro") {
+      if (localStorage.getItem("hogar-tema") === "oscuro") {
         document.documentElement.setAttribute("data-tema", "oscuro");
       }
       actualizarIconoTema();
     })();
 
     document.getElementById("btnTema").addEventListener("click", function() {
-      var actual = document.documentElement.getAttribute("data-tema");
-      if (actual === "oscuro") {
+      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
+      if (oscuro) {
         document.documentElement.removeAttribute("data-tema");
         localStorage.setItem("hogar-tema", "claro");
       } else {
@@ -378,6 +159,61 @@
       var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
       document.getElementById("btnTema").textContent = oscuro ? "\u2600" : "\u263E";
     }
+
+    /* ============================================================
+       Renderizado
+       ============================================================ */
+    function iconoHtml(icono) {
+      if (!icono) {
+        return '<div class="lanzador-icono lanzador-icono--emoji">&#128279;</div>';
+      }
+      if (icono.startsWith("emoji:")) {
+        return '<div class="lanzador-icono lanzador-icono--emoji">' + icono.slice(6) + '</div>';
+      }
+      return '<div class="lanzador-icono"><img src="' + icono + '" alt="" loading="lazy"></div>';
+    }
+
+    function renderizar(config) {
+      var contenido = document.getElementById("contenido");
+      if (!config.grupos || config.grupos.length === 0) {
+        contenido.innerHTML = '<div class="lanzador-estado">No hay grupos configurados. <a href="/admin-lanzador.html">Ir al admin &rarr;</a></div>';
+        return;
+      }
+
+      var html = "";
+      config.grupos.forEach(function(grupo) {
+        if (!grupo.enlaces || grupo.enlaces.length === 0) return;
+        html += '<section class="lanzador-seccion">';
+        html += '<h2 class="lanzador-seccion__titulo">' + grupo.titulo + '</h2>';
+        html += '<div class="lanzador-grid">';
+        grupo.enlaces.forEach(function(enlace) {
+          var target = enlace.nueva_pestana ? ' target="_blank"' : '';
+          html += '<a href="' + enlace.url + '" class="lanzador-enlace"' + target + '>';
+          html += iconoHtml(enlace.icono);
+          html += '<div>';
+          html += '<span class="lanzador-nombre">' + enlace.nombre + '</span>';
+          if (enlace.descripcion) {
+            html += '<span class="lanzador-desc">' + enlace.descripcion + '</span>';
+          }
+          html += '</div></a>';
+        });
+        html += '</div></section>';
+      });
+
+      contenido.innerHTML = html;
+    }
+
+    /* ============================================================
+       Carga desde API
+       ============================================================ */
+    fetch("/api/lanzador")
+      .then(function(r) { return r.json(); })
+      .then(function(config) { renderizar(config); })
+      .catch(function() {
+        document.getElementById("contenido").innerHTML =
+          '<div class="lanzador-estado">No se pudo conectar con hogar-api. ' +
+          '<button onclick="location.reload()" style="margin-left:0.5rem;cursor:pointer;background:none;border:1px solid currentColor;padding:0.2rem 0.6rem;border-radius:4px;color:inherit">Reintentar</button></div>';
+      });
   </script>
 
 </body>

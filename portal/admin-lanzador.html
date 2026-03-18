@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Lanzador — HogarOS</title>
+  <link rel="stylesheet" href="/static/hogar.css">
+  <style>
+    .admin-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--gap-xl);
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+    }
+
+    .admin-grupo {
+      background: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio-sm);
+      margin-bottom: var(--gap-lg);
+      overflow: hidden;
+    }
+
+    .admin-grupo__cabecera {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-md);
+      padding: var(--gap-md) var(--gap-lg);
+      background: var(--boton-sec);
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .admin-grupo__titulo {
+      font-weight: 700;
+      font-size: 1rem;
+      flex: 1;
+    }
+
+    .admin-enlace {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      align-items: center;
+      gap: var(--gap-md);
+      padding: var(--gap-sm) var(--gap-lg);
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .admin-enlace:last-child {
+      border-bottom: none;
+    }
+
+    .admin-enlace__icono {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radio-sm);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .admin-enlace__icono img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .admin-enlace__info { min-width: 0; }
+
+    .admin-enlace__nombre {
+      font-weight: 600;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .admin-enlace__url {
+      font-size: 0.75rem;
+      color: var(--texto-suave);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .admin-enlace__acciones {
+      display: flex;
+      gap: var(--gap-xs);
+      flex-shrink: 0;
+    }
+
+    .admin-add-enlace {
+      width: 100%;
+      padding: var(--gap-sm) var(--gap-lg);
+      background: none;
+      border: none;
+      color: var(--acento);
+      font-family: var(--fuente);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transicion);
+    }
+
+    .admin-add-enlace:hover {
+      background: var(--alerta-fondo);
+    }
+
+    /* Botones de icono */
+    .btn-icono {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--borde);
+      border-radius: var(--radio-sm);
+      background: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transicion), color var(--transicion);
+      color: var(--texto);
+    }
+
+    .btn-icono:hover { background: var(--boton-sec); }
+    .btn-icono--peligro:hover { background: var(--error-fondo); color: var(--error); border-color: var(--error); }
+
+    /* Modal */
+    .modal-fondo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: var(--gap-lg);
+    }
+
+    .modal-fondo.visible { display: flex; }
+
+    .modal {
+      background: var(--fondo-tarjeta);
+      border-radius: var(--radio-md);
+      box-shadow: var(--sombra-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: var(--gap-xl);
+    }
+
+    .modal__titulo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: var(--gap-lg);
+    }
+
+    .campo {
+      margin-bottom: var(--gap-md);
+    }
+
+    .campo label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--texto-suave);
+      margin-bottom: var(--gap-xs);
+    }
+
+    .campo input[type="text"],
+    .campo input[type="url"] {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--borde);
+      border-radius: var(--radio-sm);
+      background: var(--fondo);
+      color: var(--texto);
+      font-family: var(--fuente);
+      font-size: 0.9rem;
+      transition: border-color var(--transicion);
+    }
+
+    .campo input:focus {
+      outline: none;
+      border-color: var(--acento);
+    }
+
+    .campo__ayuda {
+      font-size: 0.72rem;
+      color: var(--texto-suave);
+      margin-top: var(--gap-xs);
+    }
+
+    .campo--check {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-sm);
+    }
+
+    .campo--check label {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--texto);
+      font-weight: normal;
+    }
+
+    .icono-preview {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-sm);
+      margin-top: var(--gap-xs);
+    }
+
+    .icono-preview__caja {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radio-sm);
+      background: #fff;
+      border: 1px solid var(--borde);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .icono-preview__caja img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .modal__acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--gap-sm);
+      margin-top: var(--gap-lg);
+    }
+
+    .aviso-guardado {
+      display: none;
+      position: fixed;
+      bottom: var(--gap-lg);
+      right: var(--gap-lg);
+      background: var(--exito);
+      color: #fff;
+      padding: var(--gap-sm) var(--gap-md);
+      border-radius: var(--radio-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 300;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hogar-header">
+    <a href="/" class="hogar-header__logo">HogarOS</a>
+    <nav class="hogar-header__nav">
+      <a href="/lanzador.html" class="hogar-header__enlace">&#8592; Volver al Lanzador</a>
+      <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
+    </nav>
+  </header>
+
+  <main class="hogar-contenedor">
+
+    <div class="admin-toolbar">
+      <h1 style="font-size:1.3rem;font-weight:700;">Gestionar Lanzador</h1>
+      <div style="display:flex;gap:var(--gap-sm)">
+        <button class="hogar-boton hogar-boton--secundario" id="btnAddGrupo">+ Grupo</button>
+        <button class="hogar-boton hogar-boton--primario" id="btnGuardar">Guardar cambios</button>
+      </div>
+    </div>
+
+    <div id="listaGrupos"></div>
+
+  </main>
+
+  <!-- Modal enlace -->
+  <div class="modal-fondo" id="modalEnlace">
+    <div class="modal">
+      <div class="modal__titulo" id="modalEnlaceTitulo">Nuevo enlace</div>
+
+      <div class="campo">
+        <label>Nombre *</label>
+        <input type="text" id="campoNombre" placeholder="ProxMox">
+      </div>
+      <div class="campo">
+        <label>URL *</label>
+        <input type="url" id="campoUrl" placeholder="http://192.168.31.103:8006/">
+      </div>
+      <div class="campo">
+        <label>Descripcion</label>
+        <input type="text" id="campoDesc" placeholder="MV Debian 12">
+      </div>
+      <div class="campo">
+        <label>Icono</label>
+        <input type="text" id="campoIcono" placeholder="https://cdn.simpleicons.org/proxmox">
+        <div class="campo__ayuda">
+          URL de imagen · <code>emoji:🏠</code> para emoji<br>
+          Simple Icons: <code>https://cdn.simpleicons.org/docker</code><br>
+          Homarr: <code>https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/planka.svg</code>
+        </div>
+        <div class="icono-preview">
+          <div class="icono-preview__caja" id="iconoPreview"></div>
+          <span style="font-size:0.75rem;color:var(--texto-suave)">Vista previa</span>
+        </div>
+      </div>
+      <div class="campo campo--check">
+        <input type="checkbox" id="campoNuevaPestana" checked>
+        <label for="campoNuevaPestana">Abrir en nueva pestana</label>
+      </div>
+
+      <div class="modal__acciones">
+        <button class="hogar-boton hogar-boton--secundario" id="btnCancelarEnlace">Cancelar</button>
+        <button class="hogar-boton hogar-boton--primario" id="btnConfirmarEnlace">Guardar enlace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal grupo -->
+  <div class="modal-fondo" id="modalGrupo">
+    <div class="modal">
+      <div class="modal__titulo" id="modalGrupoTitulo">Nuevo grupo</div>
+      <div class="campo">
+        <label>Titulo del grupo *</label>
+        <input type="text" id="campoGrupoTitulo" placeholder="Servicios Externos">
+      </div>
+      <div class="modal__acciones">
+        <button class="hogar-boton hogar-boton--secundario" id="btnCancelarGrupo">Cancelar</button>
+        <button class="hogar-boton hogar-boton--primario" id="btnConfirmarGrupo">Guardar grupo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="aviso-guardado" id="avisoGuardado">&#10003; Cambios guardados</div>
+
+  <script>
+    /* ============================================================
+       Estado
+       ============================================================ */
+    var config = { grupos: [] };
+    var modalEnlaceCtx = null; // { grupoIdx, enlaceIdx | null }
+    var modalGrupoCtx  = null; // { grupoIdx | null }
+
+    /* ============================================================
+       Tema
+       ============================================================ */
+    (function() {
+      if (localStorage.getItem("hogar-tema") === "oscuro")
+        document.documentElement.setAttribute("data-tema", "oscuro");
+      actualizarIconoTema();
+    })();
+
+    document.getElementById("btnTema").addEventListener("click", function() {
+      var osc = document.documentElement.getAttribute("data-tema") === "oscuro";
+      if (osc) { document.documentElement.removeAttribute("data-tema"); localStorage.setItem("hogar-tema","claro"); }
+      else      { document.documentElement.setAttribute("data-tema","oscuro"); localStorage.setItem("hogar-tema","oscuro"); }
+      actualizarIconoTema();
+    });
+
+    function actualizarIconoTema() {
+      var osc = document.documentElement.getAttribute("data-tema") === "oscuro";
+      document.getElementById("btnTema").textContent = osc ? "\u2600" : "\u263E";
+    }
+
+    /* ============================================================
+       Renderizado
+       ============================================================ */
+    function iconoPreviewHtml(icono, caja) {
+      if (!icono) { caja.textContent = "?"; return; }
+      if (icono.startsWith("emoji:")) { caja.textContent = icono.slice(6); return; }
+      caja.innerHTML = '<img src="' + icono + '" alt="">';
+    }
+
+    function renderizarLista() {
+      var lista = document.getElementById("listaGrupos");
+      if (config.grupos.length === 0) {
+        lista.innerHTML = '<p style="color:var(--texto-suave);text-align:center;padding:var(--gap-xl)">No hay grupos. Pulsa "+ Grupo" para crear uno.</p>';
+        return;
+      }
+
+      var html = "";
+      config.grupos.forEach(function(grupo, gi) {
+        html += '<div class="admin-grupo" data-gi="' + gi + '">';
+        html += '<div class="admin-grupo__cabecera">';
+        html += '<span class="admin-grupo__titulo">' + grupo.titulo + '</span>';
+        html += '<button class="btn-icono" title="Renombrar" onclick="abrirModalGrupo(' + gi + ')">&#9998;</button>';
+        html += '<button class="btn-icono btn-icono--peligro" title="Eliminar grupo" onclick="eliminarGrupo(' + gi + ')">&#128465;</button>';
+        html += '</div>';
+
+        if (grupo.enlaces && grupo.enlaces.length > 0) {
+          grupo.enlaces.forEach(function(enlace, ei) {
+            html += '<div class="admin-enlace">';
+            html += '<div class="admin-enlace__icono">';
+            if (!enlace.icono) {
+              html += '&#128279;';
+            } else if (enlace.icono.startsWith("emoji:")) {
+              html += enlace.icono.slice(6);
+            } else {
+              html += '<img src="' + enlace.icono + '" alt="" loading="lazy">';
+            }
+            html += '</div>';
+            html += '<div class="admin-enlace__info">';
+            html += '<div class="admin-enlace__nombre">' + enlace.nombre + '</div>';
+            html += '<div class="admin-enlace__url">' + enlace.url + '</div>';
+            html += '</div>';
+            html += '<div class="admin-enlace__acciones">';
+            html += '<button class="btn-icono" title="Editar" onclick="abrirModalEnlace(' + gi + ',' + ei + ')">&#9998;</button>';
+            html += '<button class="btn-icono btn-icono--peligro" title="Eliminar" onclick="eliminarEnlace(' + gi + ',' + ei + ')">&#128465;</button>';
+            html += '</div>';
+            html += '</div>';
+          });
+        }
+
+        html += '<button class="admin-add-enlace" onclick="abrirModalEnlace(' + gi + ', null)">+ Anadir enlace</button>';
+        html += '</div>';
+      });
+
+      lista.innerHTML = html;
+    }
+
+    /* ============================================================
+       Modal enlace
+       ============================================================ */
+    document.getElementById("campoIcono").addEventListener("input", function() {
+      iconoPreviewHtml(this.value.trim(), document.getElementById("iconoPreview"));
+    });
+
+    function abrirModalEnlace(gi, ei) {
+      modalEnlaceCtx = { gi: gi, ei: ei };
+      var enlace = (ei !== null) ? config.grupos[gi].enlaces[ei] : null;
+      document.getElementById("modalEnlaceTitulo").textContent = enlace ? "Editar enlace" : "Nuevo enlace";
+      document.getElementById("campoNombre").value      = enlace ? enlace.nombre      : "";
+      document.getElementById("campoUrl").value         = enlace ? enlace.url         : "";
+      document.getElementById("campoDesc").value        = enlace ? (enlace.descripcion || "") : "";
+      document.getElementById("campoIcono").value       = enlace ? (enlace.icono || "")       : "";
+      document.getElementById("campoNuevaPestana").checked = enlace ? enlace.nueva_pestana !== false : true;
+      iconoPreviewHtml(enlace ? (enlace.icono || "") : "", document.getElementById("iconoPreview"));
+      document.getElementById("modalEnlace").classList.add("visible");
+      document.getElementById("campoNombre").focus();
+    }
+
+    function cerrarModalEnlace() {
+      document.getElementById("modalEnlace").classList.remove("visible");
+      modalEnlaceCtx = null;
+    }
+
+    document.getElementById("btnCancelarEnlace").addEventListener("click", cerrarModalEnlace);
+
+    document.getElementById("btnConfirmarEnlace").addEventListener("click", function() {
+      var nombre = document.getElementById("campoNombre").value.trim();
+      var url    = document.getElementById("campoUrl").value.trim();
+      if (!nombre || !url) { alert("Nombre y URL son obligatorios."); return; }
+
+      var enlace = {
+        nombre: nombre,
+        url: url,
+        descripcion: document.getElementById("campoDesc").value.trim(),
+        icono: document.getElementById("campoIcono").value.trim(),
+        nueva_pestana: document.getElementById("campoNuevaPestana").checked
+      };
+
+      var gi = modalEnlaceCtx.gi;
+      var ei = modalEnlaceCtx.ei;
+      if (!config.grupos[gi].enlaces) config.grupos[gi].enlaces = [];
+
+      if (ei !== null) {
+        config.grupos[gi].enlaces[ei] = enlace;
+      } else {
+        config.grupos[gi].enlaces.push(enlace);
+      }
+
+      cerrarModalEnlace();
+      renderizarLista();
+    });
+
+    /* ============================================================
+       Modal grupo
+       ============================================================ */
+    function abrirModalGrupo(gi) {
+      modalGrupoCtx = { gi: gi };
+      var nuevo = gi === null;
+      document.getElementById("modalGrupoTitulo").textContent = nuevo ? "Nuevo grupo" : "Renombrar grupo";
+      document.getElementById("campoGrupoTitulo").value = nuevo ? "" : config.grupos[gi].titulo;
+      document.getElementById("modalGrupo").classList.add("visible");
+      document.getElementById("campoGrupoTitulo").focus();
+    }
+
+    function cerrarModalGrupo() {
+      document.getElementById("modalGrupo").classList.remove("visible");
+      modalGrupoCtx = null;
+    }
+
+    document.getElementById("btnCancelarGrupo").addEventListener("click", cerrarModalGrupo);
+
+    document.getElementById("btnConfirmarGrupo").addEventListener("click", function() {
+      var titulo = document.getElementById("campoGrupoTitulo").value.trim();
+      if (!titulo) { alert("El titulo es obligatorio."); return; }
+
+      var gi = modalGrupoCtx.gi;
+      if (gi === null) {
+        config.grupos.push({ id: "grupo_" + Date.now(), titulo: titulo, enlaces: [] });
+      } else {
+        config.grupos[gi].titulo = titulo;
+      }
+
+      cerrarModalGrupo();
+      renderizarLista();
+    });
+
+    document.getElementById("btnAddGrupo").addEventListener("click", function() { abrirModalGrupo(null); });
+
+    /* ============================================================
+       Eliminar
+       ============================================================ */
+    function eliminarEnlace(gi, ei) {
+      if (!confirm("¿Eliminar este enlace?")) return;
+      config.grupos[gi].enlaces.splice(ei, 1);
+      renderizarLista();
+    }
+
+    function eliminarGrupo(gi) {
+      if (!confirm("¿Eliminar el grupo \"" + config.grupos[gi].titulo + "\" y todos sus enlaces?")) return;
+      config.grupos.splice(gi, 1);
+      renderizarLista();
+    }
+
+    /* ============================================================
+       Guardar
+       ============================================================ */
+    document.getElementById("btnGuardar").addEventListener("click", function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = "Guardando...";
+
+      fetch("/api/lanzador", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config)
+      })
+        .then(function(r) {
+          if (!r.ok) throw new Error("Error " + r.status);
+          var aviso = document.getElementById("avisoGuardado");
+          aviso.style.display = "block";
+          setTimeout(function() { aviso.style.display = "none"; }, 2500);
+        })
+        .catch(function() { alert("Error al guardar. Comprueba que hogar-api esta en marcha."); })
+        .finally(function() { btn.disabled = false; btn.textContent = "Guardar cambios"; });
+    });
+
+    /* ============================================================
+       Carga inicial
+       ============================================================ */
+    fetch("/api/lanzador")
+      .then(function(r) { return r.json(); })
+      .then(function(datos) { config = datos; renderizarLista(); })
+      .catch(function() {
+        document.getElementById("listaGrupos").innerHTML =
+          '<p style="color:var(--error);text-align:center;padding:var(--gap-xl)">No se pudo conectar con hogar-api.</p>';
+      });
+  </script>
+
+</body>
+</html>

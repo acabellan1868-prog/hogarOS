@@ -16,6 +16,18 @@ services:
     command: /bin/sh -c "envsubst '$${HA_TOKEN}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       - fido
+      - hogar-api
+    restart: unless-stopped
+
+  # ── hogar-api — Gestión del lanzador ──
+  hogar-api:
+    build: ./hogar-api
+    container_name: hogar-api
+    volumes:
+      - /mnt/datos/hogar-api:/app/data
+    environment:
+      - TZ=Europe/Madrid
+      - LANZADOR_JSON=/app/data/lanzador.json
     restart: unless-stopped
 
   # ── ReDo — Red Doméstica ──

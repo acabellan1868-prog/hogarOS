@@ -406,9 +406,82 @@ Dashy usa tres sistemas de iconos. En hogarOS se resuelven así:
 
 **Mejora futura:** Endpoint proxy en nginx o backend que haga el check server-side y devuelva el estado, evitando los problemas de CORS.
 
-### Implementación
+### Implementación (fase inicial)
 
 - `portal/lanzador.html` — página del lanzador (HTML/CSS/JS vanilla, usando hogar.css)
 - Los grupos y enlaces se definen directamente en el HTML (sin fichero de configuración externo por ahora)
 - El header del lanzador incluye navegación de vuelta al portal principal
 - Diseño: grid de tarjetas por grupo, igual que el resto del portal
+
+---
+
+## Gestión dinámica del lanzador (sesión 5 — 2026-03-18)
+
+### Motivación
+
+Con los enlaces hardcodeados en HTML, cualquier cambio (añadir un servicio, cambiar una URL) requiere editar el fichero, hacer commit y `actualizar.sh` en la VM. Para un portal doméstico que se va a usar diariamente, esto es demasiado fricción.
+
+### Decisión: Opción B — JSON + backend mínimo (FastAPI)
+
+Un microservicio `hogar-api` con dos endpoints:
+- `GET /api/lanzador` → devuelve `lanzador.json`
+- `PUT /api/lanzador` → guarda `lanzador.json`
+
+nginx ya actúa como proxy — simplemente se añade una ruta más. El `lanzador.html` carga la config dinámicamente y `admin-lanzador.html` la edita sin tocar código.
+
+Opciones descartadas:
+- **localStorage**: solo funciona en el dispositivo donde se configura. Inútil si se accede desde móvil y PC.
+- **Export/import JSON manual**: demasiada fricción, no es mejor que editar el HTML.
+
+### Estructura JSON (`lanzador.json`)
+
+```json
+{
+  "grupos": [
+    {
+      "id": "externos",
+      "titulo": "Servicios Externos",
+      "enlaces": [
+        {
+          "nombre": "ChatGPT",
+          "descripcion": "",
+          "url": "https://chatgpt.com/",
+          "icono": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/chatgpt.svg",
+          "nueva_pestana": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+El campo `icono` acepta:
+- URL directa (Simple Icons, Homarr CDN, cualquier imagen)
+- Prefijo `emoji:🏠` para renderizar emoji en lugar de `<img>`
+
+### Arquitectura
+
+```
+nginx
+ ├── /                   → portal (estático)
+ ├── /api/lanzador       → hogar-api:8080/lanzador  ← NUEVO
+ ├── /red/               → redo
+ ├── /finanzas/          → fido
+ └── /domotica/api/      → home assistant
+```
+
+`hogar-api` corre como nuevo contenedor en docker-compose. El JSON se persiste en `/mnt/datos/hogar-api/lanzador.json`. Si el fichero no existe en el primer arranque, el servicio devuelve la config embebida por defecto.
+
+### Nuevos ficheros
+
+```
+hogarOS/
+├── hogar-api/
+│   ├── app/
+│   │   └── principal.py     ← FastAPI (GET + PUT /lanzador)
+│   ├── requirements.txt
+│   └── Dockerfile
+└── portal/
+    ├── lanzador.html         ← ahora carga desde /api/lanzador
+    └── admin-lanzador.html   ← CRUD de grupos y enlaces
+```
