@@ -90,22 +90,7 @@
       font-size: 0.9rem;
     }
 
-    .lanzador-admin-link {
-      font-size: 0.75rem;
-      color: var(--texto-suave);
-      text-decoration: none;
-      margin-left: auto;
-      padding: 0.3rem 0.6rem;
-      border-radius: var(--radio-sm);
-      transition: background var(--transicion), color var(--transicion);
-    }
-
-    .lanzador-admin-link:hover {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-    }
-
-    @media (max-width: 600px) {
+@media (max-width: 600px) {
       .lanzador-grid {
         grid-template-columns: 1fr 1fr;
         gap: var(--gap-sm);
@@ -123,7 +108,7 @@
       <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
       <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">Domotica</a>
       <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">Lanzador</a>
-      <a href="/admin-lanzador.html" class="lanzador-admin-link" title="Gestionar enlaces">&#9881;</a>
+      <a href="/admin-lanzador.html" class="hogar-header__enlace">Gestionar</a>
       <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
     </nav>
   </header>
