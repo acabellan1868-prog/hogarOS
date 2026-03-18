@@ -94,7 +94,34 @@
       font-size: 0.9rem;
     }
 
-@media (max-width: 600px) {
+    .fab-gestionar {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--acento);
+      color: #fff;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: var(--sombra-md);
+      transition: background var(--transicion), transform var(--transicion);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      z-index: 100;
+    }
+
+    .fab-gestionar:hover {
+      background: var(--acento-hover);
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 600px) {
       .lanzador-grid {
         grid-template-columns: 1fr 1fr;
         gap: var(--gap-sm);
@@ -112,10 +139,11 @@
       <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
       <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">Domotica</a>
       <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">Lanzador</a>
-      <a href="/admin-lanzador.html" class="hogar-header__enlace">Gestionar</a>
       <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
     </nav>
   </header>
+
+  <a href="/admin-lanzador.html" class="fab-gestionar" title="Gestionar enlaces">+</a>
 
   <main class="hogar-contenedor" id="contenido">
     <div class="lanzador-estado">Cargando...</div>

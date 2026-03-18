@@ -213,7 +213,7 @@ Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md`
   - DESARROLLO (ProxMox, Portainer, NodeRed, MLDonkey, HA, Heimdall)
 - [x] 🤖 Iconos vía Simple Icons CDN y Homarr icons CDN
 - [x] 🤖 Enlazar el lanzador desde el header del portal principal
-- [ ] 👤 Verificar que todos los enlaces funcionan correctamente
+- [x] 👤 Verificar que todos los enlaces funcionan correctamente
 - [ ] 👤 Dar de baja el contenedor de Dashy en Docker
 
 ### Gestión dinámica (Fase 8b)
@@ -222,7 +222,7 @@ Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md`
 - [x] 🤖 Crear `portal/admin-lanzador.html` — CRUD de grupos y enlaces sin tocar código
 - [x] 🤖 Actualizar `nginx.conf` — nueva ruta `/api/lanzador` → `hogar-api`
 - [x] 🤖 Actualizar `docker-compose.yml` — nuevo servicio `hogar-api`
-- [ ] 👤 Crear `/mnt/datos/hogar-api/` en la VM y ejecutar `actualizar.sh`
+- [x] 👤 Crear `/mnt/datos/hogar-api/` en la VM y ejecutar `actualizar.sh`
 - [ ] 👤 Dar de baja el contenedor de Dashy en Docker
 
 ### Mejoras futuras del lanzador
