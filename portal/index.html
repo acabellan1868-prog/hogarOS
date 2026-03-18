@@ -124,6 +124,53 @@
       font-weight: 600;
     }
 
+    /* Tarjeta Kryptonite */
+    .crypto-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: var(--gap-sm);
+      font-size: 0.78rem;
+    }
+
+    .crypto-tabla th {
+      text-align: left;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+      padding: 3px 4px;
+      border-bottom: 1px solid var(--borde);
+      white-space: nowrap;
+    }
+
+    .crypto-tabla td {
+      padding: 4px;
+      border-bottom: 1px solid var(--borde);
+      white-space: nowrap;
+    }
+
+    .crypto-tabla tr:last-child td {
+      border-bottom: none;
+    }
+
+    .crypto-tabla .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .crypto-positivo { color: var(--exito); font-weight: 600; }
+    .crypto-negativo { color: var(--error); font-weight: 600; }
+
+    .crypto-total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--gap-sm);
+      padding-top: var(--gap-sm);
+      border-top: 1px solid var(--borde);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
     /* Feed de alertas */
     .alertas-lista {
       display: flex;
@@ -205,6 +252,17 @@
           <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">Abrir Home Assistant &rarr;</a>
         </div>
 
+        <!-- TARJETA KRYPTONITE -->
+        <div class="hogar-tarjeta" id="tarjetaKrypto">
+          <div class="hogar-tarjeta__cabecera">
+            <span class="hogar-tarjeta__titulo">Crypto Portfolio</span>
+            <span class="hogar-tarjeta__icono">&#9883;</span>
+          </div>
+          <div id="kryptoContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -233,8 +291,9 @@
     /* ============================================================
        Configuración — URLs base de las apps
        ============================================================ */
-    const REDO_API  = "/red/api";
-    const FIDO_API  = "/finanzas/api";
+    const REDO_API    = "/red/api";
+    const FIDO_API   = "/finanzas/api";
+    const KRYPTO_API = "/crypto/api";
 
     /* ============================================================
        Toggle tema claro/oscuro con persistencia
@@ -431,6 +490,72 @@
     }
 
     /* ============================================================
+       Cargar datos de Kryptonite
+       ============================================================ */
+    var CRYPTO_EMOJIS = {
+      "BTC": "\u20BF", "ETH": "\u039E", "ADA": "\uD83D\uDCA0",
+      "DOT": "\u26AB", "SHIB": "\uD83D\uDC36", "SOL": "\u2600"
+    };
+
+    function cargarKrypto() {
+      fetch(KRYPTO_API + "/portafolio")
+        .then(function(r) { return r.json(); })
+        .then(function(datos) {
+          var contenedor = document.getElementById("kryptoContenido");
+
+          if (!datos || datos.length === 0) {
+            contenedor.innerHTML = '<span class="cargando">Sin datos de portafolio</span>';
+            return;
+          }
+
+          var totalInvertido = 0;
+          var totalValor = 0;
+
+          function fmtNum(n) { return Number(n).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+
+          var html = '<table class="crypto-tabla">' +
+            '<tr><th></th><th></th><th class="num">Inv. \u20AC</th><th class="num">Valor \u20AC</th><th class="num">%</th></tr>';
+
+          datos.forEach(function(c) {
+            totalInvertido += c.coste_total_inversion;
+            totalValor += c.valor_actual_inversion;
+            var pct = c.rentabilidad_porcentaje;
+            var clase = pct >= 0 ? "crypto-positivo" : "crypto-negativo";
+            var flecha = pct >= 0 ? "\u25B2" : "\u25BC";
+            var emoji = CRYPTO_EMOJIS[c.simbolo] || "\uD83E\uDE99";
+
+            html += '<tr>' +
+              '<td>' + emoji + '</td>' +
+              '<td>' + c.simbolo + '</td>' +
+              '<td class="num">' + fmtNum(c.coste_total_inversion) + '</td>' +
+              '<td class="num">' + fmtNum(c.valor_actual_inversion) + '</td>' +
+              '<td class="num ' + clase + '">' + flecha + pct.toFixed(1) + '</td>' +
+              '</tr>';
+          });
+
+          html += '</table>';
+
+          // Totales
+          var totalPct = totalInvertido > 0 ? ((totalValor - totalInvertido) / totalInvertido * 100) : 0;
+          var claseTotal = totalPct >= 0 ? "crypto-positivo" : "crypto-negativo";
+          var flechaTotal = totalPct >= 0 ? "\u25B2" : "\u25BC";
+
+          html += '<div class="crypto-total">' +
+            '<span>' + fmtNum(totalInvertido) + ' \u2192 ' + fmtNum(totalValor) + ' \u20AC</span>' +
+            '<span class="' + claseTotal + '">' + flechaTotal + ' ' + totalPct.toFixed(1) + '%</span>' +
+            '</div>';
+
+          contenedor.innerHTML = html;
+          document.getElementById("tarjetaKrypto").classList.remove("hogar-tarjeta--offline");
+        })
+        .catch(function() {
+          document.getElementById("kryptoContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con Kryptonite</span>';
+          document.getElementById("tarjetaKrypto").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
        Escaneo manual
        ============================================================ */
     document.getElementById("btnEscanear").addEventListener("click", function() {
@@ -501,12 +626,14 @@
     cargarRedo();
     cargarFido();
     cargarHA();
+    cargarKrypto();
 
     // Refrescar cada 60 segundos
     setInterval(function() {
       cargarRedo();
       cargarFido();
       cargarHA();
+      cargarKrypto();
     }, 60000);
   </script>
 

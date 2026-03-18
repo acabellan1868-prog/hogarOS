@@ -230,7 +230,18 @@ Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md`
 
 ---
 
-## Fase 9 — Futuro (sin fecha)
+## Fase 9 — Integración de Kryptonite
+
+Tarjeta de crypto portfolio en el dashboard, consumiendo la API de Kryptonite (Flask, puerto 5000, JupyterLab).
+
+- [x] 🤖 Añadir tarjeta "Crypto Portfolio" en `portal/index.html`
+- [x] 🤖 Consumir `GET /portafolio` de Kryptonite (tabla con 6 cryptos, totales, rentabilidad)
+- [x] 🤖 Añadir proxy en `nginx.conf`: `/crypto/api/` → `host.docker.internal:5000`
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra datos reales
+
+---
+
+## Fase 10 — Futuro (sin fecha)
 
 - [x] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA (completado 2026-03-17)
   - [x] Temperatura exterior (actual + max/min, Meteoclimatic)

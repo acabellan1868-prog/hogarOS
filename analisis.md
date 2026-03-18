@@ -51,6 +51,16 @@ Cada aplicación mantiene su **independencia total** — pueden desplegarse y ac
   - Balance
   - Últimos movimientos importados
 
+### Kryptonite (Crypto Portfolio)
+- **Stack:** Python, Flask, SQLite, Binance API, LangChain/Groq
+- **Repositorio:** `acabellan1868-prog/kryptonite`
+- **Despliegue:** JupyterLab (contenedor Docker gestionado por Portainer), puerto 5000
+- **Función:** Gestión de portafolio de criptomonedas — seguimiento de operaciones, precios en tiempo real, análisis de rendimiento, señales de trading, análisis IA
+- **Datos que expone al portal:**
+  - Lista de cryptos en cartera con inversión y valor actual
+  - Rentabilidad por moneda (%)
+  - Totales del portafolio
+
 ---
 
 ## Página de inicio del portal
@@ -495,3 +505,59 @@ hogarOS/
 - Solo aparece en `lanzador.html`, no en el resto del portal
 
 Estilo: círculo de 48px con color acento (índigo), escala al 110% en hover, `position: fixed` abajo a la derecha.
+
+---
+
+## Integración de Kryptonite (sesión 6 — 2026-03-19)
+
+### Motivación
+
+El usuario tiene un proyecto independiente llamado **Kryptonite** que gestiona un portafolio de criptomonedas. Corre como app Flask (puerto 5000) dentro del contenedor de JupyterLab en la VM 101. Ya dispone de un API REST con múltiples endpoints.
+
+### Decisión
+
+Añadir una tarjeta "Crypto Portfolio" en el dashboard de hogarOS que muestre un resumen del portafolio. No se integra Kryptonite como contenedor de hogarOS — se consume su API existente a través de un proxy en Nginx.
+
+### Datos mostrados
+
+La tarjeta consume `GET /portafolio` de Kryptonite y muestra una tabla compacta:
+
+| Columna | Contenido |
+|---|---|
+| Emoji | Icono representativo de cada crypto (₿, Ξ, 🐶...) |
+| Moneda | Símbolo (BTC, ETH, ADA, DOT, SHIB, SOL) |
+| Inv. € | Total invertido (euros, sin decimales) |
+| Valor € | Valor actual de mercado |
+| % | Rentabilidad con flecha verde (▲ ganancia) o roja (▼ pérdida) |
+
+Al final, una línea de totales con inversión total → valor actual y rentabilidad global.
+
+### Arquitectura
+
+Kryptonite no forma parte del `docker-compose.yml` de hogarOS. Corre de forma independiente en JupyterLab (puerto 5000). Nginx simplemente redirige:
+
+```
+nginx
+ ├── /crypto/api/  → host.docker.internal:5000/  ← Kryptonite (Flask)
+```
+
+Esto sigue el mismo patrón que Home Assistant: app externa, consumida vía proxy.
+
+### Endpoint de Kryptonite utilizado
+
+```
+GET /portafolio  →  [
+  {
+    "simbolo": "BTC",
+    "coste_total_inversion": 250.00,
+    "valor_actual_inversion": 310.50,
+    "rentabilidad_porcentaje": 24.2,
+    ...
+  }
+]
+```
+
+### Ficheros modificados
+
+- `portal/index.html` — nueva tarjeta + estilos + JS para consumir API
+- `nginx.conf` — nueva ruta `/crypto/api/` → Kryptonite
