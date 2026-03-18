@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lanzador — HogarOS</title>
+  <link rel="stylesheet" href="/static/hogar.css">
+  <style>
+    .lanzador-seccion {
+      margin-bottom: var(--gap-xl);
+    }
+
+    .lanzador-seccion__titulo {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--texto-suave);
+      margin-bottom: var(--gap-md);
+    }
+
+    .lanzador-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--gap-md);
+    }
+
+    .lanzador-enlace {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-md);
+      background: var(--fondo-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio-sm);
+      padding: var(--gap-md);
+      text-decoration: none;
+      color: var(--texto);
+      box-shadow: var(--sombra-sm);
+      transition: box-shadow var(--transicion), border-color var(--transicion);
+    }
+
+    .lanzador-enlace:hover {
+      box-shadow: var(--sombra-md);
+      border-color: var(--acento);
+    }
+
+    .lanzador-icono {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radio-sm);
+      background: #fff;
+      box-shadow: var(--sombra-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 5px;
+    }
+
+    .lanzador-icono img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
+    .lanzador-icono--emoji {
+      background: var(--alerta-fondo);
+      font-size: 1.3rem;
+    }
+
+    .lanzador-nombre {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .lanzador-desc {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--texto-suave);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 600px) {
+      .lanzador-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--gap-sm);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hogar-header">
+    <a href="/" class="hogar-header__logo">HogarOS</a>
+    <nav class="hogar-header__nav">
+      <a href="/" class="hogar-header__enlace">Inicio</a>
+      <a href="/red/" class="hogar-header__enlace">Red</a>
+      <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
+      <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">Domotica</a>
+      <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">Lanzador</a>
+      <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
+    </nav>
+  </header>
+
+  <main class="hogar-contenedor">
+
+    <!-- ======== SERVICIOS EXTERNOS ======== -->
+    <section class="lanzador-seccion">
+      <h2 class="lanzador-seccion__titulo">Servicios Externos</h2>
+      <div class="lanzador-grid">
+
+        <a href="https://chatgpt.com/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/openai" alt="ChatGPT">
+          </div>
+          <div>
+            <span class="lanzador-nombre">ChatGPT</span>
+          </div>
+        </a>
+
+        <a href="https://grok.com/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grok.svg" alt="Grok">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Grok</span>
+          </div>
+        </a>
+
+        <a href="https://gemini.google.com/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/googlegemini" alt="Gemini">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Gemini</span>
+          </div>
+        </a>
+
+        <a href="https://claude.ai" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/anthropic" alt="Claude">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Claude</span>
+          </div>
+        </a>
+
+        <a href="https://login.tailscale.com/admin/machines" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/tailscale" alt="TailScale">
+          </div>
+          <div>
+            <span class="lanzador-nombre">TailScale</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ======== PRODUCCIÓN ======== -->
+    <section class="lanzador-seccion">
+      <h2 class="lanzador-seccion__titulo">Produccion — Dell 7050</h2>
+      <div class="lanzador-grid">
+
+        <a href="http://192.168.31.103:8006/#v1:0:18:4::::::::" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/proxmox" alt="ProxMox">
+          </div>
+          <div>
+            <span class="lanzador-nombre">ProxMox</span>
+            <span class="lanzador-desc">Dell 7050</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:9000/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/portainer" alt="Portainer">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Portainer</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:8091/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/heimdall.svg" alt="Heimdall">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Heimdall</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.132:8123" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/home-assistant.svg" alt="Home Assistant">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Home Assistant</span>
+            <span class="lanzador-desc">MV</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:1880/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/nodered" alt="NodeRed">
+          </div>
+          <div>
+            <span class="lanzador-nombre">NodeRed</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:8081/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/nextcloud" alt="NextCloud">
+          </div>
+          <div>
+            <span class="lanzador-nombre">NextCloud</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:8888/lab" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/jupyter" alt="Jupyter">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Jupyter Lab</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:5678/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/n8n" alt="N8N">
+          </div>
+          <div>
+            <span class="lanzador-nombre">N8N</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:3010/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/planka.svg" alt="Planka">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Planka</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="https://192.168.31.131:8002" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/docker" alt="DockMon">
+          </div>
+          <div>
+            <span class="lanzador-nombre">DockMon</span>
+            <span class="lanzador-desc">MV Debian 12</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131:8082/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono lanzador-icono--emoji">&#128176;</div>
+          <div>
+            <span class="lanzador-nombre">FiDo</span>
+            <span class="lanzador-desc">Finanzas Domesticas</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.131" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono lanzador-icono--emoji">&#127968;</div>
+          <div>
+            <span class="lanzador-nombre">hogarOS</span>
+            <span class="lanzador-desc">Portal</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ======== DESARROLLO ======== -->
+    <section class="lanzador-seccion">
+      <h2 class="lanzador-seccion__titulo">Desarrollo — Optiplex 3070</h2>
+      <div class="lanzador-grid">
+
+        <a href="https://192.168.31.101:8006/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/proxmox" alt="ProxMox">
+          </div>
+          <div>
+            <span class="lanzador-nombre">ProxMox</span>
+            <span class="lanzador-desc">Optiplex 3070</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.111:9000/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/portainer" alt="Portainer">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Portainer</span>
+            <span class="lanzador-desc">LXC</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.111:1880" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/nodered" alt="NodeRed">
+          </div>
+          <div>
+            <span class="lanzador-nombre">NodeRed</span>
+            <span class="lanzador-desc">LXC</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.111:4081/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.simpleicons.org/transmission" alt="MLDonkey">
+          </div>
+          <div>
+            <span class="lanzador-nombre">MLDonkey</span>
+            <span class="lanzador-desc">LXC</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.111:8123/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/home-assistant.svg" alt="Home Assistant">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Home Assistant</span>
+            <span class="lanzador-desc">LXC</span>
+          </div>
+        </a>
+
+        <a href="http://192.168.31.111:8091/" class="lanzador-enlace" target="_blank">
+          <div class="lanzador-icono">
+            <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/heimdall.svg" alt="Heimdall">
+          </div>
+          <div>
+            <span class="lanzador-nombre">Heimdall</span>
+            <span class="lanzador-desc">LXC</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function initTema() {
+      var guardado = localStorage.getItem("hogar-tema");
+      if (guardado === "oscuro") {
+        document.documentElement.setAttribute("data-tema", "oscuro");
+      }
+      actualizarIconoTema();
+    })();
+
+    document.getElementById("btnTema").addEventListener("click", function() {
+      var actual = document.documentElement.getAttribute("data-tema");
+      if (actual === "oscuro") {
+        document.documentElement.removeAttribute("data-tema");
+        localStorage.setItem("hogar-tema", "claro");
+      } else {
+        document.documentElement.setAttribute("data-tema", "oscuro");
+        localStorage.setItem("hogar-tema", "oscuro");
+      }
+      actualizarIconoTema();
+    });
+
+    function actualizarIconoTema() {
+      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
+      document.getElementById("btnTema").textContent = oscuro ? "\u2600" : "\u263E";
+    }
+  </script>
+
+</body>
+</html>

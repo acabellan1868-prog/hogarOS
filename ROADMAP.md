@@ -207,12 +207,12 @@ Prioridad inmediata tras el despliegue. No solo bases de datos — backup integr
 
 Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md` para el análisis completo.
 
-- [ ] 🤖 Crear `portal/lanzador.html` con los grupos de enlaces de Dashy migrados:
+- [x] 🤖 Crear `portal/lanzador.html` con los grupos de enlaces de Dashy migrados:
   - Servicios Externos (ChatGPT, Grok, Gemini, Claude, TailScale)
   - PRODUCCIÓN Dell 7050 (ProxMox, Portainer, Heimdall, HA, NodeRed, NextCloud, Jupyter, N8N, Planka, DockMon, FiDo, hogarOS)
   - DESARROLLO (ProxMox, Portainer, NodeRed, MLDonkey, HA, Heimdall)
-- [ ] 🤖 Iconos vía Font Awesome, Simple Icons CDN y Homarr icons CDN
-- [ ] 🤖 Enlazar el lanzador desde el header del portal principal
+- [x] 🤖 Iconos vía Simple Icons CDN y Homarr icons CDN
+- [x] 🤖 Enlazar el lanzador desde el header del portal principal
 - [ ] 👤 Verificar que todos los enlaces funcionan correctamente
 - [ ] 👤 Dar de baja el contenedor de Dashy en Docker
 
