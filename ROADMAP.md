@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: fase de diseño y planificación completada.
-> Última actualización: 2026-03-19
+> Última actualización: 2026-03-19 (tarde)
 
 ### Leyenda
 
@@ -237,7 +237,7 @@ Tarjeta de crypto portfolio en el dashboard, consumiendo la API de Kryptonite (F
 - [x] 🤖 Añadir tarjeta "Crypto Portfolio" en `portal/index.html`
 - [x] 🤖 Consumir `GET /portafolio` de Kryptonite (tabla con 6 cryptos, totales, rentabilidad)
 - [x] 🤖 Añadir proxy en `nginx.conf`: `/crypto/api/` → `host.docker.internal:5000`
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra datos reales
+- [x] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra datos reales ✅
 
 ### Fase 9b — Gráfica comparativa 24h (2026-03-19)
 
@@ -245,16 +245,18 @@ Tarjeta de crypto portfolio en el dashboard, consumiendo la API de Kryptonite (F
 - [x] 🤖 Añadir tarjeta "Crypto Comparativa 24h" en `portal/index.html`
 - [x] 🤖 Consumir `GET /grafica24h` (sin parámetros) → imagen PNG base64 con comparativa de todo el portafolio
 - [x] 🤖 Separar intervalos de refresco: datos operacionales 60s, tarjetas crypto 10 minutos
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra la gráfica
+- [x] 👤 Ejecutar `actualizar.sh` en la VM y verificar ✅
 
-### Fase 9c — Crypto integrado en FiDo (2026-03-19)
+### Fase 9c — Crypto integrado en FiDo (2026-03-19) ✅
 
 - [x] 🤖 Mover tarjetas crypto del portal hogarOS a FiDo (nueva pestaña "₿ Crypto")
-- [x] 🤖 FiDo: tabla de portfolio con inversión, valor actual y rentabilidad por moneda + totales
-- [x] 🤖 FiDo: gráfica comparativa 24h debajo de la tabla (carga lazy al entrar en la pestaña)
+- [x] 🤖 FiDo: tabla de portfolio con inversión, valor actual y rentabilidad por moneda + totales en pie de tabla
+- [x] 🤖 FiDo: gráfica comparativa 24h cargada en segundo plano (no bloquea la tabla)
+- [x] 🤖 FiDo: estado "⏳ Cargando..." visible al entrar en la pestaña + mensaje de error si Kryptonite no responde
+- [x] 🤖 FiDo: cache-busting en `api.js` y `app.js` (`?v=2`) para forzar recarga tras despliegue
 - [x] 🤖 Portal hogarOS: mini-resumen crypto en tarjeta "Finanzas Domésticas" (₿ inv → valor € ▼ %)
 - [x] 🤖 Portal hogarOS: limpieza de CSS y JS de las tarjetas crypto eliminadas
-- [ ] 👤 Ejecutar `actualizar.sh` en VM para FiDo y hogarOS y verificar
+- [x] 👤 Verificado en producción: tabla y gráfica visibles ✅
 
 ---
 
