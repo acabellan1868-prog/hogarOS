@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: fase de diseño y planificación completada.
-> Última actualización: 2026-03-18
+> Última actualización: 2026-03-19
 
 ### Leyenda
 
@@ -214,7 +214,7 @@ Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md`
 - [x] 🤖 Iconos vía Simple Icons CDN y Homarr icons CDN
 - [x] 🤖 Enlazar el lanzador desde el header del portal principal
 - [x] 👤 Verificar que todos los enlaces funcionan correctamente
-- [ ] 👤 Dar de baja el contenedor de Dashy en Docker
+- [x] 👤 Dar de baja el contenedor de Dashy en Docker
 
 ### Gestión dinámica (Fase 8b)
 - [x] 🤖 Crear `hogar-api/` — microservicio FastAPI con `GET /api/lanzador` y `PUT /api/lanzador`
@@ -223,7 +223,7 @@ Reemplaza Dashy como lanzador, liberando un contenedor Docker. Ver `analisis.md`
 - [x] 🤖 Actualizar `nginx.conf` — nueva ruta `/api/lanzador` → `hogar-api`
 - [x] 🤖 Actualizar `docker-compose.yml` — nuevo servicio `hogar-api`
 - [x] 👤 Crear `/mnt/datos/hogar-api/` en la VM y ejecutar `actualizar.sh`
-- [ ] 👤 Dar de baja el contenedor de Dashy en Docker
+- [x] 👤 Dar de baja el contenedor de Dashy en Docker
 
 ### Mejoras futuras del lanzador
 - [ ] 🤖 Status check server-side (proxy nginx o endpoint backend) para evitar problemas de CORS
@@ -238,6 +238,14 @@ Tarjeta de crypto portfolio en el dashboard, consumiendo la API de Kryptonite (F
 - [x] 🤖 Consumir `GET /portafolio` de Kryptonite (tabla con 6 cryptos, totales, rentabilidad)
 - [x] 🤖 Añadir proxy en `nginx.conf`: `/crypto/api/` → `host.docker.internal:5000`
 - [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra datos reales
+
+### Fase 9b — Gráfica comparativa 24h (2026-03-19)
+
+- [x] 🤖 Clonar repo `acabellan1868-prog/kryptonite` para explorar la API
+- [x] 🤖 Añadir tarjeta "Crypto Comparativa 24h" en `portal/index.html`
+- [x] 🤖 Consumir `GET /grafica24h` (sin parámetros) → imagen PNG base64 con comparativa de todo el portafolio
+- [x] 🤖 Separar intervalos de refresco: datos operacionales 60s, tarjetas crypto 10 minutos
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra la gráfica
 
 ---
 

@@ -171,6 +171,15 @@
       font-weight: 600;
     }
 
+    /* Tarjeta Gráfica 24h */
+    .grafica24-img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radio-sm);
+      margin-top: var(--gap-sm);
+      display: block;
+    }
+
     /* Feed de alertas */
     .alertas-lista {
       display: flex;
@@ -259,6 +268,17 @@
             <span class="hogar-tarjeta__icono">&#9883;</span>
           </div>
           <div id="kryptoContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
+        </div>
+
+        <!-- TARJETA KRYPTONITE — GRÁFICA 24H -->
+        <div class="hogar-tarjeta" id="tarjetaGrafica24">
+          <div class="hogar-tarjeta__cabecera">
+            <span class="hogar-tarjeta__titulo">Crypto Comparativa 24h</span>
+            <span class="hogar-tarjeta__icono">&#128200;</span>
+          </div>
+          <div id="grafica24Contenido">
             <span class="cargando">Cargando...</span>
           </div>
         </div>
@@ -556,6 +576,32 @@
     }
 
     /* ============================================================
+       Cargar gráfica comparativa 24h de Kryptonite
+       ============================================================ */
+    function cargarGrafica24() {
+      fetch(KRYPTO_API + "/grafica24h")
+        .then(function(r) { return r.json(); })
+        .then(function(datos) {
+          var contenedor = document.getElementById("grafica24Contenido");
+
+          if (!datos || !datos.chart) {
+            contenedor.innerHTML = '<span class="cargando">Sin datos de gráfica</span>';
+            return;
+          }
+
+          contenedor.innerHTML =
+            '<img class="grafica24-img" src="data:image/png;base64,' + datos.chart + '" alt="Comparativa 24h">';
+
+          document.getElementById("tarjetaGrafica24").classList.remove("hogar-tarjeta--offline");
+        })
+        .catch(function() {
+          document.getElementById("grafica24Contenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con Kryptonite</span>';
+          document.getElementById("tarjetaGrafica24").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
        Escaneo manual
        ============================================================ */
     document.getElementById("btnEscanear").addEventListener("click", function() {
@@ -627,14 +673,20 @@
     cargarFido();
     cargarHA();
     cargarKrypto();
+    cargarGrafica24();
 
-    // Refrescar cada 60 segundos
+    // Refrescar cada 60 segundos (datos operacionales)
     setInterval(function() {
       cargarRedo();
       cargarFido();
       cargarHA();
-      cargarKrypto();
     }, 60000);
+
+    // Refrescar cada 10 minutos (crypto — datos menos volátiles)
+    setInterval(function() {
+      cargarKrypto();
+      cargarGrafica24();
+    }, 600000);
   </script>
 
 </body>
