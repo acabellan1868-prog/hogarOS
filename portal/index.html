@@ -124,61 +124,17 @@
       font-weight: 600;
     }
 
-    /* Tarjeta Kryptonite */
-    .crypto-tabla {
-      width: 100%;
-      border-collapse: collapse;
+    /* Resumen crypto en tarjeta FiDo */
+    .fido-crypto-resumen {
       margin-top: var(--gap-sm);
+      padding-top: var(--gap-sm);
+      border-top: 1px solid var(--borde);
       font-size: 0.78rem;
-    }
-
-    .crypto-tabla th {
-      text-align: left;
-      font-size: 0.65rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: var(--texto-suave);
-      padding: 3px 4px;
-      border-bottom: 1px solid var(--borde);
-      white-space: nowrap;
-    }
-
-    .crypto-tabla td {
-      padding: 4px;
-      border-bottom: 1px solid var(--borde);
-      white-space: nowrap;
-    }
-
-    .crypto-tabla tr:last-child td {
-      border-bottom: none;
-    }
-
-    .crypto-tabla .num {
-      text-align: right;
       font-variant-numeric: tabular-nums;
     }
 
     .crypto-positivo { color: var(--exito); font-weight: 600; }
     .crypto-negativo { color: var(--error); font-weight: 600; }
-
-    .crypto-total {
-      display: flex;
-      justify-content: space-between;
-      margin-top: var(--gap-sm);
-      padding-top: var(--gap-sm);
-      border-top: 1px solid var(--borde);
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    /* Tarjeta Gráfica 24h */
-    .grafica24-img {
-      width: 100%;
-      height: auto;
-      border-radius: var(--radio-sm);
-      margin-top: var(--gap-sm);
-      display: block;
-    }
 
     /* Feed de alertas */
     .alertas-lista {
@@ -246,6 +202,7 @@
           <div id="fidoContenido">
             <span class="cargando">Cargando...</span>
           </div>
+          <div id="fidoCryptoResumen"></div>
           <a href="/finanzas/" class="hogar-tarjeta__enlace">Abrir FiDo &rarr;</a>
         </div>
 
@@ -259,28 +216,6 @@
             <span class="cargando">Cargando...</span>
           </div>
           <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">Abrir Home Assistant &rarr;</a>
-        </div>
-
-        <!-- TARJETA KRYPTONITE -->
-        <div class="hogar-tarjeta" id="tarjetaKrypto">
-          <div class="hogar-tarjeta__cabecera">
-            <span class="hogar-tarjeta__titulo">Crypto Portfolio</span>
-            <span class="hogar-tarjeta__icono">&#9883;</span>
-          </div>
-          <div id="kryptoContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-        </div>
-
-        <!-- TARJETA KRYPTONITE — GRÁFICA 24H -->
-        <div class="hogar-tarjeta" id="tarjetaGrafica24">
-          <div class="hogar-tarjeta__cabecera">
-            <span class="hogar-tarjeta__titulo">Crypto Comparativa 24h</span>
-            <span class="hogar-tarjeta__icono">&#128200;</span>
-          </div>
-          <div id="grafica24Contenido">
-            <span class="cargando">Cargando...</span>
-          </div>
         </div>
 
       </div>
@@ -510,95 +445,29 @@
     }
 
     /* ============================================================
-       Cargar datos de Kryptonite
+       Resumen crypto en tarjeta FiDo
        ============================================================ */
-    var CRYPTO_EMOJIS = {
-      "BTC": "\u20BF", "ETH": "\u039E", "ADA": "\uD83D\uDCA0",
-      "DOT": "\u26AB", "SHIB": "\uD83D\uDC36", "SOL": "\u2600"
-    };
-
-    function cargarKrypto() {
+    function cargarCryptoResumen() {
       fetch(KRYPTO_API + "/portafolio")
         .then(function(r) { return r.json(); })
         .then(function(datos) {
-          var contenedor = document.getElementById("kryptoContenido");
-
-          if (!datos || datos.length === 0) {
-            contenedor.innerHTML = '<span class="cargando">Sin datos de portafolio</span>';
-            return;
-          }
-
-          var totalInvertido = 0;
-          var totalValor = 0;
-
-          function fmtNum(n) { return Number(n).toLocaleString("es-ES", { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
-
-          var html = '<table class="crypto-tabla">' +
-            '<tr><th></th><th></th><th class="num">Inv. \u20AC</th><th class="num">Valor \u20AC</th><th class="num">%</th></tr>';
-
+          if (!datos || !datos.length) return;
+          var totalInv = 0, totalVal = 0;
           datos.forEach(function(c) {
-            totalInvertido += c.coste_total_inversion;
-            totalValor += c.valor_actual_inversion;
-            var pct = c.rentabilidad_porcentaje;
-            var clase = pct >= 0 ? "crypto-positivo" : "crypto-negativo";
-            var flecha = pct >= 0 ? "\u25B2" : "\u25BC";
-            var emoji = CRYPTO_EMOJIS[c.simbolo] || "\uD83E\uDE99";
-
-            html += '<tr>' +
-              '<td>' + emoji + '</td>' +
-              '<td>' + c.simbolo + '</td>' +
-              '<td class="num">' + fmtNum(c.coste_total_inversion) + '</td>' +
-              '<td class="num">' + fmtNum(c.valor_actual_inversion) + '</td>' +
-              '<td class="num ' + clase + '">' + flecha + pct.toFixed(1) + '</td>' +
-              '</tr>';
+            totalInv += c.coste_total_inversion;
+            totalVal += c.valor_actual_inversion;
           });
-
-          html += '</table>';
-
-          // Totales
-          var totalPct = totalInvertido > 0 ? ((totalValor - totalInvertido) / totalInvertido * 100) : 0;
-          var claseTotal = totalPct >= 0 ? "crypto-positivo" : "crypto-negativo";
-          var flechaTotal = totalPct >= 0 ? "\u25B2" : "\u25BC";
-
-          html += '<div class="crypto-total">' +
-            '<span>' + fmtNum(totalInvertido) + ' \u2192 ' + fmtNum(totalValor) + ' \u20AC</span>' +
-            '<span class="' + claseTotal + '">' + flechaTotal + ' ' + totalPct.toFixed(1) + '%</span>' +
+          var pct = totalInv > 0 ? ((totalVal - totalInv) / totalInv * 100) : 0;
+          var clase = pct >= 0 ? "crypto-positivo" : "crypto-negativo";
+          var flecha = pct >= 0 ? "\u25B2" : "\u25BC";
+          var fmtNum = function(n) { return Math.round(n).toLocaleString("es-ES"); };
+          document.getElementById("fidoCryptoResumen").innerHTML =
+            '<div class="fido-crypto-resumen">' +
+              '\u20BF ' + fmtNum(totalInv) + ' \u2192 ' + fmtNum(totalVal) + ' \u20AC' +
+              ' <span class="' + clase + '">' + flecha + ' ' + Math.abs(pct).toFixed(1) + '%</span>' +
             '</div>';
-
-          contenedor.innerHTML = html;
-          document.getElementById("tarjetaKrypto").classList.remove("hogar-tarjeta--offline");
         })
-        .catch(function() {
-          document.getElementById("kryptoContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con Kryptonite</span>';
-          document.getElementById("tarjetaKrypto").classList.add("hogar-tarjeta--offline");
-        });
-    }
-
-    /* ============================================================
-       Cargar gráfica comparativa 24h de Kryptonite
-       ============================================================ */
-    function cargarGrafica24() {
-      fetch(KRYPTO_API + "/grafica24h")
-        .then(function(r) { return r.json(); })
-        .then(function(datos) {
-          var contenedor = document.getElementById("grafica24Contenido");
-
-          if (!datos || !datos.chart) {
-            contenedor.innerHTML = '<span class="cargando">Sin datos de gráfica</span>';
-            return;
-          }
-
-          contenedor.innerHTML =
-            '<img class="grafica24-img" src="data:image/png;base64,' + datos.chart + '" alt="Comparativa 24h">';
-
-          document.getElementById("tarjetaGrafica24").classList.remove("hogar-tarjeta--offline");
-        })
-        .catch(function() {
-          document.getElementById("grafica24Contenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con Kryptonite</span>';
-          document.getElementById("tarjetaGrafica24").classList.add("hogar-tarjeta--offline");
-        });
+        .catch(function() {}); // Silencioso — es info complementaria
     }
 
     /* ============================================================
@@ -672,8 +541,7 @@
     cargarRedo();
     cargarFido();
     cargarHA();
-    cargarKrypto();
-    cargarGrafica24();
+    cargarCryptoResumen();
 
     // Refrescar cada 60 segundos (datos operacionales)
     setInterval(function() {
@@ -683,10 +551,7 @@
     }, 60000);
 
     // Refrescar cada 10 minutos (crypto — datos menos volátiles)
-    setInterval(function() {
-      cargarKrypto();
-      cargarGrafica24();
-    }, 600000);
+    setInterval(cargarCryptoResumen, 600000);
   </script>
 
 </body>
