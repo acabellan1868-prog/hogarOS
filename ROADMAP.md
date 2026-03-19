@@ -247,6 +247,15 @@ Tarjeta de crypto portfolio en el dashboard, consumiendo la API de Kryptonite (F
 - [x] 🤖 Separar intervalos de refresco: datos operacionales 60s, tarjetas crypto 10 minutos
 - [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar que muestra la gráfica
 
+### Fase 9c — Crypto integrado en FiDo (2026-03-19)
+
+- [x] 🤖 Mover tarjetas crypto del portal hogarOS a FiDo (nueva pestaña "₿ Crypto")
+- [x] 🤖 FiDo: tabla de portfolio con inversión, valor actual y rentabilidad por moneda + totales
+- [x] 🤖 FiDo: gráfica comparativa 24h debajo de la tabla (carga lazy al entrar en la pestaña)
+- [x] 🤖 Portal hogarOS: mini-resumen crypto en tarjeta "Finanzas Domésticas" (₿ inv → valor € ▼ %)
+- [x] 🤖 Portal hogarOS: limpieza de CSS y JS de las tarjetas crypto eliminadas
+- [ ] 👤 Ejecutar `actualizar.sh` en VM para FiDo y hogarOS y verificar
+
 ---
 
 ## Fase 10 — Futuro (sin fecha)
