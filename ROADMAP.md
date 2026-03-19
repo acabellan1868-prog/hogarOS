@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: fase de diseño y planificación completada.
-> Última actualización: 2026-03-19 (tarde)
+> Última actualización: 2026-03-19 (noche)
 
 ### Leyenda
 
@@ -15,7 +15,7 @@
 ## Fase 0 — Preparación de repositorios
 
 - [x] 👤 Crear repositorio `ReDo` en GitHub (`acabellan1868-prog/ReDo`)
-- [ ] 👤 Verificar que el repositorio `FiDo` está actualizado en GitHub
+- [x] 👤 Verificar que el repositorio `FiDo` está actualizado en GitHub ✅
 
 > **Nota:** El código actual de ReDo (`network-monitor/`) es una versión muy básica sin Docker ni frontend.
 > Se construye desde cero en la Fase 1. Sirve solo como referencia de la lógica de escaneo existente.
