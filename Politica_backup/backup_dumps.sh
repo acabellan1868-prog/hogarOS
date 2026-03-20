@@ -8,7 +8,7 @@
 # Uso: bash /mnt/datos/hogarOS/scripts/backup_dumps.sh
 # =============================================================================
 
-set -euo pipefail
+set -uo pipefail
 
 # --- Configuración -----------------------------------------------------------
 
