@@ -136,6 +136,27 @@
     .crypto-positivo { color: var(--exito); font-weight: 600; }
     .crypto-negativo { color: var(--error); font-weight: 600; }
 
+    /* Tarjeta Backup */
+    .backup-estado {
+      margin-top: var(--gap-sm);
+    }
+
+    .backup-estado__dias {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .backup-estado__detalle {
+      font-size: 0.78rem;
+      color: var(--texto-suave);
+      margin-top: 2px;
+    }
+
+    .backup--ok .backup-estado__dias { color: var(--exito); }
+    .backup--aviso .backup-estado__dias { color: var(--arena-oscuro, #e67e22); }
+    .backup--peligro .backup-estado__dias { color: var(--error); }
+    .backup--nunca .backup-estado__dias { color: var(--error); }
+
     /* Feed de alertas */
     .alertas-lista {
       display: flex;
@@ -216,6 +237,17 @@
             <span class="cargando">Cargando...</span>
           </div>
           <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">Abrir Home Assistant &rarr;</a>
+        </div>
+
+        <!-- TARJETA BACKUP -->
+        <div class="hogar-tarjeta" id="tarjetaBackup">
+          <div class="hogar-tarjeta__cabecera">
+            <span class="hogar-tarjeta__titulo">Estado del Backup</span>
+            <span class="hogar-tarjeta__icono">&#128190;</span>
+          </div>
+          <div id="backupContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
         </div>
 
       </div>
@@ -471,6 +503,64 @@
     }
 
     /* ============================================================
+       Cargar estado del Backup
+       ============================================================ */
+    function cargarBackup() {
+      fetch("/api/backup")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var contenedor = document.getElementById("backupContenido");
+          var tarjeta = document.getElementById("tarjetaBackup");
+
+          if (!d.ultima_fecha) {
+            tarjeta.className = "hogar-tarjeta backup--nunca";
+            contenedor.innerHTML =
+              '<div class="backup-estado">' +
+                '<div class="backup-estado__dias">Sin backup</div>' +
+                '<div class="backup-estado__detalle">Nunca se ha registrado un backup</div>' +
+              '</div>';
+            agregarAlerta("error", "No hay backup registrado — conecta el disco externo");
+            return;
+          }
+
+          var ahora = new Date();
+          var fecha = new Date(d.ultima_fecha);
+          var dias = Math.floor((ahora - fecha) / (1000 * 60 * 60 * 24));
+
+          var clase, texto;
+          if (dias < 7) {
+            clase = "backup--ok";
+            texto = "Hace " + dias + " dia" + (dias !== 1 ? "s" : "");
+          } else if (dias < 14) {
+            clase = "backup--aviso";
+            texto = "Hace " + dias + " dias — toca hacer copia";
+          } else {
+            clase = "backup--peligro";
+            texto = "SIN BACKUP DESDE HACE " + dias + " DIAS";
+          }
+
+          tarjeta.className = "hogar-tarjeta " + clase;
+          contenedor.innerHTML =
+            '<div class="backup-estado">' +
+              '<div class="backup-estado__dias">' + texto + '</div>' +
+              '<div class="backup-estado__detalle">Ultimo: ' + formatearFecha(d.ultima_fecha) + '</div>' +
+              (d.tamano_total ? '<div class="backup-estado__detalle">' + d.tamano_total + '</div>' : '') +
+            '</div>';
+
+          if (dias >= 14) {
+            agregarAlerta("error", "Sin backup desde hace " + dias + " dias — conecta el disco externo");
+          } else if (dias >= 7) {
+            agregarAlerta("aviso", "El backup tiene " + dias + " dias — toca hacer copia");
+          }
+        })
+        .catch(function() {
+          document.getElementById("backupContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con hogar-api</span>';
+          document.getElementById("tarjetaBackup").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
        Escaneo manual
        ============================================================ */
     document.getElementById("btnEscanear").addEventListener("click", function() {
@@ -542,6 +632,7 @@
     cargarFido();
     cargarHA();
     cargarCryptoResumen();
+    cargarBackup();
 
     // Refrescar cada 60 segundos (datos operacionales)
     setInterval(function() {

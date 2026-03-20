@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 aplicacion = FastAPI()
 
 RUTA_JSON = os.getenv("LANZADOR_JSON", "/app/data/lanzador.json")
+RUTA_BACKUP_JSON = os.getenv("BACKUP_JSON", "/app/data/backup_estado.json")
 
 # Config por defecto si no existe el fichero persistido
 CONFIG_DEFECTO = {
@@ -69,5 +70,24 @@ async def guardar_lanzador(peticion: Request):
     datos = await peticion.json()
     os.makedirs(os.path.dirname(RUTA_JSON), exist_ok=True)
     with open(RUTA_JSON, "w", encoding="utf-8") as f:
+        json.dump(datos, f, ensure_ascii=False, indent=2)
+    return {"ok": True}
+
+
+# ── Backup: estado del ultimo backup ──
+
+@aplicacion.get("/backup")
+def obtener_backup():
+    if os.path.exists(RUTA_BACKUP_JSON):
+        with open(RUTA_BACKUP_JSON, encoding="utf-8") as f:
+            return json.load(f)
+    return {"ultima_fecha": None}
+
+
+@aplicacion.post("/backup")
+async def registrar_backup(peticion: Request):
+    datos = await peticion.json()
+    os.makedirs(os.path.dirname(RUTA_BACKUP_JSON), exist_ok=True)
+    with open(RUTA_BACKUP_JSON, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
     return {"ok": True}
