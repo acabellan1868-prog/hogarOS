@@ -1,6 +1,6 @@
 # Política de Backup — Hoja de ruta
 
-> Estado actual: scripts creados, pendiente de pruebas en VM.
+> Estado actual: backup funcional y probado. Pendiente: documentación de restauración y NTFY.
 > Última actualización: 2026-03-20
 
 ### Leyenda
@@ -78,12 +78,16 @@
 - [x] 🤖 Notificar estado del backup a hogar-api: `curl -X POST /api/backup`
 - [x] 🤖 Log de salida con resultado de cada dump (OK/ERROR)
 
-### 4b — Permisos y pruebas
+### 4b — Permisos y pruebas ✅
 
-- [ ] 👤 Hacer `git pull` en la VM 101 para obtener el script
-- [ ] 👤 Ejecutar manualmente: `bash /mnt/datos/hogarOS/Politica_backup/backup_dumps.sh`
-- [ ] 👤 Verificar que genera los `.bak` y `.sql` en `/mnt/datos/`
-- [ ] 👤 Verificar que la tarjeta del portal cambia a verde
+- [x] 👤 Hacer `git pull` en la VM 101 para obtener el script
+- [x] 👤 Instalar `sqlite3` y `rsync` en la VM 101: `apt install sqlite3 rsync`
+- [x] 👤 Ejecutar manualmente como root: `bash /mnt/datos/hogarOS/Politica_backup/backup_dumps.sh` → TODO OK
+- [x] 👤 Verificar que genera los `.bak` y `.sql` en `/mnt/datos/`
+- [x] 👤 Verificar que la tarjeta del portal cambia a verde
+- [x] 👤 Dar permisos a `antonio` sobre `/mnt/datos/fido` y `/mnt/datos/redo` para dumps SQLite
+
+> **Nota:** Como `antonio`, los dumps de Planka (PostgreSQL) y Nextcloud (MariaDB) dan warning por permisos, pero los ficheros `.sql` se generan correctamente ya que `docker exec` los ejecuta dentro del contenedor. El script trata estos casos como WARNING.
 
 ---
 
@@ -100,14 +104,14 @@
   6. Generar `MANIFIESTO.txt` con fecha, tamaños y estado de cada paso
   7. Mostrar resumen por pantalla
 
-### 5b — Prueba completa
+### 5b — Prueba completa ✅
 
-- [ ] 👤 Conectar disco externo USB al servidor
-- [ ] 👤 Montar disco: `mount /dev/sdb1 /mnt/usb1`
-- [ ] 👤 Copiar `backup.sh` a Proxmox (o ejecutar directamente desde la VM vía ruta compartida)
-- [ ] 👤 Ejecutar `bash backup.sh` y verificar que completa sin errores
-- [ ] 👤 Revisar `MANIFIESTO.txt` en el disco externo
-- [ ] 👤 Verificar que la tarjeta del portal está en verde
+- [x] 👤 Conectar disco externo USB al servidor
+- [x] 👤 Montar disco: `mount /dev/sdb1 /mnt/usb1`
+- [x] 👤 Copiar `backup.sh` a Proxmox: `scp antonio@192.168.31.131:/mnt/datos/hogarOS/Politica_backup/backup.sh /root/backup.sh`
+- [x] 👤 Ejecutar `bash /root/backup.sh` → BACKUP COMPLETADO SIN ERRORES (con warnings de permisos)
+- [x] 👤 Revisar `MANIFIESTO.txt`: VMs ✅, datos 2.1 GB ✅, 4 dumps de BDs ✅
+- [x] 👤 Verificar que la tarjeta del portal está en verde
 - [ ] 👤 Desmontar y desconectar disco: `umount /mnt/usb1`
 
 ### Capacidad del disco externo
@@ -153,9 +157,9 @@ Fase 2 (Endpoint hogar-api)         ✅
     ↓
 Fase 3 (Tarjeta portal)             ✅
     ↓
-Fase 4 (Script dumps VM 101)        ✅ código — pendiente pruebas
+Fase 4 (Script dumps VM 101)        ✅ probado
     ↓
-Fase 5 (Script orquestador Proxmox) ✅ código — pendiente pruebas
+Fase 5 (Script orquestador Proxmox) ✅ probado
     ↓
 Fase 6 (Documentación restauración) pendiente
     ↓
