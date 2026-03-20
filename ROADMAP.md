@@ -260,7 +260,36 @@ Tarjeta de crypto portfolio en el dashboard, consumiendo la API de Kryptonite (F
 
 ---
 
-## Fase 10 — Futuro (sin fecha)
+## Fase 10 — Rediseño visual "Living Sanctuary" (2026-03-20)
+
+Cambio completo de la capa visual de todo el ecosistema. Solo diseño, sin cambios funcionales.
+
+### Design system
+| Aspecto | Antes (Índigo y Arena) | Después (Living Sanctuary) |
+|---------|------------------------|----------------------------|
+| Paleta | Índigo `#6C63A8` + Arena `#F5F0E8` | Teal `#1a6a60` + Pasteles (mint, blush, dusk) |
+| Tipografía | System UI | Plus Jakarta Sans + Be Vietnam Pro |
+| Iconos | Emojis | Material Symbols Outlined |
+| Bordes | 4px, con líneas 1px | Redondeados grandes (1-3rem), sin líneas |
+| Header | Barra sólida oscura sticky | Barra flotante glassmorphic con blur |
+| Tarjetas | Fondo plano + borde 1px | Fondos semi-transparentes + sombras ambient |
+| Framework CSS | CSS puro (variables) | CSS variables + clases utilitarias |
+
+### Tareas
+- [x] 🤖 Paso 1: Reescribir `hogar.css` con paleta Living Sanctuary (modo claro + oscuro), tipografías, formas orgánicas, glassmorphism, componentes compartidos
+- [x] 🤖 Paso 2: Rediseñar `portal/index.html` — header flotante, tarjetas orgánicas, layout bento (mismo contenido y JS)
+- [x] 🤖 Paso 3: Rediseñar `portal/lanzador.html` — grid de blobs orgánicos, misma carga desde API
+- [x] 🤖 Paso 4: Rediseñar `ReDo/static/index.html` — aplicar design system, cargar hogar.css via proxy
+- [ ] 🤖 Paso 5: Rediseñar `FiDo/static/index.html` + `estilos.css` — adaptar a Living Sanctuary
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar en producción
+
+### Referencia de diseño
+- Diseños en `diseño/stitch (6)/` (dashboard) y `diseño/stitch (7)_lanzador (3)/` (lanzador)
+- Especificación completa: `diseño/stitch (6)/DESIGN.md`
+
+---
+
+## Fase 11 — Futuro (sin fecha)
 
 - [x] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA (completado 2026-03-17)
   - [x] Temperatura exterior (actual + max/min, Meteoclimatic)
@@ -290,5 +319,11 @@ Fase 1 (ReDo desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
                               ↓
                     Fase 7 (Backups)  ← prioridad post-despliegue
                               ↓
-                    Fase 8 (Futuro)
+                    Fase 8 (Lanzador)
+                              ↓
+                    Fase 9 (Kryptonite)
+                              ↓
+                    Fase 10 (Rediseño visual)
+                              ↓
+                    Fase 11 (Futuro)
 ```

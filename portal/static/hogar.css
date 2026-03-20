@@ -1,47 +1,82 @@
 /*
  * hogar.css — Design System de hogarOS
- * Paleta: Índigo y Arena · Tipografía: System UI · Bordes: 4px
+ * Estilo: Living Sanctuary
+ * Paleta: Teal + Pasteles · Tipografía: Plus Jakarta Sans / Be Vietnam Pro
  *
  * Todas las apps del ecosistema (hogarOS, ReDo, FiDo, futuras)
  * cargan este fichero para mantener coherencia visual.
  *
  * Uso: <link rel="stylesheet" href="/static/hogar.css">
+ * Requiere: Tailwind CDN + Google Fonts (Plus Jakarta Sans, Be Vietnam Pro, Material Symbols)
  */
 
 /* ============================================================
-   1. Variables CSS — Modo claro (por defecto)
+   1. Google Fonts — se cargan aquí para que todas las apps
+      solo necesiten importar hogar.css
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* ============================================================
+   2. Variables CSS — Modo claro (por defecto)
    ============================================================ */
 :root {
-  /* --- Paleta Índigo y Arena --- */
-  --fondo:          #F5F0E8;
-  --fondo-tarjeta:  #FDF9F3;
-  --fondo-header:   #1E1B2E;
-  --texto:          #1E1B2E;
-  --texto-suave:    rgba(30, 27, 46, 0.5);
-  --acento:         #6C63A8;
-  --acento-hover:   #5A5296;
-  --alerta-fondo:   #EDE8F8;
-  --alerta-borde:   #6C63A8;
-  --boton-sec:      #EAE4D8;
-  --boton-sec-hover:#DDD6C8;
-  --borde:          rgba(30, 27, 46, 0.1);
+  /* --- Paleta Living Sanctuary --- */
+  --primary:               #1a6a60;
+  --primary-dim:           #025e54;
+  --primary-container:     #a4eee0;
+  --on-primary:            #e2fff8;
+  --on-primary-container:  #005b51;
+
+  --secondary:             #535b93;
+  --secondary-dim:         #474f86;
+  --secondary-container:   #dfe0ff;
+  --on-secondary-container:#454e85;
+
+  --tertiary:              #76575f;
+  --tertiary-dim:          #694b53;
+  --tertiary-container:    #fed5df;
+  --on-tertiary-container: #654850;
+
+  --error:                 #a83836;
+  --error-container:       #fa746f;
+  --on-error:              #fff7f6;
+
+  --background:            #f8f9fa;
+  --surface:               #f8f9fa;
+  --surface-dim:           #d5dbdd;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f1f4f5;
+  --surface-container:     #ebeef0;
+  --surface-container-high:#e5e9eb;
+  --surface-container-highest:#dee3e6;
+
+  --on-surface:            #2d3335;
+  --on-surface-variant:    #5a6062;
+  --outline:               #767c7e;
+  --outline-variant:       #adb3b5;
 
   /* --- Semánticos --- */
-  --exito:          #4CAF50;
-  --exito-fondo:    #E8F5E9;
-  --aviso:          #FF9800;
-  --aviso-fondo:    #FFF3E0;
-  --error:          #E53935;
-  --error-fondo:    #FFEBEE;
+  --exito:                 #2e7d32;
+  --exito-fondo:           #e8f5e9;
+  --aviso:                 #e67e22;
+  --aviso-fondo:           #fff3e0;
+  --peligro:               #c62828;
+  --peligro-fondo:         #ffebee;
 
   /* --- Tipografía --- */
-  --fuente: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --fuente-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --fuente-titular:  'Plus Jakarta Sans', system-ui, sans-serif;
+  --fuente-cuerpo:   'Be Vietnam Pro', system-ui, sans-serif;
+  --fuente-mono:     'Cascadia Code', 'Fira Code', 'Consolas', monospace;
 
-  /* --- Bordes --- */
-  --radio-sm: 4px;
-  --radio-md: 6px;
-  --radio-lg: 8px;
+  /* --- Bordes (redondeados orgánicos) --- */
+  --radio-sm:  0.75rem;
+  --radio-md:  1rem;
+  --radio-lg:  1.5rem;
+  --radio-xl:  2rem;
+  --radio-2xl: 2.5rem;
+  --radio-3xl: 3rem;
+  --radio-full:9999px;
 
   /* --- Espaciado --- */
   --gap-xs: 0.25rem;
@@ -49,47 +84,81 @@
   --gap-md: 1rem;
   --gap-lg: 1.5rem;
   --gap-xl: 2rem;
+  --gap-2xl: 3rem;
+  --gap-3xl: 4rem;
 
-  /* --- Sombras --- */
-  --sombra-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --sombra-md: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --sombra-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+  /* --- Sombras ambient (sin heavy shadows) --- */
+  --sombra-sm:    0 4px 12px rgba(0, 0, 0, 0.04);
+  --sombra-md:    0 15px 30px rgba(0, 0, 0, 0.04);
+  --sombra-lg:    0 30px 60px rgba(0, 0, 0, 0.06);
+  --sombra-float: 0 20px 50px rgba(0, 0, 0, 0.06);
 
   /* --- Transiciones --- */
-  --transicion: 0.2s ease;
+  --transicion:       0.3s ease;
+  --transicion-lenta: 0.7s ease;
+
+  /* --- Glass --- */
+  --glass-bg:     rgba(255, 255, 255, 0.20);
+  --glass-border: rgba(255, 255, 255, 0.30);
+  --glass-blur:   16px;
 }
 
 /* ============================================================
-   2. Variables CSS — Modo oscuro
+   3. Variables CSS — Modo oscuro
    ============================================================ */
 [data-tema="oscuro"] {
-  --fondo:          #13111E;
-  --fondo-tarjeta:  #1E1B2E;
-  --fondo-header:   #1E1B2E;
-  --texto:          #D4CEEE;
-  --texto-suave:    rgba(212, 206, 238, 0.5);
-  --acento:         #8B82C4;
-  --acento-hover:   #9D95D0;
-  --alerta-fondo:   #26223A;
-  --alerta-borde:   #8B82C4;
-  --boton-sec:      #2A2640;
-  --boton-sec-hover:#342F50;
-  --borde:          rgba(212, 206, 238, 0.1);
+  --primary:               #a4eee0;
+  --primary-dim:           #96dfd2;
+  --primary-container:     #11655a;
+  --on-primary:            #003830;
+  --on-primary-container:  #c0fff4;
 
-  --exito:          #66BB6A;
-  --exito-fondo:    #1B2E1B;
-  --aviso:          #FFB74D;
-  --aviso-fondo:    #2E2517;
-  --error:          #EF5350;
-  --error-fondo:    #2E1717;
+  --secondary:             #cdd1ff;
+  --secondary-dim:         #b8bcf0;
+  --secondary-container:   #3b4378;
+  --on-secondary-container:#e8e9ff;
 
-  --sombra-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --sombra-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --sombra-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --tertiary:              #efc7d1;
+  --tertiary-dim:          #ddb5bf;
+  --tertiary-container:    #5a3f47;
+  --on-tertiary-container: #ffe1e8;
+
+  --error:                 #ffb4ab;
+  --error-container:       #93000a;
+  --on-error:              #690005;
+
+  --background:            #0e1112;
+  --surface:               #0e1112;
+  --surface-dim:           #0e1112;
+  --surface-container-lowest: #090b0c;
+  --surface-container-low: #1a1d1e;
+  --surface-container:     #1e2122;
+  --surface-container-high:#282b2c;
+  --surface-container-highest:#333637;
+
+  --on-surface:            #dee3e5;
+  --on-surface-variant:    #c0c7c9;
+  --outline:               #8a9193;
+  --outline-variant:       #404849;
+
+  --exito:                 #81c784;
+  --exito-fondo:           #1b3a1b;
+  --aviso:                 #ffb74d;
+  --aviso-fondo:           #3d2a0f;
+  --peligro:               #ef9a9a;
+  --peligro-fondo:         #3d1515;
+
+  --sombra-sm:    0 4px 12px rgba(0, 0, 0, 0.20);
+  --sombra-md:    0 15px 30px rgba(0, 0, 0, 0.25);
+  --sombra-lg:    0 30px 60px rgba(0, 0, 0, 0.35);
+  --sombra-float: 0 20px 50px rgba(0, 0, 0, 0.30);
+
+  --glass-bg:     rgba(14, 17, 18, 0.60);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================================
-   3. Reset y base
+   4. Reset y base
    ============================================================ */
 *, *::before, *::after {
   margin: 0;
@@ -98,257 +167,775 @@
 }
 
 body {
-  font-family: var(--fuente);
-  background: var(--fondo);
-  color: var(--texto);
+  font-family: var(--fuente-cuerpo);
+  background: var(--background);
+  color: var(--on-surface);
   line-height: 1.5;
   min-height: 100vh;
   transition: background var(--transicion), color var(--transicion);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
 }
 
 /* ============================================================
-   4. Header con navegación
+   5. Tipografía
    ============================================================ */
-.hogar-header {
-  background: var(--fondo-header);
-  color: #fff;
-  padding: var(--gap-sm) var(--gap-lg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+.fuente-titular {
+  font-family: var(--fuente-titular);
 }
 
-.hogar-header__logo {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.fuente-cuerpo {
+  font-family: var(--fuente-cuerpo);
+}
+
+/* ============================================================
+   6. Material Symbols — config base
+   ============================================================ */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ============================================================
+   7. Header flotante glassmorphic
+   ============================================================ */
+.hogar-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+}
+
+.hogar-header__barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radio-2xl);
+  box-shadow: var(--sombra-float);
+  border: 1px solid var(--glass-border);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hogar-header__marca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
   color: inherit;
+}
+
+.hogar-header__icono-marca {
+  color: var(--primary);
+  font-size: 1.5rem;
+}
+
+[data-tema="oscuro"] .hogar-header__icono-marca {
+  color: var(--primary);
+}
+
+.hogar-header__titulo {
+  font-family: var(--fuente-titular);
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+[data-tema="oscuro"] .hogar-header__titulo {
+  background: linear-gradient(135deg, var(--primary-dim), var(--primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hogar-header__subtitulo {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--on-surface-variant);
+  font-weight: 700;
+  opacity: 0.6;
 }
 
 .hogar-header__nav {
   display: flex;
   align-items: center;
-  gap: var(--gap-sm);
+  gap: 0.25rem;
 }
 
 .hogar-header__enlace {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  font-size: 0.85rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: var(--radio-sm);
-  transition: background var(--transicion), color var(--transicion);
-}
-
-.hogar-header__enlace:hover,
-.hogar-header__enlace--activo {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-/* ============================================================
-   5. Tarjeta de módulo
-   ============================================================ */
-.hogar-tarjeta {
-  background: var(--fondo-tarjeta);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio-sm);
-  padding: var(--gap-lg);
-  box-shadow: var(--sombra-sm);
-  transition: box-shadow var(--transicion), background var(--transicion);
-}
-
-.hogar-tarjeta:hover {
-  box-shadow: var(--sombra-md);
-}
-
-.hogar-tarjeta__cabecera {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--gap-md);
-}
-
-.hogar-tarjeta__titulo {
-  font-size: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radio-lg);
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--texto-suave);
+  transition: background var(--transicion), color var(--transicion);
 }
 
-.hogar-tarjeta__icono {
-  font-size: 1.2rem;
+.hogar-header__enlace:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.hogar-header__enlace--activo {
+  background: rgba(164, 238, 224, 0.3);
+  color: var(--on-primary-container);
+}
+
+[data-tema="oscuro"] .hogar-header__enlace--activo {
+  background: rgba(164, 238, 224, 0.15);
+  color: var(--primary);
+}
+
+/* ============================================================
+   8. Botón toggle tema
+   ============================================================ */
+.hogar-toggle-tema {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radio-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--on-surface-variant);
+  font-size: 1.1rem;
+  transition: background var(--transicion), color var(--transicion), transform var(--transicion);
+}
+
+.hogar-toggle-tema:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.hogar-toggle-tema:active {
+  transform: scale(0.9);
+}
+
+/* ============================================================
+   9. Layout — Contenedor principal
+   ============================================================ */
+.hogar-contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5.5rem 1.5rem 3rem;
+}
+
+/* ============================================================
+   10. Efecto Lumina (resplandor degradado superior)
+   ============================================================ */
+.hogar-lumina {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 500px;
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(164, 238, 224, 0.35) 0%,
+    rgba(248, 249, 250, 0) 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+[data-tema="oscuro"] .hogar-lumina {
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(26, 106, 96, 0.15) 0%,
+    rgba(14, 17, 18, 0) 70%
+  );
+}
+
+/* ============================================================
+   11. Tarjetas — Estilo orgánico
+   ============================================================ */
+.hogar-tarjeta {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radio-xl);
+  padding: var(--gap-xl);
+  box-shadow: var(--sombra-md);
+  transition: box-shadow var(--transicion-lenta), transform var(--transicion);
+  position: relative;
+  overflow: hidden;
+}
+
+.hogar-tarjeta:hover {
+  box-shadow: var(--sombra-lg);
+}
+
+/* Variantes de color para tarjetas */
+.hogar-tarjeta--primary {
+  background: rgba(164, 238, 224, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+[data-tema="oscuro"] .hogar-tarjeta--primary {
+  background: rgba(17, 101, 90, 0.25);
+}
+
+.hogar-tarjeta--secondary {
+  background: rgba(223, 224, 255, 0.20);
+  backdrop-filter: blur(8px);
+}
+
+[data-tema="oscuro"] .hogar-tarjeta--secondary {
+  background: rgba(59, 67, 120, 0.20);
+}
+
+.hogar-tarjeta--tertiary {
+  background: rgba(254, 213, 223, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+[data-tema="oscuro"] .hogar-tarjeta--tertiary {
+  background: rgba(90, 63, 71, 0.25);
+}
+
+/* Elementos de tarjeta */
+.hogar-tarjeta__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--gap-md);
+}
+
+.hogar-tarjeta__icono-circulo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radio-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hogar-tarjeta__icono-circulo--primary {
+  background: rgba(26, 106, 96, 0.10);
+  color: var(--primary);
+}
+
+.hogar-tarjeta__icono-circulo--tertiary {
+  background: rgba(118, 87, 95, 0.10);
+  color: var(--tertiary);
+}
+
+.hogar-tarjeta__icono-circulo--secondary {
+  background: rgba(83, 91, 147, 0.10);
+  color: var(--secondary);
+}
+
+.hogar-tarjeta__label {
+  font-family: var(--fuente-titular);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--on-surface-variant);
 }
 
 .hogar-tarjeta__valor {
+  font-family: var(--fuente-titular);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--acento);
+  color: var(--on-surface);
   line-height: 1.2;
+  letter-spacing: -0.02em;
 }
+
+.hogar-tarjeta__valor--primary { color: var(--primary); }
+.hogar-tarjeta__valor--exito   { color: var(--exito); }
+.hogar-tarjeta__valor--peligro { color: var(--peligro); }
 
 .hogar-tarjeta__detalle {
   font-size: 0.8rem;
-  color: var(--texto-suave);
+  color: var(--on-surface-variant);
   margin-top: var(--gap-xs);
 }
 
 .hogar-tarjeta__enlace {
-  display: inline-block;
-  margin-top: var(--gap-md);
-  color: var(--acento);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: var(--gap-lg);
+  color: var(--primary);
   text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: color var(--transicion);
+  font-family: var(--fuente-titular);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: opacity var(--transicion);
 }
 
 .hogar-tarjeta__enlace:hover {
-  color: var(--acento-hover);
+  opacity: 0.7;
+}
+
+/* Estado offline */
+.hogar-tarjeta--offline {
+  opacity: 0.45;
+}
+
+.hogar-tarjeta--offline .hogar-tarjeta__valor {
+  color: var(--on-surface-variant);
+}
+
+.hogar-estado-offline {
+  font-size: 0.82rem;
+  color: var(--peligro);
+  font-style: italic;
 }
 
 /* ============================================================
-   6. Botones
+   12. Grid de tarjetas
+   ============================================================ */
+.hogar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--gap-lg);
+}
+
+/* ============================================================
+   13. Botones
    ============================================================ */
 .hogar-boton {
   display: inline-flex;
   align-items: center;
-  gap: var(--gap-xs);
-  padding: 0.5rem 1rem;
+  gap: var(--gap-sm);
+  padding: 0.6rem 1.25rem;
   border: none;
-  border-radius: var(--radio-sm);
-  font-family: var(--fuente);
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: var(--radio-full);
+  font-family: var(--fuente-titular);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background var(--transicion), color var(--transicion);
+  text-decoration: none;
+  transition: opacity var(--transicion), transform var(--transicion), box-shadow var(--transicion);
+}
+
+.hogar-boton:active {
+  transform: scale(0.96);
 }
 
 .hogar-boton--primario {
-  background: var(--acento);
-  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+  color: var(--on-primary);
+  box-shadow: 0 8px 20px rgba(26, 106, 96, 0.20);
 }
 
 .hogar-boton--primario:hover {
-  background: var(--acento-hover);
+  opacity: 0.9;
+  box-shadow: 0 12px 28px rgba(26, 106, 96, 0.30);
 }
 
 .hogar-boton--secundario {
-  background: var(--boton-sec);
-  color: var(--texto);
+  background: rgba(255, 255, 255, 0.50);
+  backdrop-filter: blur(8px);
+  color: var(--on-surface);
+}
+
+[data-tema="oscuro"] .hogar-boton--secundario {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .hogar-boton--secundario:hover {
-  background: var(--boton-sec-hover);
+  background: rgba(255, 255, 255, 0.70);
+}
+
+[data-tema="oscuro"] .hogar-boton--secundario:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hogar-boton--peligro {
+  background: var(--peligro);
+  color: #fff;
 }
 
 /* ============================================================
-   7. Alertas / Notificaciones
+   14. Alertas / Notificaciones
    ============================================================ */
 .hogar-alerta {
-  padding: var(--gap-sm) var(--gap-md);
-  border-radius: var(--radio-sm);
-  border-left: 3px solid var(--alerta-borde);
-  background: var(--alerta-fondo);
+  padding: var(--gap-md) var(--gap-lg);
+  border-radius: var(--radio-lg);
   font-size: 0.85rem;
   transition: background var(--transicion);
 }
 
 .hogar-alerta--exito {
   background: var(--exito-fondo);
-  border-color: var(--exito);
+  color: var(--exito);
 }
 
 .hogar-alerta--aviso {
   background: var(--aviso-fondo);
-  border-color: var(--aviso);
+  color: var(--aviso);
 }
 
 .hogar-alerta--error {
-  background: var(--error-fondo);
-  border-color: var(--error);
+  background: var(--peligro-fondo);
+  color: var(--peligro);
 }
 
 .hogar-alerta__tiempo {
-  font-size: 0.75rem;
-  color: var(--texto-suave);
+  font-size: 0.72rem;
+  color: var(--on-surface-variant);
   margin-top: var(--gap-xs);
 }
 
 /* ============================================================
-   8. Toggle claro/oscuro
+   15. Formas orgánicas (border-radius asimétricos)
    ============================================================ */
-.hogar-toggle-tema {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.1rem;
-  padding: 0.3rem;
-  border-radius: var(--radio-sm);
-  color: rgba(255, 255, 255, 0.7);
-  transition: color var(--transicion);
+.forma-organica-1 {
+  border-radius: 60% 40% 70% 30% / 40% 50% 60% 50%;
 }
 
-.hogar-toggle-tema:hover {
-  color: #fff;
+.forma-organica-2 {
+  border-radius: 30% 70% 40% 60% / 50% 60% 40% 50%;
+}
+
+.forma-organica-3 {
+  border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%;
+}
+
+.forma-organica-4 {
+  border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
 }
 
 /* ============================================================
-   9. Layout — Grid de tarjetas
+   16. Glassmorphism
    ============================================================ */
-.hogar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--gap-lg);
-}
-
-.hogar-contenedor {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: var(--gap-lg);
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 
 /* ============================================================
-   10. Estado de conexión (sin respuesta de una app)
+   17. Filas de datos (para listas dentro de tarjetas)
    ============================================================ */
-.hogar-tarjeta--offline {
-  opacity: 0.5;
+.hogar-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.40);
+  border-radius: var(--radio-md);
+  transition: background var(--transicion);
 }
 
-.hogar-tarjeta--offline .hogar-tarjeta__valor {
-  color: var(--texto-suave);
+[data-tema="oscuro"] .hogar-fila {
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.hogar-estado-offline {
-  font-size: 0.8rem;
-  color: var(--error);
+.hogar-fila + .hogar-fila {
+  margin-top: var(--gap-sm);
+}
+
+.hogar-fila__izq {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hogar-fila__valor {
+  font-family: var(--fuente-titular);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ============================================================
+   18. Badges de estado
+   ============================================================ */
+.hogar-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radio-full);
+  font-family: var(--fuente-titular);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hogar-badge--exito {
+  background: var(--exito-fondo);
+  color: var(--exito);
+}
+
+.hogar-badge--peligro {
+  background: var(--peligro-fondo);
+  color: var(--peligro);
+}
+
+.hogar-badge--primary {
+  background: rgba(164, 238, 224, 0.30);
+  color: var(--primary);
+}
+
+/* ============================================================
+   19. Tabla estilizada
+   ============================================================ */
+.hogar-tabla-wrap {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radio-xl);
+  box-shadow: var(--sombra-sm);
+  overflow: hidden;
+}
+
+.hogar-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.hogar-tabla th {
+  background: var(--surface-container);
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-family: var(--fuente-titular);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--on-surface-variant);
+  font-weight: 700;
+}
+
+.hogar-tabla td {
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--surface-container);
+}
+
+.hogar-tabla tr:hover td {
+  background: rgba(164, 238, 224, 0.06);
+}
+
+/* ============================================================
+   20. Sección con título
+   ============================================================ */
+.hogar-seccion {
+  margin-bottom: var(--gap-2xl);
+}
+
+.hogar-seccion__titulo {
+  font-family: var(--fuente-titular);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+  margin-bottom: var(--gap-lg);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hogar-seccion__titulo::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--outline-variant);
+  opacity: 0.2;
+}
+
+/* ============================================================
+   21. Cargando / Spinner
+   ============================================================ */
+.cargando {
+  color: var(--on-surface-variant);
+  font-size: 0.85rem;
   font-style: italic;
 }
 
 /* ============================================================
-   11. Responsive
+   22. Menú desplegable (navigation drawer)
+   ============================================================ */
+.hogar-drawer {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 1rem;
+  width: 14rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--radio-xl);
+  padding: 0.75rem;
+  box-shadow: var(--sombra-lg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.hogar-drawer.oculto {
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   23. Lanzador — Grid de apps con blobs orgánicos
+   ============================================================ */
+.lanzador-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem 3rem;
+}
+
+@media (min-width: 768px) {
+  .lanzador-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.lanzador-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.5s ease;
+}
+
+.lanzador-app:hover {
+  transform: translateY(-4px);
+}
+
+.lanzador-blob {
+  width: 7rem;
+  height: 7rem;
+  background: var(--surface-container-lowest);
+  box-shadow: var(--sombra-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow var(--transicion-lenta), transform var(--transicion-lenta);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .lanzador-blob {
+    width: 8rem;
+    height: 8rem;
+  }
+}
+
+.lanzador-app:hover .lanzador-blob {
+  box-shadow: var(--sombra-lg);
+  transform: scale(1.05);
+}
+
+.lanzador-blob__icono {
+  font-size: 2.25rem;
+}
+
+.lanzador-blob__img {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+
+.lanzador-nombre {
+  font-family: var(--fuente-titular);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.lanzador-desc {
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+  text-align: center;
+}
+
+/* Botón flotante de añadir */
+.lanzador-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(164, 238, 224, 0.6);
+  color: var(--on-primary-container);
+  border: 1px solid var(--glass-border);
+  border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  box-shadow: var(--sombra-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1.5rem;
+  transition: transform 0.5s ease, box-shadow var(--transicion);
+}
+
+.lanzador-fab:hover {
+  transform: scale(1.1);
+  box-shadow: var(--sombra-lg);
+}
+
+/* ============================================================
+   24. Responsive
    ============================================================ */
 @media (max-width: 600px) {
-  .hogar-header {
-    padding: var(--gap-sm) var(--gap-md);
+  .hogar-header__barra {
+    padding: 0.6rem 1rem;
   }
 
-  .hogar-header__logo {
-    font-size: 0.95rem;
+  .hogar-header__titulo {
+    font-size: 1rem;
   }
 
   .hogar-header__enlace {
-    font-size: 0.78rem;
-    padding: 0.25rem 0.4rem;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .hogar-header__enlace span:not(.material-symbols-outlined) {
+    display: none;
   }
 
   .hogar-contenedor {
-    padding: var(--gap-md);
+    padding: 5rem 1rem 2rem;
   }
 
   .hogar-grid {
@@ -356,7 +943,50 @@ body {
     gap: var(--gap-md);
   }
 
+  .hogar-tarjeta {
+    padding: var(--gap-lg);
+  }
+
   .hogar-tarjeta__valor {
     font-size: 1.6rem;
   }
+
+  .lanzador-grid {
+    gap: 1.5rem;
+  }
+}
+
+/* ============================================================
+   25. Utilidades
+   ============================================================ */
+
+/* Ocultar elementos Alpine.js hasta inicialización */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Tabular nums para datos numéricos */
+.nums-tabulares {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar fina */
+.scroll-fino::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scroll-fino::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 3px;
+}
+
+/* Decoración inferior sutil */
+.hogar-linea-glow {
+  width: 24rem;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--primary), transparent);
+  opacity: 0.3;
+  filter: blur(4px);
+  margin: var(--gap-3xl) auto 0;
 }

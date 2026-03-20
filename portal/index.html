@@ -7,52 +7,91 @@
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/favicon.svg">
   <link rel="manifest" href="/static/site.webmanifest">
-  <meta name="theme-color" content="#1E1B2E">
+  <meta name="theme-color" content="#1a6a60">
   <link rel="stylesheet" href="/static/hogar.css">
   <style>
     /* Estilos específicos del portal (no del design system) */
-    .portal-seccion {
-      margin-bottom: var(--gap-xl);
+
+    /* Grid bento para tarjetas principales */
+    .portal-bento {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap-lg);
     }
 
-    .portal-seccion__titulo {
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--texto-suave);
+    @media (min-width: 768px) {
+      .portal-bento {
+        grid-template-columns: repeat(12, 1fr);
+      }
+      .portal-bento > :nth-child(1) { grid-column: span 5; }
+      .portal-bento > :nth-child(2) { grid-column: span 7; }
+      .portal-bento > :nth-child(3) { grid-column: span 5; }
+      .portal-bento > :nth-child(4) { grid-column: span 7; }
+    }
+
+    /* Tarjeta HA — temperaturas en grid orgánico */
+    .ha-exterior {
+      display: flex;
+      align-items: baseline;
+      gap: var(--gap-sm);
       margin-bottom: var(--gap-md);
     }
 
-    /* Tarjeta ReDo — sub-métricas */
-    .redo-metricas {
+    .ha-exterior__temp {
+      font-family: var(--fuente-titular);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--on-surface);
+      letter-spacing: -0.03em;
+    }
+
+    .ha-exterior__rango {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+    }
+
+    .ha-interior-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap-sm);
+    }
+
+    .ha-interior-item {
       display: flex;
-      gap: var(--gap-lg);
-      margin-top: var(--gap-sm);
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
     }
 
-    .redo-metrica {
-      text-align: center;
+    .ha-interior-item__nombre {
+      font-family: var(--fuente-titular);
+      font-size: 0.56rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--outline-variant);
     }
 
-    .redo-metrica__valor {
-      font-size: 1.4rem;
+    .ha-interior-item__valor {
+      font-family: var(--fuente-titular);
+      font-size: 1.15rem;
       font-weight: 700;
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
     }
 
-    .redo-metrica__label {
-      font-size: 0.72rem;
-      color: var(--texto-suave);
+    .ha-luces {
+      margin-top: var(--gap-md);
     }
 
-    .redo-metrica--ok .redo-metrica__valor { color: var(--exito); }
-    .redo-metrica--alerta .redo-metrica__valor { color: var(--error); }
+    .ha-luces__resumen {
+      font-weight: 600;
+    }
 
     /* Tarjeta FiDo — sub-métricas */
     .fido-metricas {
       display: flex;
-      gap: var(--gap-lg);
-      margin-top: var(--gap-sm);
+      gap: var(--gap-xl);
+      margin-top: var(--gap-md);
     }
 
     .fido-metrica {
@@ -60,81 +99,59 @@
     }
 
     .fido-metrica__valor {
+      font-family: var(--fuente-titular);
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .fido-metrica__label {
-      font-size: 0.72rem;
-      color: var(--texto-suave);
+      font-size: 0.68rem;
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .fido-metrica--ingreso .fido-metrica__valor { color: var(--exito); }
-    .fido-metrica--gasto .fido-metrica__valor { color: var(--error); }
+    .fido-metrica--gasto .fido-metrica__valor { color: var(--peligro); }
 
-    /* Tarjeta Home Assistant */
-    .ha-exterior {
-      display: flex;
-      align-items: baseline;
-      gap: var(--gap-sm);
-      margin-bottom: var(--gap-sm);
-    }
-
-    .ha-exterior__temp {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--indigo);
-    }
-
-    .ha-exterior__rango {
-      font-size: 0.8rem;
-      color: var(--texto-suave);
-    }
-
-    .ha-interior {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px var(--gap-md);
-      margin-bottom: var(--gap-sm);
-    }
-
-    .ha-interior__item {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      padding: 2px 0;
-    }
-
-    .ha-interior__nombre {
-      color: var(--texto-suave);
-    }
-
-    .ha-interior__valor {
-      font-weight: 600;
-    }
-
-    .ha-luces {
-      font-size: 0.85rem;
-      margin-top: var(--gap-sm);
-      padding-top: var(--gap-sm);
-      border-top: 1px solid var(--borde);
-    }
-
-    .ha-luces__resumen {
-      font-weight: 600;
-    }
-
-    /* Resumen crypto en tarjeta FiDo */
+    /* Resumen crypto */
     .fido-crypto-resumen {
-      margin-top: var(--gap-sm);
+      margin-top: var(--gap-md);
       padding-top: var(--gap-sm);
-      border-top: 1px solid var(--borde);
       font-size: 0.78rem;
       font-variant-numeric: tabular-nums;
+      color: var(--on-surface-variant);
     }
 
-    .crypto-positivo { color: var(--exito); font-weight: 600; }
-    .crypto-negativo { color: var(--error); font-weight: 600; }
+    .crypto-positivo { color: var(--exito); font-weight: 700; }
+    .crypto-negativo { color: var(--peligro); font-weight: 700; }
+
+    /* Tarjeta ReDo — sub-métricas */
+    .redo-metricas {
+      display: flex;
+      gap: var(--gap-xl);
+      margin-top: var(--gap-md);
+    }
+
+    .redo-metrica {
+      text-align: center;
+    }
+
+    .redo-metrica__valor {
+      font-family: var(--fuente-titular);
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .redo-metrica__label {
+      font-size: 0.68rem;
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .redo-metrica--ok .redo-metrica__valor { color: var(--exito); }
+    .redo-metrica--alerta .redo-metrica__valor { color: var(--peligro); }
 
     /* Tarjeta Backup */
     .backup-estado {
@@ -142,22 +159,23 @@
     }
 
     .backup-estado__dias {
-      font-size: 2rem;
+      font-family: var(--fuente-titular);
+      font-size: 1.6rem;
       font-weight: 700;
     }
 
     .backup-estado__detalle {
       font-size: 0.78rem;
-      color: var(--texto-suave);
+      color: var(--on-surface-variant);
       margin-top: 2px;
     }
 
     .backup--ok .backup-estado__dias { color: var(--exito); }
-    .backup--aviso .backup-estado__dias { color: var(--arena-oscuro, #e67e22); }
-    .backup--peligro .backup-estado__dias { color: var(--error); }
-    .backup--nunca .backup-estado__dias { color: var(--error); }
+    .backup--aviso .backup-estado__dias { color: var(--aviso); }
+    .backup--peligro .backup-estado__dias { color: var(--peligro); }
+    .backup--nunca .backup-estado__dias { color: var(--peligro); }
 
-    /* Feed de alertas */
+    /* Alertas lista */
     .alertas-lista {
       display: flex;
       flex-direction: column;
@@ -170,80 +188,112 @@
       flex-wrap: wrap;
       gap: var(--gap-sm);
     }
-
-    /* Spinner de carga */
-    .cargando {
-      color: var(--texto-suave);
-      font-size: 0.85rem;
-      font-style: italic;
-    }
   </style>
 </head>
 <body>
 
-  <!-- ======== HEADER ======== -->
+  <!-- ======== EFECTO LUMINA ======== -->
+  <div class="hogar-lumina"></div>
+
+  <!-- ======== HEADER FLOTANTE ======== -->
   <header class="hogar-header">
-    <a href="/" class="hogar-header__logo">HogarOS</a>
-    <nav class="hogar-header__nav">
-      <a href="/red/" class="hogar-header__enlace">Red</a>
-      <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
-      <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">Domotica</a>
-      <a href="/lanzador.html" class="hogar-header__enlace">Lanzador</a>
-      <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
-    </nav>
+    <div class="hogar-header__barra">
+      <a href="/" class="hogar-header__marca">
+        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
+        <div>
+          <div class="hogar-header__titulo">HogarOS</div>
+          <div class="hogar-header__subtitulo">El refugio del silencio</div>
+        </div>
+      </a>
+      <nav class="hogar-header__nav">
+        <a href="/red/" class="hogar-header__enlace">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">lan</span>
+          <span>Red</span>
+        </a>
+        <a href="/finanzas/" class="hogar-header__enlace">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">payments</span>
+          <span>Finanzas</span>
+        </a>
+        <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">home_iot_device</span>
+          <span>Domotica</span>
+        </a>
+        <a href="/lanzador.html" class="hogar-header__enlace">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">apps</span>
+          <span>Lanzador</span>
+        </a>
+        <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">
+          <span class="material-symbols-outlined" style="font-size:1.2rem" id="iconoTema">dark_mode</span>
+        </button>
+      </nav>
+    </div>
   </header>
 
   <!-- ======== CONTENIDO ======== -->
   <main class="hogar-contenedor">
 
-    <!-- Tarjetas de módulos -->
-    <section class="portal-seccion">
-      <h2 class="portal-seccion__titulo">Modulos</h2>
+    <!-- Tarjetas de módulos — layout bento -->
+    <section class="hogar-seccion">
+      <h2 class="hogar-seccion__titulo">Modulos</h2>
 
-      <div class="hogar-grid">
+      <div class="portal-bento">
 
-        <!-- TARJETA REDO -->
-        <div class="hogar-tarjeta" id="tarjetaRedo">
+        <!-- TARJETA HOME ASSISTANT (Nivel 2 — datos reales) -->
+        <div class="hogar-tarjeta hogar-tarjeta--primary" id="tarjetaHA">
           <div class="hogar-tarjeta__cabecera">
-            <span class="hogar-tarjeta__titulo">Red Domestica</span>
-            <span class="hogar-tarjeta__icono">&#128268;</span>
+            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
+              <span class="material-symbols-outlined filled" style="font-size:1.1rem">thermostat</span>
+            </div>
+            <span class="hogar-tarjeta__label">Domotica</span>
           </div>
-          <div id="redoContenido">
+          <div id="haContenido">
             <span class="cargando">Cargando...</span>
           </div>
-          <a href="/red/" class="hogar-tarjeta__enlace">Abrir ReDo &rarr;</a>
+          <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">
+            Abrir Home Assistant <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
+          </a>
         </div>
 
         <!-- TARJETA FIDO -->
-        <div class="hogar-tarjeta" id="tarjetaFido">
+        <div class="hogar-tarjeta hogar-tarjeta--tertiary" id="tarjetaFido">
           <div class="hogar-tarjeta__cabecera">
-            <span class="hogar-tarjeta__titulo">Finanzas Domesticas</span>
-            <span class="hogar-tarjeta__icono">&#128176;</span>
+            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--tertiary">
+              <span class="material-symbols-outlined" style="font-size:1.1rem">payments</span>
+            </div>
+            <span class="hogar-tarjeta__label">Finanzas Domesticas</span>
           </div>
           <div id="fidoContenido">
             <span class="cargando">Cargando...</span>
           </div>
           <div id="fidoCryptoResumen"></div>
-          <a href="/finanzas/" class="hogar-tarjeta__enlace">Abrir FiDo &rarr;</a>
+          <a href="/finanzas/" class="hogar-tarjeta__enlace">
+            Abrir FiDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
+          </a>
         </div>
 
-        <!-- TARJETA HOME ASSISTANT (Nivel 2 — datos reales) -->
-        <div class="hogar-tarjeta" id="tarjetaHA">
+        <!-- TARJETA REDO -->
+        <div class="hogar-tarjeta hogar-tarjeta--secondary" id="tarjetaRedo">
           <div class="hogar-tarjeta__cabecera">
-            <span class="hogar-tarjeta__titulo">Domotica</span>
-            <span class="hogar-tarjeta__icono">&#127968;</span>
+            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--secondary">
+              <span class="material-symbols-outlined" style="font-size:1.1rem">lan</span>
+            </div>
+            <span class="hogar-tarjeta__label">Red Domestica</span>
           </div>
-          <div id="haContenido">
+          <div id="redoContenido">
             <span class="cargando">Cargando...</span>
           </div>
-          <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">Abrir Home Assistant &rarr;</a>
+          <a href="/red/" class="hogar-tarjeta__enlace">
+            Abrir ReDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
+          </a>
         </div>
 
         <!-- TARJETA BACKUP -->
         <div class="hogar-tarjeta" id="tarjetaBackup">
           <div class="hogar-tarjeta__cabecera">
-            <span class="hogar-tarjeta__titulo">Estado del Backup</span>
-            <span class="hogar-tarjeta__icono">&#128190;</span>
+            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
+              <span class="material-symbols-outlined" style="font-size:1.1rem">backup</span>
+            </div>
+            <span class="hogar-tarjeta__label">Estado del Backup</span>
           </div>
           <div id="backupContenido">
             <span class="cargando">Cargando...</span>
@@ -254,23 +304,38 @@
     </section>
 
     <!-- Feed de alertas -->
-    <section class="portal-seccion">
-      <h2 class="portal-seccion__titulo">Alertas recientes</h2>
+    <section class="hogar-seccion">
+      <h2 class="hogar-seccion__titulo">Alertas recientes</h2>
       <div class="alertas-lista" id="alertas">
         <span class="cargando">Cargando alertas...</span>
       </div>
     </section>
 
     <!-- Accesos rápidos -->
-    <section class="portal-seccion">
-      <h2 class="portal-seccion__titulo">Accesos rapidos</h2>
+    <section class="hogar-seccion">
+      <h2 class="hogar-seccion__titulo">Accesos rapidos</h2>
       <div class="accesos-rapidos">
-        <button class="hogar-boton hogar-boton--primario" id="btnEscanear">Escanear red</button>
-        <a href="/red/#dispositivos" class="hogar-boton hogar-boton--secundario">Clasificar dispositivos</a>
-        <a href="/finanzas/#importar" class="hogar-boton hogar-boton--secundario">Importar extracto</a>
-        <a href="/finanzas/#panel" class="hogar-boton hogar-boton--secundario">Informe mensual</a>
+        <button class="hogar-boton hogar-boton--primario" id="btnEscanear">
+          <span class="material-symbols-outlined" style="font-size:1rem">radar</span>
+          Escanear red
+        </button>
+        <a href="/red/#dispositivos" class="hogar-boton hogar-boton--secundario">
+          <span class="material-symbols-outlined" style="font-size:1rem">devices</span>
+          Clasificar dispositivos
+        </a>
+        <a href="/finanzas/#importar" class="hogar-boton hogar-boton--secundario">
+          <span class="material-symbols-outlined" style="font-size:1rem">upload_file</span>
+          Importar extracto
+        </a>
+        <a href="/finanzas/#panel" class="hogar-boton hogar-boton--secundario">
+          <span class="material-symbols-outlined" style="font-size:1rem">bar_chart</span>
+          Informe mensual
+        </a>
       </div>
     </section>
+
+    <!-- Línea decorativa inferior -->
+    <div class="hogar-linea-glow"></div>
 
   </main>
 
@@ -278,9 +343,9 @@
     /* ============================================================
        Configuración — URLs base de las apps
        ============================================================ */
-    const REDO_API    = "/red/api";
-    const FIDO_API   = "/finanzas/api";
-    const KRYPTO_API = "/crypto/api";
+    var REDO_API    = "/red/api";
+    var FIDO_API   = "/finanzas/api";
+    var KRYPTO_API = "/crypto/api";
 
     /* ============================================================
        Toggle tema claro/oscuro con persistencia
@@ -307,7 +372,7 @@
 
     function actualizarIconoTema() {
       var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
-      document.getElementById("btnTema").textContent = oscuro ? "\u2600" : "\u263E";
+      document.getElementById("iconoTema").textContent = oscuro ? "light_mode" : "dark_mode";
     }
 
     /* ============================================================
@@ -438,14 +503,14 @@
           }
 
           // --- Temperaturas interiores ---
-          var htmlInterior = '<div class="ha-interior">';
+          var htmlInterior = '<div class="ha-interior-grid">';
           Object.keys(HA_TEMP_INTERIOR).forEach(function(eid) {
             var e = mapa[eid];
-            var val = (e && e.state !== "unavailable") ? e.state + "&deg;C" : "--";
+            var val = (e && e.state !== "unavailable") ? e.state + "&deg;" : "--";
             htmlInterior +=
-              '<div class="ha-interior__item">' +
-                '<span class="ha-interior__nombre">' + HA_TEMP_INTERIOR[eid] + '</span>' +
-                '<span class="ha-interior__valor">' + val + '</span>' +
+              '<div class="ha-interior-item">' +
+                '<span class="ha-interior-item__nombre">' + HA_TEMP_INTERIOR[eid] + '</span>' +
+                '<span class="ha-interior-item__valor">' + val + '</span>' +
               '</div>';
           });
           htmlInterior += '</div>';
@@ -462,8 +527,11 @@
           });
 
           var htmlLuces =
-            '<div class="ha-luces">' +
-              '&#128161; <span class="ha-luces__resumen">' + encendidas + ' de ' + totalLuces + ' encendidos</span>' +
+            '<div class="ha-luces hogar-fila">' +
+              '<div class="hogar-fila__izq">' +
+                '<span class="material-symbols-outlined filled" style="font-size:1.1rem;color:var(--primary)">lightbulb</span>' +
+                '<span>' + encendidas + ' de ' + totalLuces + ' encendidos</span>' +
+              '</div>' +
             '</div>';
 
           document.getElementById("haContenido").innerHTML = htmlExterior + htmlInterior + htmlLuces;
@@ -566,20 +634,20 @@
     document.getElementById("btnEscanear").addEventListener("click", function() {
       var btn = this;
       btn.disabled = true;
-      btn.textContent = "Escaneando...";
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">hourglass_top</span> Escaneando...';
 
       fetch(REDO_API + "/escanear", { method: "POST" })
         .then(function() {
-          btn.textContent = "Escaneo lanzado";
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">check_circle</span> Escaneo lanzado';
           setTimeout(function() {
             btn.disabled = false;
-            btn.textContent = "Escanear red";
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">radar</span> Escanear red';
             cargarRedo();
           }, 5000);
         })
         .catch(function() {
           btn.disabled = false;
-          btn.textContent = "Escanear red";
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">radar</span> Escanear red';
           agregarAlerta("error", "No se pudo lanzar el escaneo — ReDo no responde");
         });
     });

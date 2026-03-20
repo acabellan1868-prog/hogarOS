@@ -7,146 +7,87 @@
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/favicon.svg">
   <link rel="manifest" href="/static/site.webmanifest">
-  <meta name="theme-color" content="#1E1B2E">
+  <meta name="theme-color" content="#1a6a60">
   <link rel="stylesheet" href="/static/hogar.css">
   <style>
-    .lanzador-seccion {
-      margin-bottom: var(--gap-xl);
-    }
-
-    .lanzador-seccion__titulo {
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--texto-suave);
-      margin-bottom: var(--gap-md);
-    }
-
-    .lanzador-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: var(--gap-md);
-    }
-
-    .lanzador-enlace {
-      display: flex;
-      align-items: center;
-      gap: var(--gap-md);
-      background: var(--fondo-tarjeta);
-      border: 1px solid var(--borde);
-      border-radius: var(--radio-sm);
-      padding: var(--gap-md);
-      text-decoration: none;
-      color: var(--texto);
-      box-shadow: var(--sombra-sm);
-      transition: box-shadow var(--transicion), border-color var(--transicion);
-    }
-
-    .lanzador-enlace:hover {
-      box-shadow: var(--sombra-md);
-      border-color: var(--acento);
-    }
-
-    .lanzador-icono {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radio-sm);
-      background: #fff;
-      box-shadow: var(--sombra-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      padding: 5px;
-    }
-
-    .lanzador-icono img {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-    }
-
-    .lanzador-icono--emoji {
-      background: var(--alerta-fondo);
-      font-size: 1.3rem;
-      padding: 0;
-    }
-
-    .lanzador-nombre {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      line-height: 1.2;
-    }
-
-    .lanzador-desc {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--texto-suave);
-      margin-top: 2px;
-    }
-
     .lanzador-estado {
       text-align: center;
-      padding: var(--gap-xl);
-      color: var(--texto-suave);
+      padding: var(--gap-3xl);
+      color: var(--on-surface-variant);
       font-size: 0.9rem;
     }
 
-    .fab-gestionar {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--acento);
-      color: #fff;
-      border: none;
-      font-size: 1.5rem;
-      line-height: 1;
+    .lanzador-estado button {
+      margin-left: 0.5rem;
       cursor: pointer;
-      box-shadow: var(--sombra-md);
-      transition: background var(--transicion), transform var(--transicion);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      z-index: 100;
+      background: none;
+      border: 1px solid currentColor;
+      padding: 0.3rem 0.8rem;
+      border-radius: var(--radio-full);
+      color: inherit;
+      font-family: var(--fuente-cuerpo);
+      font-size: 0.8rem;
+      transition: background var(--transicion);
     }
 
-    .fab-gestionar:hover {
-      background: var(--acento-hover);
-      transform: scale(1.1);
-    }
-
-    @media (max-width: 600px) {
-      .lanzador-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--gap-sm);
-      }
+    .lanzador-estado button:hover {
+      background: var(--surface-container);
     }
   </style>
 </head>
 <body>
 
+  <!-- ======== EFECTO LUMINA ======== -->
+  <div class="hogar-lumina"></div>
+
+  <!-- ======== HEADER FLOTANTE ======== -->
   <header class="hogar-header">
-    <a href="/" class="hogar-header__logo">HogarOS</a>
-    <nav class="hogar-header__nav">
-      <a href="/" class="hogar-header__enlace">Inicio</a>
-      <a href="/red/" class="hogar-header__enlace">Red</a>
-      <a href="/finanzas/" class="hogar-header__enlace">Finanzas</a>
-      <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">Domotica</a>
-      <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">Lanzador</a>
-      <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
-    </nav>
+    <div class="hogar-header__barra">
+      <a href="/" class="hogar-header__marca">
+        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
+        <div>
+          <div class="hogar-header__titulo">HogarOS</div>
+          <div class="hogar-header__subtitulo">El refugio del silencio</div>
+        </div>
+      </a>
+      <nav class="hogar-header__nav">
+        <a href="/" class="hogar-header__enlace">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">roofing</span>
+          <span>Inicio</span>
+        </a>
+        <a href="/red/" class="hogar-header__enlace">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">lan</span>
+          <span>Red</span>
+        </a>
+        <a href="/finanzas/" class="hogar-header__enlace">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">payments</span>
+          <span>Finanzas</span>
+        </a>
+        <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">home_iot_device</span>
+          <span>Domotica</span>
+        </a>
+        <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">apps</span>
+          <span>Lanzador</span>
+        </a>
+        <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">
+          <span class="material-symbols-outlined" style="font-size:1.2rem" id="iconoTema">dark_mode</span>
+        </button>
+      </nav>
+    </div>
   </header>
 
-  <a href="/admin-lanzador.html" class="fab-gestionar" title="Gestionar enlaces">+</a>
+  <!-- ======== FAB GESTIONAR ======== -->
+  <a href="/admin-lanzador.html" class="lanzador-fab" title="Gestionar enlaces">
+    <span class="material-symbols-outlined" style="font-size:1.5rem">add</span>
+  </a>
 
+  <!-- ======== CONTENIDO ======== -->
   <main class="hogar-contenedor" id="contenido">
-    <div class="lanzador-estado">Cargando...</div>
+    <div class="lanzador-estado">
+      <span class="cargando">Cargando...</span>
+    </div>
   </main>
 
   <script>
@@ -174,20 +115,78 @@
 
     function actualizarIconoTema() {
       var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
-      document.getElementById("btnTema").textContent = oscuro ? "\u2600" : "\u263E";
+      document.getElementById("iconoTema").textContent = oscuro ? "light_mode" : "dark_mode";
     }
+
+    /* ============================================================
+       Iconos Material — mapa de nombres a iconos
+       (se usan como fallback cuando el enlace no tiene icono propio)
+       ============================================================ */
+    var ICONOS_MATERIAL = {
+      "chatgpt": "forum",
+      "gemini": "auto_awesome",
+      "claude": "cognition",
+      "grok": "psychology",
+      "spotify": "music_note",
+      "tailscale": "vpn_lock",
+      "proxmox": "dns",
+      "portainer": "dock",
+      "heimdall": "dashboard",
+      "home assistant": "house_with_shield",
+      "nodered": "hub",
+      "node-red": "hub",
+      "nextcloud": "cloud",
+      "jupyter": "data_exploration",
+      "jupyterlab": "data_exploration",
+      "n8n": "schema",
+      "planka": "view_kanban",
+      "dockmon": "monitor_heart",
+      "fido": "payments",
+      "hogaros": "roofing",
+      "mldonkey": "download",
+      "assistant": "house_with_shield"
+    };
+
+    /* Colores por posición para los iconos Material */
+    var COLORES_ICONO = [
+      "var(--primary)", "var(--secondary)", "var(--tertiary)",
+      "var(--primary-dim)", "var(--secondary-dim)", "var(--tertiary-dim)"
+    ];
+
+    /* Formas orgánicas rotativas */
+    var FORMAS = ["forma-organica-1", "forma-organica-2", "forma-organica-3", "forma-organica-4"];
 
     /* ============================================================
        Renderizado
        ============================================================ */
-    function iconoHtml(icono) {
-      if (!icono) {
-        return '<div class="lanzador-icono lanzador-icono--emoji">&#128279;</div>';
+    function iconoHtml(enlace, idx) {
+      var icono = enlace.icono;
+      var forma = FORMAS[idx % FORMAS.length];
+      var color = COLORES_ICONO[idx % COLORES_ICONO.length];
+
+      // Icono de imagen (URL)
+      if (icono && !icono.startsWith("emoji:")) {
+        return '<div class="lanzador-blob ' + forma + '">' +
+          '<img class="lanzador-blob__img" src="' + icono + '" alt="" loading="lazy">' +
+          '</div>';
       }
-      if (icono.startsWith("emoji:")) {
-        return '<div class="lanzador-icono lanzador-icono--emoji">' + icono.slice(6) + '</div>';
+
+      // Emoji
+      if (icono && icono.startsWith("emoji:")) {
+        return '<div class="lanzador-blob ' + forma + '">' +
+          '<span style="font-size:2.25rem">' + icono.slice(6) + '</span>' +
+          '</div>';
       }
-      return '<div class="lanzador-icono"><img src="' + icono + '" alt="" loading="lazy"></div>';
+
+      // Material Symbol (buscar por nombre del enlace)
+      var nombreLower = (enlace.nombre || "").toLowerCase();
+      var materialIcon = ICONOS_MATERIAL[nombreLower] || "link";
+
+      return '<div class="lanzador-blob ' + forma + '">' +
+        '<span class="material-symbols-outlined lanzador-blob__icono" style="color:' + color + '">' +
+          materialIcon +
+        '</span>' +
+        '</div>';
     }
 
     function renderizar(config) {
@@ -198,25 +197,28 @@
       }
 
       var html = "";
+      var idxGlobal = 0;
       config.grupos.forEach(function(grupo) {
         if (!grupo.enlaces || grupo.enlaces.length === 0) return;
-        html += '<section class="lanzador-seccion">';
-        html += '<h2 class="lanzador-seccion__titulo">' + grupo.titulo + '</h2>';
+        html += '<section class="hogar-seccion">';
+        html += '<h2 class="hogar-seccion__titulo">' + grupo.titulo + '</h2>';
         html += '<div class="lanzador-grid">';
         grupo.enlaces.forEach(function(enlace) {
           var target = enlace.nueva_pestana ? ' target="_blank"' : '';
-          html += '<a href="' + enlace.url + '" class="lanzador-enlace"' + target + '>';
-          html += iconoHtml(enlace.icono);
+          html += '<a href="' + enlace.url + '" class="lanzador-app"' + target + '>';
+          html += iconoHtml(enlace, idxGlobal);
           html += '<div>';
-          html += '<span class="lanzador-nombre">' + enlace.nombre + '</span>';
+          html += '<div class="lanzador-nombre">' + enlace.nombre + '</div>';
           if (enlace.descripcion) {
-            html += '<span class="lanzador-desc">' + enlace.descripcion + '</span>';
+            html += '<div class="lanzador-desc">' + enlace.descripcion + '</div>';
           }
           html += '</div></a>';
+          idxGlobal++;
         });
         html += '</div></section>';
       });
 
+      html += '<div class="hogar-linea-glow"></div>';
       contenido.innerHTML = html;
     }
 
@@ -228,8 +230,8 @@
       .then(function(config) { renderizar(config); })
       .catch(function() {
         document.getElementById("contenido").innerHTML =
-          '<div class="lanzador-estado">No se pudo conectar con hogar-api. ' +
-          '<button onclick="location.reload()" style="margin-left:0.5rem;cursor:pointer;background:none;border:1px solid currentColor;padding:0.2rem 0.6rem;border-radius:4px;color:inherit">Reintentar</button></div>';
+          '<div class="lanzador-estado">No se pudo conectar con hogar-api.' +
+          '<button onclick="location.reload()">Reintentar</button></div>';
       });
   </script>
 
