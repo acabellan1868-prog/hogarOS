@@ -1,6 +1,6 @@
 # Política de Backup — Hoja de ruta
 
-> Estado actual: análisis completado, pendiente de implementación.
+> Estado actual: scripts creados, pendiente de pruebas en VM.
 > Última actualización: 2026-03-20
 
 ### Leyenda
@@ -12,7 +12,7 @@
 
 ---
 
-## Fase 1 — Prerequisitos
+## Fase 1 — Prerequisitos ✅
 
 ### 1a — Usuario antonio en grupo docker ✅
 
@@ -27,7 +27,7 @@
 
 ---
 
-## Fase 2 — Endpoint de backup en hogar-api
+## Fase 2 — Endpoint de backup en hogar-api ✅
 
 ### 2a — Endpoint GET/POST /api/backup ✅
 
@@ -38,14 +38,14 @@
 
 - [x] 🤖 Añadir regla `/api/backup` → `hogar-api/backup` en `nginx.conf`
 
-### 2c — Despliegue
+### 2c — Despliegue ✅
 
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM para desplegar los cambios
-- [ ] 👤 Verificar que `GET /api/backup` responde correctamente
+- [x] 👤 Ejecutar `actualizar.sh` en la VM para desplegar los cambios
+- [x] 👤 Verificar que `GET /api/backup` responde correctamente
 
 ---
 
-## Fase 3 — Tarjeta "Estado del Backup" en el portal
+## Fase 3 — Tarjeta "Estado del Backup" en el portal ✅
 
 ### 3a — Tarjeta en el dashboard ✅
 
@@ -58,58 +58,69 @@
 - [x] 🤖 Estado especial si no hay backup registrado: "Nunca se ha registrado un backup"
 - [x] 🤖 Alimenta alertas si backup > 7 días o nunca registrado
 
-### 3b — Despliegue y verificación
+### 3b — Despliegue y verificación ✅
 
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM
-- [ ] 👤 Verificar que la tarjeta aparece en el portal (inicialmente en rojo, sin backup registrado)
+- [x] 👤 Ejecutar `actualizar.sh` en la VM
+- [x] 👤 Verificar que la tarjeta aparece en el portal (inicialmente en rojo, sin backup registrado)
 
 ---
 
-## Fase 4 — Script de dumps (VM 101)
+## Fase 4 — Script de dumps (VM 101) ✅
 
-### 4a — Script backup_dumps.sh
+### 4a — Script backup_dumps.sh ✅
 
-- [ ] 🤖 Crear `scripts/backup_dumps.sh` que ejecute dentro de la VM 101:
+- [x] 🤖 Crear `Politica_backup/backup_dumps.sh` que ejecute dentro de la VM 101:
   - Dump SQLite de FiDo: `sqlite3 /mnt/datos/fido/fido.db ".backup /mnt/datos/fido/fido.db.bak"`
   - Dump SQLite de ReDo: `sqlite3 /mnt/datos/redo/redo.db ".backup /mnt/datos/redo/redo.db.bak"`
   - Dump PostgreSQL de Planka: `docker exec planka-db pg_dump -U planka planka > /mnt/datos/planka/planka_dump.sql`
-  - Dump MariaDB de Nextcloud: `docker exec <contenedor_mariadb> mariadb-dump ...`
+  - Dump MariaDB de Nextcloud: `docker exec next-cloud-db-1 mariadb-dump -u root -p'...' --all-databases > /mnt/datos/mariadb/nextcloud_dump.sql`
   - Snapshot Docker: `docker ps -a` y `docker volume ls` → ficheros informativos en `/mnt/datos/`
-- [ ] 🤖 Notificar estado del backup a hogar-api: `curl -X POST /api/backup`
-- [ ] 🤖 Log de salida con resultado de cada dump (OK/ERROR)
+- [x] 🤖 Notificar estado del backup a hogar-api: `curl -X POST /api/backup`
+- [x] 🤖 Log de salida con resultado de cada dump (OK/ERROR)
 
 ### 4b — Permisos y pruebas
 
-- [ ] 👤 Copiar `backup_dumps.sh` a `/mnt/datos/hogarOS/scripts/` en la VM
-- [ ] 👤 Dar permisos de ejecución: `chmod +x backup_dumps.sh`
-- [ ] 👤 Ejecutar manualmente y verificar que genera los `.bak` y `.sql`
+- [ ] 👤 Hacer `git pull` en la VM 101 para obtener el script
+- [ ] 👤 Ejecutar manualmente: `bash /mnt/datos/hogarOS/Politica_backup/backup_dumps.sh`
+- [ ] 👤 Verificar que genera los `.bak` y `.sql` en `/mnt/datos/`
 - [ ] 👤 Verificar que la tarjeta del portal cambia a verde
-
-> **Nota:** Las rutas exactas de las BDs de Kryptonite y n8n se determinarán durante la implementación (están en volúmenes Docker gestionados por Portainer).
 
 ---
 
-## Fase 5 — Script orquestador (Proxmox)
+## Fase 5 — Script orquestador (Proxmox) ✅
 
-### 5a — Script backup.sh
+### 5a — Script backup.sh ✅
 
-- [ ] 🤖 Crear `scripts/backup.sh` para ejecutar desde la consola de Proxmox:
-  1. Verificar que el disco externo está montado
+- [x] 🤖 Crear `Politica_backup/backup.sh` para ejecutar desde la consola de Proxmox:
+  1. Verificar que el disco externo está montado en `/mnt/usb1`
   2. Rotación: renombrar `backup_actual/` → `backup_anterior/`
   3. SSH a VM 101 → ejecutar `backup_dumps.sh` (dumps de BDs)
-  4. `vzdump 101 102` → disco externo (snapshot + compresión zstd)
-  5. `rsync` de `/mnt/datos/` de la VM 101 → disco externo
+  4. Copiar dumps de VMs más recientes de `/var/lib/vz/dump/` → disco externo (VM 101: ~23 GB, VM 102: ~2 GB)
+  5. `rsync` de `/mnt/datos/` (~1.8 GB) de la VM 101 → disco externo
   6. Generar `MANIFIESTO.txt` con fecha, tamaños y estado de cada paso
   7. Mostrar resumen por pantalla
 
 ### 5b — Prueba completa
 
 - [ ] 👤 Conectar disco externo USB al servidor
-- [ ] 👤 Montar disco en Proxmox
-- [ ] 👤 Ejecutar `backup.sh` y verificar que completa sin errores
+- [ ] 👤 Montar disco: `mount /dev/sdb1 /mnt/usb1`
+- [ ] 👤 Copiar `backup.sh` a Proxmox (o ejecutar directamente desde la VM vía ruta compartida)
+- [ ] 👤 Ejecutar `bash backup.sh` y verificar que completa sin errores
 - [ ] 👤 Revisar `MANIFIESTO.txt` en el disco externo
 - [ ] 👤 Verificar que la tarjeta del portal está en verde
-- [ ] 👤 Desmontar y desconectar disco
+- [ ] 👤 Desmontar y desconectar disco: `umount /mnt/usb1`
+
+### Capacidad del disco externo
+
+| Elemento | Tamaño |
+|----------|--------|
+| Disco externo | 117 GB (84 GB libres) |
+| VM 101 dump | ~23 GB |
+| VM 102 dump | ~2 GB |
+| /mnt/datos/ | ~1.8 GB |
+| **Total por backup** | **~27 GB** |
+| **2 copias (rotación)** | **~54 GB** |
+| **Margen libre** | **~30 GB** |
 
 ---
 
@@ -136,17 +147,17 @@
 ## Resumen de dependencias
 
 ```
-Fase 1 (Prerequisitos)
+Fase 1 (Prerequisitos)              ✅
     ↓
-Fase 2 (Endpoint hogar-api)
+Fase 2 (Endpoint hogar-api)         ✅
     ↓
-Fase 3 (Tarjeta portal)
+Fase 3 (Tarjeta portal)             ✅
     ↓
-Fase 4 (Script dumps VM 101)
+Fase 4 (Script dumps VM 101)        ✅ código — pendiente pruebas
     ↓
-Fase 5 (Script orquestador Proxmox)
+Fase 5 (Script orquestador Proxmox) ✅ código — pendiente pruebas
     ↓
-Fase 6 (Documentación restauración)
+Fase 6 (Documentación restauración) pendiente
     ↓
-Fase 7 (Recordatorio NTFY — opcional)
+Fase 7 (Recordatorio NTFY)          pendiente (opcional)
 ```
