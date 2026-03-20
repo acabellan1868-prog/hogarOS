@@ -92,8 +92,9 @@ ssh "${VM_101_USER}@${VM_101_IP}" "bash ${DUMPS_SCRIPT}" && {
     registrar "Dumps BDs (VM 101)" 0
     log "  → Dumps completados"
 } || {
-    registrar "Dumps BDs (VM 101)" 1
-    log "  → AVISO: algunos dumps fallaron (ver log en VM 101)"
+    # Se ejecuta como antonio — algunos dumps pueden fallar por permisos (warning, no error)
+    RESUMEN="${RESUMEN}  Dumps BDs (VM 101): WARNING (permisos)\n"
+    log "  → AVISO: algunos dumps fallaron por permisos (ver log en VM 101)"
 }
 
 # --- 4. Copiar dumps de VMs (generados por el vzdump semanal de Proxmox) -----
@@ -131,13 +132,19 @@ log "Copiando /mnt/datos/ desde VM 101..."
 mkdir -p "${DIR_ACTUAL}/datos"
 rsync -av --delete \
     "${VM_101_USER}@${VM_101_IP}:/mnt/datos/" \
-    "${DIR_ACTUAL}/datos/" && {
+    "${DIR_ACTUAL}/datos/"
+RSYNC_EXIT=$?
+if [ "$RSYNC_EXIT" -eq 0 ]; then
     registrar "rsync /mnt/datos/" 0
     log "  → Copia de datos completada"
-} || {
+elif [ "$RSYNC_EXIT" -eq 23 ]; then
+    # Code 23 = algunos ficheros no se pudieron copiar (permisos) — warning, no error
+    RESUMEN="${RESUMEN}  rsync /mnt/datos/: WARNING (algunos ficheros sin permisos)\n"
+    log "  → Copia completada con avisos (algunos ficheros sin permisos de lectura)"
+else
     registrar "rsync /mnt/datos/" 1
-    log "  → ERROR copiando /mnt/datos/"
-}
+    log "  → ERROR copiando /mnt/datos/ (rsync exit code: $RSYNC_EXIT)"
+fi
 
 # --- 6. Generar MANIFIESTO.txt -----------------------------------------------
 
