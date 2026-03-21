@@ -274,41 +274,43 @@ body {
   opacity: 0.6;
 }
 
-.hogar-header__nav {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.hogar-header__enlace {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radio-lg);
+/* Botón hamburguesa / menú */
+.hogar-header__menu-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radio-full);
+  border: 1px solid var(--glass-border);
+  background: var(--surface-container-high);
   color: var(--on-surface-variant);
-  text-decoration: none;
-  font-family: var(--fuente-cuerpo);
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: background var(--transicion), color var(--transicion);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transicion), transform var(--transicion);
+  flex-shrink: 0;
 }
 
-.hogar-header__enlace:hover {
+.hogar-header__menu-btn:hover {
   background: var(--surface-container);
   color: var(--on-surface);
 }
 
-.hogar-header__enlace--activo {
-  background: rgba(164, 238, 224, 0.3);
-  color: var(--on-primary-container);
+.hogar-header__menu-btn:active {
+  transform: scale(0.92);
 }
 
-[data-tema="oscuro"] .hogar-header__enlace--activo {
-  background: rgba(164, 238, 224, 0.15);
-  color: var(--primary);
+/* Overlay para cerrar drawer */
+.hogar-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 150;
+  transition: opacity 0.3s ease;
+}
+
+.hogar-drawer-overlay.oculto {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -779,31 +781,106 @@ body {
 }
 
 /* ============================================================
-   22. Menú desplegable (navigation drawer)
+   22. Navigation Drawer (glassmorphic)
    ============================================================ */
 .hogar-drawer {
-  position: absolute;
-  top: 100%;
+  position: fixed;
+  top: 0;
   right: 0;
-  margin-top: 1rem;
-  width: 14rem;
+  height: 100vh;
+  height: 100dvh;
+  width: 17rem;
   background: var(--glass-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-radius: var(--radio-xl);
-  padding: 0.75rem;
+  border-radius: var(--radio-xl) 0 0 var(--radio-xl);
+  padding: 1.5rem 1rem;
   box-shadow: var(--sombra-lg);
   border: 1px solid var(--glass-border);
+  border-right: none;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  z-index: 200;
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
 }
 
 .hogar-drawer.oculto {
-  transform: translateY(-10px);
-  opacity: 0;
+  transform: translateX(100%);
   pointer-events: none;
+}
+
+.hogar-drawer__titulo {
+  font-family: var(--fuente-titular);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--on-surface-variant);
+  font-weight: 700;
+  padding: 0.5rem 0.75rem 0.25rem;
+  opacity: 0.6;
+}
+
+.hogar-drawer__enlace {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radio-lg);
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background var(--transicion), color var(--transicion);
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.hogar-drawer__enlace:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.hogar-drawer__enlace--activo {
+  background: rgba(164, 238, 224, 0.3);
+  color: var(--on-primary-container);
+}
+
+[data-tema="oscuro"] .hogar-drawer__enlace--activo {
+  background: rgba(164, 238, 224, 0.15);
+  color: var(--primary);
+}
+
+.hogar-drawer__separador {
+  height: 1px;
+  background: var(--outline-variant);
+  opacity: 0.3;
+  margin: 0.5rem 0.75rem;
+}
+
+.hogar-drawer__cerrar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  padding: 0.25rem;
+  border-radius: var(--radio-full);
+  transition: background var(--transicion);
+}
+
+.hogar-drawer__cerrar:hover {
+  background: var(--surface-container);
 }
 
 /* ============================================================

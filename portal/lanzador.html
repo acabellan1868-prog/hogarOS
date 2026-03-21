@@ -50,33 +50,45 @@
           <div class="hogar-header__subtitulo">El refugio del silencio</div>
         </div>
       </a>
-      <nav class="hogar-header__nav">
-        <a href="/" class="hogar-header__enlace">
-          <span class="material-symbols-outlined" style="font-size:1.1rem">roofing</span>
-          <span>Inicio</span>
-        </a>
-        <a href="/red/" class="hogar-header__enlace">
-          <span class="material-symbols-outlined" style="font-size:1.1rem">lan</span>
-          <span>Red</span>
-        </a>
-        <a href="/finanzas/" class="hogar-header__enlace">
-          <span class="material-symbols-outlined" style="font-size:1.1rem">payments</span>
-          <span>Finanzas</span>
-        </a>
-        <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-header__enlace" target="_blank">
-          <span class="material-symbols-outlined" style="font-size:1.1rem">home_iot_device</span>
-          <span>Domotica</span>
-        </a>
-        <a href="/lanzador.html" class="hogar-header__enlace hogar-header__enlace--activo">
-          <span class="material-symbols-outlined" style="font-size:1.1rem">apps</span>
-          <span>Lanzador</span>
-        </a>
-        <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">
-          <span class="material-symbols-outlined" style="font-size:1.2rem" id="iconoTema">dark_mode</span>
-        </button>
-      </nav>
+      <button class="hogar-header__menu-btn" id="btnMenu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
     </div>
   </header>
+
+  <!-- ======== DRAWER DE NAVEGACIÓN ======== -->
+  <div class="hogar-drawer-overlay oculto" id="drawerOverlay"></div>
+  <nav class="hogar-drawer oculto" id="drawerNav">
+    <button class="hogar-drawer__cerrar" id="btnCerrarDrawer">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <span class="hogar-drawer__titulo">Navegacion</span>
+    <a href="/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">roofing</span>
+      <span>Inicio</span>
+    </a>
+    <a href="/red/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">lan</span>
+      <span>Red</span>
+    </a>
+    <a href="/finanzas/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">payments</span>
+      <span>Finanzas</span>
+    </a>
+    <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-drawer__enlace" target="_blank">
+      <span class="material-symbols-outlined">home_iot_device</span>
+      <span>Domotica</span>
+    </a>
+    <a href="/lanzador.html" class="hogar-drawer__enlace hogar-drawer__enlace--activo">
+      <span class="material-symbols-outlined">apps</span>
+      <span>Lanzador</span>
+    </a>
+    <div class="hogar-drawer__separador"></div>
+    <button class="hogar-drawer__enlace" id="btnTema">
+      <span class="material-symbols-outlined" id="iconoTema">dark_mode</span>
+      <span>Cambiar tema</span>
+    </button>
+  </nav>
 
   <!-- ======== FAB GESTIONAR ======== -->
   <a href="/admin-lanzador.html" class="lanzador-fab" title="Gestionar enlaces">
@@ -91,6 +103,24 @@
   </main>
 
   <script>
+    /* ============================================================
+       Drawer de navegacion
+       ============================================================ */
+    var drawer = document.getElementById("drawerNav");
+    var overlay = document.getElementById("drawerOverlay");
+
+    function toggleDrawer() {
+      drawer.classList.toggle("oculto");
+      overlay.classList.toggle("oculto");
+    }
+
+    document.getElementById("btnMenu").addEventListener("click", toggleDrawer);
+    document.getElementById("drawerOverlay").addEventListener("click", toggleDrawer);
+    document.getElementById("btnCerrarDrawer").addEventListener("click", toggleDrawer);
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && !drawer.classList.contains("oculto")) toggleDrawer();
+    });
+
     /* ============================================================
        Tema
        ============================================================ */
