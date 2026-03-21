@@ -1,7 +1,8 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: rediseño visual y nuevo header completados.
-> Última actualización: 2026-03-21
+> Estado actual: Fase 10 completa (código). Nuevo header drawer + ApexCharts + fix enlaces subidos a GitHub.
+> Pendiente: ejecutar `actualizar.sh` en la VM para desplegar y verificar en producción.
+> Última actualización: 2026-03-21 (noche)
 
 ### Leyenda
 
