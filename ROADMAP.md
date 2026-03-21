@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: fase de diseño y planificación completada.
-> Última actualización: 2026-03-19 (noche)
+> Última actualización: 2026-03-21
 
 ### Leyenda
 
@@ -282,6 +282,21 @@ Cambio completo de la capa visual de todo el ecosistema. Solo diseño, sin cambi
 - [x] 🤖 Paso 4: Rediseñar `ReDo/static/index.html` — aplicar design system, cargar hogar.css via proxy
 - [ ] 🤖 Paso 5: Rediseñar `FiDo/static/index.html` + `estilos.css` — adaptar a Living Sanctuary
 - [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar en producción
+
+### Fix nginx — sub_filter y hogar.css (2026-03-21)
+
+Al desplegar el rediseño de ReDo se detectó que `hogar.css` no cargaba.
+Causa: el `sub_filter` reescribe `/static/hogar.css` → `/red/static/hogar.css`,
+pero no había `location` block para esa ruta → nginx la proxificaba a ReDo → 404.
+
+- [x] 🤖 Añadir `location /red/static/` en `nginx.conf` → sirve desde `portal/static/`
+- [x] 🤖 Añadir `location /finanzas/static/` en `nginx.conf` → mismo fix preventivo para FiDo
+
+### Documentación del ecosistema (2026-03-21)
+
+- [x] 🤖 Crear `CLAUDE.md` en `hogarOS/` — estructura completa del ecosistema, arquitectura nginx, flujo de despliegue, design system
+- [x] 🤖 Crear `CLAUDE.md` en `ReDo/` — estructura interna, API, integración con hogarOS
+- [x] 🤖 Crear `CLAUDE.md` en `FiDo/` — estructura interna, API, parsers bancarios
 
 ### Referencia de diseño
 - Diseños en `diseño/stitch (6)/` (dashboard) y `diseño/stitch (7)_lanzador (3)/` (lanzador)
