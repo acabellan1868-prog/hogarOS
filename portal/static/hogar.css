@@ -889,12 +889,12 @@ body {
 .lanzador-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem 3rem;
+  gap: 1.5rem 2rem;
 }
 
 @media (min-width: 768px) {
   .lanzador-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -913,8 +913,8 @@ body {
 }
 
 .lanzador-blob {
-  width: 7rem;
-  height: 7rem;
+  width: 5rem;
+  height: 5rem;
   background: var(--surface-container-lowest);
   box-shadow: var(--sombra-md);
   display: flex;
@@ -926,8 +926,8 @@ body {
 
 @media (min-width: 768px) {
   .lanzador-blob {
-    width: 8rem;
-    height: 8rem;
+    width: 5.5rem;
+    height: 5.5rem;
   }
 }
 
@@ -937,12 +937,12 @@ body {
 }
 
 .lanzador-blob__icono {
-  font-size: 2.25rem;
+  font-size: 1.75rem;
 }
 
 .lanzador-blob__img {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   object-fit: contain;
 }
 
@@ -1029,7 +1029,7 @@ body {
   }
 
   .lanzador-grid {
-    gap: 1.5rem;
+    gap: 1rem;
   }
 }
 
