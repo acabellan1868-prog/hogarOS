@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Tarjetas del portal compactadas (menos padding/espaciado). Subido a GitHub.
-> Pendiente: ejecutar `actualizar.sh` en la VM para desplegar y verificar en producción.
+> Estado actual: Fase 10 completa. Ajustes visuales del portal y lanzador (compactación + iconos). Subido a GitHub.
+> Pendiente: verificar en producción los cambios del lanzador (5 columnas).
 > Última actualización: 2026-03-22
 
 ### Leyenda
@@ -325,6 +325,24 @@ desde la derecha con overlay, cierre por Escape/click fuera.
 - Diseños en `diseño/stitch (6)/` (dashboard) y `diseño/stitch (7)_lanzador (3)/` (lanzador)
 - Especificación completa: `diseño/stitch (6)/DESIGN.md`
 - Carpeta `diseño/` excluida del repo (`.gitignore`)
+
+### Ajustes visuales del portal y lanzador (2026-03-22)
+
+**Tarjetas del portal** — demasiado espacio vacío en desktop:
+- [x] 🤖 Compactar padding (2rem → 1.25rem), border-radius (2rem → 1rem), margen cabecera (1rem → 0.5rem), margen enlace (1.5rem → 0.75rem), gap grid (1.5rem → 1rem)
+- [x] 👤 Verificado en producción ✅
+
+**Iconos del lanzador** — rotos por certificado SSL autofirmado de `cdn.simpleicons.org`:
+- [x] 🤖 Migrar todos los iconos a `cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/`
+- [x] 🤖 Actualizar config por defecto en `principal.py`
+- [x] 👤 Actualizar `lanzador.json` en la VM (sed reemplazo masivo)
+- [x] 👤 Verificado en producción ✅
+
+**Blobs del lanzador** — demasiado grandes, solo 4 por fila:
+- [x] 🤖 Grid: 4 → 5 columnas en desktop
+- [x] 🤖 Blob: 8rem → 5.5rem (desktop), 7rem → 5rem (móvil)
+- [x] 🤖 Iconos: img 2.5rem → 2rem, material 2.25rem → 1.75rem
+- [ ] 👤 Verificar en producción
 
 ---
 
