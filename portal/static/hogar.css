@@ -381,8 +381,8 @@ body {
    ============================================================ */
 .hogar-tarjeta {
   background: var(--surface-container-lowest);
-  border-radius: var(--radio-xl);
-  padding: var(--gap-xl);
+  border-radius: var(--radio-md);
+  padding: 1.25rem;
   box-shadow: var(--sombra-md);
   transition: box-shadow var(--transicion-lenta), transform var(--transicion);
   position: relative;
@@ -426,7 +426,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: var(--gap-md);
+  margin-bottom: 0.5rem;
 }
 
 .hogar-tarjeta__icono-circulo {
@@ -486,7 +486,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  margin-top: var(--gap-lg);
+  margin-top: 0.75rem;
   color: var(--primary);
   text-decoration: none;
   font-family: var(--fuente-titular);
