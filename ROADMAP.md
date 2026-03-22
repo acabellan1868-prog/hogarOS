@@ -1,8 +1,8 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 10 completa (código). Nuevo header drawer + ApexCharts + fix enlaces subidos a GitHub.
+> Estado actual: Tarjetas del portal compactadas (menos padding/espaciado). Subido a GitHub.
 > Pendiente: ejecutar `actualizar.sh` en la VM para desplegar y verificar en producción.
-> Última actualización: 2026-03-21 (noche)
+> Última actualización: 2026-03-22
 
 ### Leyenda
 
