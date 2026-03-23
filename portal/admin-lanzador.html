@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/favicon.svg">
   <link rel="manifest" href="/static/site.webmanifest">
-  <meta name="theme-color" content="#1E1B2E">
+  <meta name="theme-color" content="#1a6a60">
   <link rel="stylesheet" href="/static/hogar.css">
   <style>
     .admin-toolbar {
@@ -20,9 +20,9 @@
     }
 
     .admin-grupo {
-      background: var(--fondo-tarjeta);
-      border: 1px solid var(--borde);
-      border-radius: var(--radio-sm);
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radio-md);
       margin-bottom: var(--gap-lg);
       overflow: hidden;
     }
@@ -32,11 +32,12 @@
       align-items: center;
       gap: var(--gap-md);
       padding: var(--gap-md) var(--gap-lg);
-      background: var(--boton-sec);
-      border-bottom: 1px solid var(--borde);
+      background: var(--surface-container);
+      border-bottom: 1px solid var(--outline-variant);
     }
 
     .admin-grupo__titulo {
+      font-family: var(--fuente-titular);
       font-weight: 700;
       font-size: 1rem;
       flex: 1;
@@ -48,7 +49,7 @@
       align-items: center;
       gap: var(--gap-md);
       padding: var(--gap-sm) var(--gap-lg);
-      border-bottom: 1px solid var(--borde);
+      border-bottom: 1px solid var(--outline-variant);
     }
 
     .admin-enlace:last-child {
@@ -59,7 +60,7 @@
       width: 36px;
       height: 36px;
       border-radius: var(--radio-sm);
-      background: #fff;
+      background: var(--surface-container-lowest);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -85,7 +86,7 @@
 
     .admin-enlace__url {
       font-size: 0.75rem;
-      color: var(--texto-suave);
+      color: var(--on-surface-variant);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -102,8 +103,8 @@
       padding: var(--gap-sm) var(--gap-lg);
       background: none;
       border: none;
-      color: var(--acento);
-      font-family: var(--fuente);
+      color: var(--primary);
+      font-family: var(--fuente-cuerpo);
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
@@ -112,14 +113,14 @@
     }
 
     .admin-add-enlace:hover {
-      background: var(--alerta-fondo);
+      background: var(--surface-container);
     }
 
     /* Botones de icono */
     .btn-icono {
       width: 30px;
       height: 30px;
-      border: 1px solid var(--borde);
+      border: 1px solid var(--outline-variant);
       border-radius: var(--radio-sm);
       background: none;
       cursor: pointer;
@@ -128,11 +129,11 @@
       align-items: center;
       justify-content: center;
       transition: background var(--transicion), color var(--transicion);
-      color: var(--texto);
+      color: var(--on-surface);
     }
 
-    .btn-icono:hover { background: var(--boton-sec); }
-    .btn-icono--peligro:hover { background: var(--error-fondo); color: var(--error); border-color: var(--error); }
+    .btn-icono:hover { background: var(--surface-container); }
+    .btn-icono--peligro:hover { background: var(--peligro-fondo); color: var(--peligro); border-color: var(--peligro); }
 
     /* Modal */
     .modal-fondo {
@@ -149,8 +150,8 @@
     .modal-fondo.visible { display: flex; }
 
     .modal {
-      background: var(--fondo-tarjeta);
-      border-radius: var(--radio-md);
+      background: var(--surface-container-low);
+      border-radius: var(--radio-lg);
       box-shadow: var(--sombra-lg);
       width: 100%;
       max-width: 480px;
@@ -158,6 +159,7 @@
     }
 
     .modal__titulo {
+      font-family: var(--fuente-titular);
       font-size: 1.1rem;
       font-weight: 700;
       margin-bottom: var(--gap-lg);
@@ -171,7 +173,7 @@
       display: block;
       font-size: 0.8rem;
       font-weight: 600;
-      color: var(--texto-suave);
+      color: var(--on-surface-variant);
       margin-bottom: var(--gap-xs);
     }
 
@@ -179,23 +181,23 @@
     .campo input[type="url"] {
       width: 100%;
       padding: 0.5rem 0.75rem;
-      border: 1px solid var(--borde);
+      border: 1px solid var(--outline-variant);
       border-radius: var(--radio-sm);
-      background: var(--fondo);
-      color: var(--texto);
-      font-family: var(--fuente);
+      background: var(--surface-container-lowest);
+      color: var(--on-surface);
+      font-family: var(--fuente-cuerpo);
       font-size: 0.9rem;
       transition: border-color var(--transicion);
     }
 
     .campo input:focus {
       outline: none;
-      border-color: var(--acento);
+      border-color: var(--primary);
     }
 
     .campo__ayuda {
       font-size: 0.72rem;
-      color: var(--texto-suave);
+      color: var(--on-surface-variant);
       margin-top: var(--gap-xs);
     }
 
@@ -208,7 +210,7 @@
     .campo--check label {
       margin: 0;
       font-size: 0.9rem;
-      color: var(--texto);
+      color: var(--on-surface);
       font-weight: normal;
     }
 
@@ -223,8 +225,8 @@
       width: 36px;
       height: 36px;
       border-radius: var(--radio-sm);
-      background: #fff;
-      border: 1px solid var(--borde);
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -253,7 +255,7 @@
       background: var(--exito);
       color: #fff;
       padding: var(--gap-sm) var(--gap-md);
-      border-radius: var(--radio-sm);
+      border-radius: var(--radio-full);
       font-size: 0.9rem;
       font-weight: 600;
       z-index: 300;
@@ -262,18 +264,68 @@
 </head>
 <body>
 
+  <!-- ======== EFECTO LUMINA ======== -->
+  <div class="hogar-lumina"></div>
+
+  <!-- ======== HEADER FLOTANTE ======== -->
   <header class="hogar-header">
-    <a href="/" class="hogar-header__logo">HogarOS</a>
-    <nav class="hogar-header__nav">
-      <a href="/lanzador.html" class="hogar-header__enlace">&#8592; Volver al Lanzador</a>
-      <button class="hogar-toggle-tema" id="btnTema" title="Cambiar tema">&#9790;</button>
-    </nav>
+    <div class="hogar-header__barra">
+      <a href="/" class="hogar-header__marca">
+        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
+        <div>
+          <div class="hogar-header__titulo">HogarOS</div>
+          <div class="hogar-header__subtitulo">El refugio del silencio</div>
+        </div>
+      </a>
+      <button class="hogar-header__menu-btn" id="btnMenu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
   </header>
 
+  <!-- ======== DRAWER DE NAVEGACION ======== -->
+  <div class="hogar-drawer-overlay oculto" id="drawerOverlay"></div>
+  <nav class="hogar-drawer oculto" id="drawerNav">
+    <button class="hogar-drawer__cerrar" id="btnCerrarDrawer">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <span class="hogar-drawer__titulo">Navegacion</span>
+    <a href="/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">roofing</span>
+      <span>Inicio</span>
+    </a>
+    <a href="/red/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">lan</span>
+      <span>Red</span>
+    </a>
+    <a href="/finanzas/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">payments</span>
+      <span>Finanzas</span>
+    </a>
+    <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-drawer__enlace" target="_blank">
+      <span class="material-symbols-outlined">home_iot_device</span>
+      <span>Domotica</span>
+    </a>
+    <a href="/lanzador.html" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">apps</span>
+      <span>Lanzador</span>
+    </a>
+    <a href="/admin-lanzador.html" class="hogar-drawer__enlace hogar-drawer__enlace--activo">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Admin Lanzador</span>
+    </a>
+    <div class="hogar-drawer__separador"></div>
+    <button class="hogar-drawer__enlace" id="btnTema">
+      <span class="material-symbols-outlined" id="iconoTema">dark_mode</span>
+      <span>Cambiar tema</span>
+    </button>
+  </nav>
+
+  <!-- ======== CONTENIDO ======== -->
   <main class="hogar-contenedor">
 
     <div class="admin-toolbar">
-      <h1 style="font-size:1.3rem;font-weight:700;">Gestionar Lanzador</h1>
+      <h1 style="font-family:var(--fuente-titular);font-size:1.3rem;font-weight:700;">Gestionar Lanzador</h1>
       <div style="display:flex;gap:var(--gap-sm)">
         <button class="hogar-boton hogar-boton--secundario" id="btnAddGrupo">+ Grupo</button>
         <button class="hogar-boton hogar-boton--primario" id="btnGuardar">Guardar cambios</button>
@@ -303,15 +355,14 @@
       </div>
       <div class="campo">
         <label>Icono</label>
-        <input type="text" id="campoIcono" placeholder="https://cdn.simpleicons.org/proxmox">
+        <input type="text" id="campoIcono" placeholder="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/proxmox.svg">
         <div class="campo__ayuda">
-          URL de imagen · <code>emoji:🏠</code> para emoji<br>
-          Simple Icons: <code>https://cdn.simpleicons.org/docker</code><br>
+          URL de imagen · <code>emoji:&#127968;</code> para emoji<br>
           Homarr: <code>https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/planka.svg</code>
         </div>
         <div class="icono-preview">
           <div class="icono-preview__caja" id="iconoPreview"></div>
-          <span style="font-size:0.75rem;color:var(--texto-suave)">Vista previa</span>
+          <span style="font-size:0.75rem;color:var(--on-surface-variant)">Vista previa</span>
         </div>
       </div>
       <div class="campo campo--check">
@@ -348,15 +399,34 @@
        Estado
        ============================================================ */
     var config = { grupos: [] };
-    var modalEnlaceCtx = null; // { grupoIdx, enlaceIdx | null }
-    var modalGrupoCtx  = null; // { grupoIdx | null }
+    var modalEnlaceCtx = null;
+    var modalGrupoCtx  = null;
+
+    /* ============================================================
+       Drawer de navegacion
+       ============================================================ */
+    var drawer = document.getElementById("drawerNav");
+    var overlay = document.getElementById("drawerOverlay");
+
+    function toggleDrawer() {
+      drawer.classList.toggle("oculto");
+      overlay.classList.toggle("oculto");
+    }
+
+    document.getElementById("btnMenu").addEventListener("click", toggleDrawer);
+    document.getElementById("drawerOverlay").addEventListener("click", toggleDrawer);
+    document.getElementById("btnCerrarDrawer").addEventListener("click", toggleDrawer);
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && !drawer.classList.contains("oculto")) toggleDrawer();
+    });
 
     /* ============================================================
        Tema
        ============================================================ */
-    (function() {
-      if (localStorage.getItem("hogar-tema") === "oscuro")
+    (function initTema() {
+      if (localStorage.getItem("hogar-tema") === "oscuro") {
         document.documentElement.setAttribute("data-tema", "oscuro");
+      }
       actualizarIconoTema();
     })();
 
@@ -369,7 +439,7 @@
 
     function actualizarIconoTema() {
       var osc = document.documentElement.getAttribute("data-tema") === "oscuro";
-      document.getElementById("btnTema").textContent = osc ? "\u2600" : "\u263E";
+      document.getElementById("iconoTema").textContent = osc ? "light_mode" : "dark_mode";
     }
 
     /* ============================================================
@@ -384,7 +454,7 @@
     function renderizarLista() {
       var lista = document.getElementById("listaGrupos");
       if (config.grupos.length === 0) {
-        lista.innerHTML = '<p style="color:var(--texto-suave);text-align:center;padding:var(--gap-xl)">No hay grupos. Pulsa "+ Grupo" para crear uno.</p>';
+        lista.innerHTML = '<p style="color:var(--on-surface-variant);text-align:center;padding:var(--gap-xl)">No hay grupos. Pulsa "+ Grupo" para crear uno.</p>';
         return;
       }
 
@@ -393,8 +463,8 @@
         html += '<div class="admin-grupo" data-gi="' + gi + '">';
         html += '<div class="admin-grupo__cabecera">';
         html += '<span class="admin-grupo__titulo">' + grupo.titulo + '</span>';
-        html += '<button class="btn-icono" title="Renombrar" onclick="abrirModalGrupo(' + gi + ')">&#9998;</button>';
-        html += '<button class="btn-icono btn-icono--peligro" title="Eliminar grupo" onclick="eliminarGrupo(' + gi + ')">&#128465;</button>';
+        html += '<button class="btn-icono" title="Renombrar" onclick="abrirModalGrupo(' + gi + ')"><span class="material-symbols-outlined" style="font-size:1rem">edit</span></button>';
+        html += '<button class="btn-icono btn-icono--peligro" title="Eliminar grupo" onclick="eliminarGrupo(' + gi + ')"><span class="material-symbols-outlined" style="font-size:1rem">delete</span></button>';
         html += '</div>';
 
         if (grupo.enlaces && grupo.enlaces.length > 0) {
@@ -402,7 +472,7 @@
             html += '<div class="admin-enlace">';
             html += '<div class="admin-enlace__icono">';
             if (!enlace.icono) {
-              html += '&#128279;';
+              html += '<span class="material-symbols-outlined" style="font-size:1.2rem">link</span>';
             } else if (enlace.icono.startsWith("emoji:")) {
               html += enlace.icono.slice(6);
             } else {
@@ -414,14 +484,14 @@
             html += '<div class="admin-enlace__url">' + enlace.url + '</div>';
             html += '</div>';
             html += '<div class="admin-enlace__acciones">';
-            html += '<button class="btn-icono" title="Editar" onclick="abrirModalEnlace(' + gi + ',' + ei + ')">&#9998;</button>';
-            html += '<button class="btn-icono btn-icono--peligro" title="Eliminar" onclick="eliminarEnlace(' + gi + ',' + ei + ')">&#128465;</button>';
+            html += '<button class="btn-icono" title="Editar" onclick="abrirModalEnlace(' + gi + ',' + ei + ')"><span class="material-symbols-outlined" style="font-size:1rem">edit</span></button>';
+            html += '<button class="btn-icono btn-icono--peligro" title="Eliminar" onclick="eliminarEnlace(' + gi + ',' + ei + ')"><span class="material-symbols-outlined" style="font-size:1rem">delete</span></button>';
             html += '</div>';
             html += '</div>';
           });
         }
 
-        html += '<button class="admin-add-enlace" onclick="abrirModalEnlace(' + gi + ', null)">+ Anadir enlace</button>';
+        html += '<button class="admin-add-enlace" onclick="abrirModalEnlace(' + gi + ', null)"><span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle">add</span> Anadir enlace</button>';
         html += '</div>';
       });
 

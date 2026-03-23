@@ -1,8 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 10 completa. Ajustes visuales del portal y lanzador (compactación + iconos). Subido a GitHub.
-> Pendiente: verificar en producción los cambios del lanzador (5 columnas).
-> Última actualización: 2026-03-22
+> Estado actual: Fase 10 completa y verificada en producción. Drawer lateral y lanzador compactado funcionando.
+> Última actualización: 2026-03-23
 
 ### Leyenda
 
@@ -319,7 +318,7 @@ desde la derecha con overlay, cierre por Escape/click fuera.
 - [x] 🤖 `FiDo/static/index.html`: 7 pestañas pasan al drawer (integrado con Alpine.js), cierre auto al seleccionar. Toggle tema añadido
 - [x] 🤖 `ReDo/static/index.html`: drawer con Red, Ir al Portal, Finanzas. Toggle tema añadido
 - [x] 🤖 Fix enlaces cruzados: `href="/"` era reescrito por `sub_filter` de nginx → usar `window.location.origin` en FiDo y ReDo
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM y verificar en producción
+- [x] 👤 Verificado en producción ✅
 
 ### Referencia de diseño
 - Diseños en `diseño/stitch (6)/` (dashboard) y `diseño/stitch (7)_lanzador (3)/` (lanzador)
@@ -342,7 +341,7 @@ desde la derecha con overlay, cierre por Escape/click fuera.
 - [x] 🤖 Grid: 4 → 5 columnas en desktop
 - [x] 🤖 Blob: 8rem → 5.5rem (desktop), 7rem → 5rem (móvil)
 - [x] 🤖 Iconos: img 2.5rem → 2rem, material 2.25rem → 1.75rem
-- [ ] 👤 Verificar en producción
+- [x] 👤 Verificado en producción ✅
 
 ---
 
