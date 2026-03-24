@@ -23,8 +23,8 @@
       .portal-bento {
         grid-template-columns: repeat(12, 1fr);
       }
-      .portal-bento > :nth-child(1) { grid-column: span 5; }
-      .portal-bento > :nth-child(2) { grid-column: span 7; }
+      .portal-bento > :nth-child(1) { grid-column: span 7; }
+      .portal-bento > :nth-child(2) { grid-column: span 5; }
       .portal-bento > :nth-child(3) { grid-column: span 5; }
       .portal-bento > :nth-child(4) { grid-column: span 7; }
     }
@@ -84,7 +84,47 @@
     }
 
     .ha-luces__resumen {
-      font-weight: 600;
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      margin-bottom: var(--gap-sm);
+    }
+
+    .ha-dispositivos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap-xs);
+    }
+
+    .ha-dispositivo {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: var(--radio-sm);
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      background: var(--surface-container);
+      transition: background 0.2s;
+    }
+
+    .ha-dispositivo--on {
+      background: color-mix(in srgb, var(--primary) 15%, transparent);
+      color: var(--on-surface);
+    }
+
+    .ha-dispositivo--on .ha-dispositivo__icono {
+      color: var(--aviso);
+    }
+
+    .ha-dispositivo__icono {
+      font-size: 1rem;
+      color: var(--outline-variant);
+    }
+
+    .ha-dispositivo__nombre {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Tarjeta FiDo — sub-métricas */
@@ -498,17 +538,17 @@
       "sensor.temperature_158d000425161b": "Dormitorio"
     };
 
-    // Entidades de luces/enchufes (entity_id → nombre corto)
+    // Entidades de luces/enchufes (entity_id → { nombre, icono })
     var HA_LUCES = {
-      "light.smart_bulb_msl120d_main_channel": "Bombilla",
-      "switch.0xa4c138c23ca59c24": "Cocina",
-      "switch.0xa4c138d738bb72c1_left": "Salon izq.",
-      "switch.0xa4c138d738bb72c1_right": "Salon der.",
-      "switch.0xa4c1385fa998b01e": "Entrada",
-      "switch.0xa4c1384e3242935e": "Pasillo",
-      "switch.enchufe_001_lavadero_mss310_main_channel": "Lavadero",
-      "switch.enchufe_002_antonio_mss310_main_channel": "Enchufe Antonio",
-      "switch.enchufe_003_cocina_mss310_main_channel": "Enchufe Cocina"
+      "light.smart_bulb_msl120d_main_channel": { nombre: "Bombilla", icono: "lightbulb" },
+      "switch.0xa4c138c23ca59c24": { nombre: "Cocina", icono: "light" },
+      "switch.0xa4c138d738bb72c1_left": { nombre: "Salon izq.", icono: "light" },
+      "switch.0xa4c138d738bb72c1_right": { nombre: "Salon der.", icono: "light" },
+      "switch.0xa4c1385fa998b01e": { nombre: "Entrada", icono: "light" },
+      "switch.0xa4c1384e3242935e": { nombre: "Pasillo", icono: "light" },
+      "switch.enchufe_001_lavadero_mss310_main_channel": { nombre: "Lavadero", icono: "power" },
+      "switch.enchufe_002_antonio_mss310_main_channel": { nombre: "Enc. Antonio", icono: "power" },
+      "switch.enchufe_003_cocina_mss310_main_channel": { nombre: "Enc. Cocina", icono: "power" }
     };
 
     function cargarHA() {
@@ -552,20 +592,30 @@
           // --- Luces y enchufes ---
           var totalLuces = 0;
           var encendidas = 0;
+          var htmlDispositivos = '<div class="ha-dispositivos-grid">';
           Object.keys(HA_LUCES).forEach(function(eid) {
             var e = mapa[eid];
+            var info = HA_LUCES[eid];
             if (e && e.state !== "unavailable") {
               totalLuces++;
-              if (e.state === "on") encendidas++;
+              var on = e.state === "on";
+              if (on) encendidas++;
+              htmlDispositivos +=
+                '<div class="ha-dispositivo' + (on ? ' ha-dispositivo--on' : '') + '">' +
+                  '<span class="material-symbols-outlined' + (on ? ' filled' : '') + ' ha-dispositivo__icono">' + info.icono + '</span>' +
+                  '<span class="ha-dispositivo__nombre">' + info.nombre + '</span>' +
+                '</div>';
             }
           });
+          htmlDispositivos += '</div>';
 
           var htmlLuces =
-            '<div class="ha-luces hogar-fila">' +
-              '<div class="hogar-fila__izq">' +
-                '<span class="material-symbols-outlined filled" style="font-size:1.1rem;color:var(--primary)">lightbulb</span>' +
-                '<span>' + encendidas + ' de ' + totalLuces + ' encendidos</span>' +
+            '<div class="ha-luces">' +
+              '<div class="ha-luces__resumen">' +
+                '<span class="material-symbols-outlined filled" style="font-size:0.85rem;vertical-align:-2px;color:var(--primary)">lightbulb</span> ' +
+                encendidas + ' de ' + totalLuces + ' encendidos' +
               '</div>' +
+              htmlDispositivos +
             '</div>';
 
           document.getElementById("haContenido").innerHTML = htmlExterior + htmlInterior + htmlLuces;

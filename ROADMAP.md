@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 10 completa y verificada en producción. Drawer lateral y lanzador compactado funcionando.
-> Última actualización: 2026-03-23
+> Estado actual: Fase 10 completa. Tarjeta domótica con grid individual de dispositivos.
+> Última actualización: 2026-03-24
 
 ### Leyenda
 
@@ -343,6 +343,18 @@ desde la derecha con overlay, cierre por Escape/click fuera.
 - [x] 🤖 Iconos: img 2.5rem → 2rem, material 2.25rem → 1.75rem
 - [x] 👤 Verificado en producción ✅
 
+### Tarjeta Domótica — grid de dispositivos (2026-03-24)
+
+Reajuste de anchos del layout bento y mejora de la tarjeta de domótica para mostrar
+cada dispositivo individualmente con su estado encendido/apagado.
+
+- [x] 🤖 Grid bento: Domótica de span 5 → span 7, Finanzas de span 7 → span 5
+- [x] 🤖 Grid 3×3 de dispositivos: cada entidad como chip con icono + nombre
+- [x] 🤖 Iconos por tipo: `lightbulb` (bombilla), `light` (interruptores), `power` (enchufes)
+- [x] 🤖 Estado visual: encendido → fondo tintado primary, icono filled ámbar; apagado → fondo neutro, icono outline gris
+- [x] 🤖 Resumen "X de Y encendidos" conservado como subtítulo sobre el grid
+- [ ] 👤 Verificar en producción
+
 ---
 
 ## Fase 11 — Futuro (sin fecha)
@@ -350,7 +362,7 @@ desde la derecha con overlay, cierre por Escape/click fuera.
 - [x] 🤖 **Home Assistant Nivel 2**: widget con datos reales via API REST de HA (completado 2026-03-17)
   - [x] Temperatura exterior (actual + max/min, Meteoclimatic)
   - [x] Temperaturas interiores por habitación (Xiaomi Aqara + MQTT)
-  - [x] Luces/enchufes activos (conteo encendidos)
+  - [x] Luces/enchufes activos (conteo + grid individual de dispositivos)
   - [ ] Estado alarma
   - [ ] Consumo eléctrico
 - [ ] 🤖 Módulo Inventario del hogar
