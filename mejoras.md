@@ -71,18 +71,86 @@ Docker Compose (hogarOS)
 |---|---|
 | Backend | Python 3.12 + FastAPI |
 | Base de datos | SQLite (historial de métricas) |
-| Acceso a Docker | `docker` SDK para Python |
-| Métricas de sistema | `psutil` (CPU, RAM, disco, red) |
+| Métricas de sistema | **Proxmox API** (CPU, RAM, disco de VMs y host) |
+| Acceso a Docker | `docker` SDK para Python (contenedores) |
 | Health checks | `httpx` (peticiones HTTP a cada servicio) |
 | Scheduler | APScheduler (recolección periódica) |
 | Frontend | HTML/CSS/JS vanilla + hogar.css |
 | Notificaciones | NTFY (topic `hogaros-3ca6f61b`, igual que ReDo) |
 
+> **Decisión de diseño (2026-03-26):** Se descarta `psutil` para métricas de sistema.
+> Dentro de un contenedor Docker, `psutil` ve los recursos del contenedor, no los del
+> host. Habría que montar `/proc` y `/sys` del host, lo cual es un hack frágil.
+>
+> En su lugar se usa la **API REST de Proxmox** (puerto 8006), que ve todo desde arriba:
+> el propio host Proxmox, todas las VMs, almacenamiento, etc. Es más limpio, más potente
+> y no requiere montar nada especial en el contenedor — solo una petición HTTP con token.
+
 ### Qué se monitoriza
 
-#### 1.1 Estado de contenedores Docker
+#### 1.1 Recursos del sistema — Proxmox API
 
-Mediante el SDK de Docker (socket montado), listar todos los contenedores y su estado:
+Mediante la API REST de Proxmox (`https://IP_PROXMOX:8006/api2/json/...`).
+Se autentica con un **API Token** (creado en Proxmox, almacenado en `.env`).
+
+**Datos del host Proxmox:**
+
+| Endpoint | Datos |
+|---|---|
+| `GET /nodes/{node}/status` | CPU, RAM, disco, uptime del servidor físico |
+
+**Datos de cada VM (ej: VM 101):**
+
+| Endpoint | Datos |
+|---|---|
+| `GET /nodes/{node}/qemu/{vmid}/status/current` | CPU, RAM, disco, estado, uptime |
+| `GET /nodes/{node}/qemu` | Lista de todas las VMs con estado |
+
+**Datos de almacenamiento:**
+
+| Endpoint | Datos |
+|---|---|
+| `GET /nodes/{node}/storage` | Discos, uso, espacio libre (incluye disco externo USB) |
+
+```json
+{
+  "host": {
+    "cpu_percent": 15.2,
+    "memoria": { "total_gb": 16.0, "usado_gb": 10.5, "percent": 65.6 },
+    "uptime_dias": 90
+  },
+  "vms": [
+    {
+      "vmid": 101,
+      "nombre": "debian-docker",
+      "estado": "running",
+      "cpu_percent": 23.5,
+      "memoria": { "total_gb": 8.0, "usado_gb": 5.2, "percent": 65.0 },
+      "disco": { "total_gb": 100.0, "usado_gb": 62.0, "percent": 62.0 },
+      "uptime_dias": 45
+    }
+  ],
+  "almacenamiento": [
+    { "nombre": "local-lvm", "total_gb": 200, "usado_gb": 120, "percent": 60.0 },
+    { "nombre": "usb1", "total_gb": 117, "usado_gb": 45, "percent": 38.5 }
+  ]
+}
+```
+
+**Ventajas sobre psutil:**
+- Ve las métricas **reales** de la VM (no las del contenedor)
+- Ve el **host Proxmox** (si el servidor se queda sin RAM, lo sabrías)
+- Ve **todas las VMs** (si en el futuro se añade otra VM, se monitoriza automáticamente)
+- Ve el **almacenamiento** (incluido disco externo de backups)
+- No necesita montar nada especial en el contenedor
+
+**Configuración necesaria:**
+1. Crear API Token en Proxmox: Datacenter → Permissions → API Tokens
+2. Variables en `.env`: `PVE_HOST`, `PVE_TOKEN_ID`, `PVE_TOKEN_SECRET`, `PVE_NODE`
+
+#### 1.2 Estado de contenedores Docker
+
+Mediante el SDK de Docker (socket montado `:ro`), listar todos los contenedores y su estado:
 
 ```json
 {
@@ -104,20 +172,6 @@ Mediante el SDK de Docker (socket montado), listar todos los contenedores y su e
 MediDo ve todos los contenedores (el socket de Docker es compartido):
 - **Gestionados por hogarOS:** nginx, hogar-api, redo, fido, medido
 - **Gestionados por Portainer:** n8n, jupyterlab, planka, nodered, nextcloud, etc.
-
-#### 1.2 Recursos del sistema (VM 101)
-
-Usando `psutil`:
-
-```json
-{
-  "cpu_percent": 23.5,
-  "memoria": { "total_gb": 8.0, "usado_gb": 5.2, "percent": 65.0 },
-  "disco": { "total_gb": 100.0, "usado_gb": 62.0, "percent": 62.0 },
-  "red": { "bytes_enviados_mb": 1234, "bytes_recibidos_mb": 5678 },
-  "uptime_dias": 45
-}
-```
 
 #### 1.3 Health checks de servicios
 
@@ -146,13 +200,18 @@ Consulta el endpoint `/api/backup` de hogar-api o lee `backup_estado.json`. Calc
 ### Esquema de base de datos
 
 ```sql
--- Snapshots periódicos del estado del sistema
+-- Snapshots periódicos del estado del sistema (Proxmox + Docker)
 CREATE TABLE IF NOT EXISTS metricas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fecha TEXT NOT NULL DEFAULT (datetime('now')),
-    cpu_percent REAL,
-    memoria_percent REAL,
-    disco_percent REAL,
+    -- Host Proxmox
+    pve_cpu_percent REAL,
+    pve_memoria_percent REAL,
+    -- VM 101 (o la que corresponda)
+    vm_cpu_percent REAL,
+    vm_memoria_percent REAL,
+    vm_disco_percent REAL,
+    -- Contenedores Docker
     contenedores_total INTEGER,
     contenedores_running INTEGER,
     contenedores_stopped INTEGER
@@ -212,9 +271,9 @@ CREATE INDEX IF NOT EXISTS idx_alertas_fecha ON alertas(fecha);
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/resumen` | Estado general para la tarjeta del portal |
-| GET | `/api/sistema` | Métricas actuales de CPU/RAM/disco |
-| GET | `/api/sistema/historial?horas=24` | Historial de métricas |
-| GET | `/api/contenedores` | Lista de contenedores con estado |
+| GET | `/api/proxmox` | Métricas actuales de Proxmox (host + VMs + almacenamiento) |
+| GET | `/api/proxmox/historial?horas=24` | Historial de métricas del sistema |
+| GET | `/api/contenedores` | Lista de contenedores Docker con estado |
 | GET | `/api/servicios` | Estado de los health checks |
 | GET | `/api/servicios/{nombre}/historial` | Historial de un servicio |
 | GET | `/api/alertas` | Alertas activas y recientes |
@@ -225,9 +284,11 @@ CREATE INDEX IF NOT EXISTS idx_alertas_fecha ON alertas(fecha);
 ```json
 {
   "estado_global": "ok",
-  "cpu_percent": 23.5,
-  "memoria_percent": 65.0,
-  "disco_percent": 62.0,
+  "pve_cpu_percent": 15.2,
+  "pve_memoria_percent": 65.6,
+  "vm_cpu_percent": 23.5,
+  "vm_memoria_percent": 65.0,
+  "vm_disco_percent": 62.0,
   "contenedores_running": 12,
   "contenedores_total": 12,
   "servicios_ok": 8,
@@ -267,13 +328,13 @@ MediDo/
 │   ├── config.py             → Variables de entorno
 │   ├── esquema.sql           → DDL
 │   ├── modelos.py            → Pydantic schemas
-│   ├── recolector_sistema.py → psutil (CPU, RAM, disco)
+│   ├── recolector_proxmox.py → Proxmox API (host, VMs, almacenamiento)
 │   ├── recolector_docker.py  → Docker SDK (contenedores)
 │   ├── health_checker.py     → httpx (health checks)
 │   ├── alertador.py          → Lógica de umbrales + NTFY
 │   └── rutas/
 │       ├── resumen.py
-│       ├── sistema.py
+│       ├── proxmox.py
 │       ├── contenedores.py
 │       ├── servicios.py
 │       └── alertas.py
@@ -298,7 +359,7 @@ MediDo/
 | Componente | Esfuerzo |
 |---|---|
 | Estructura del proyecto (boilerplate) | Bajo |
-| Recolector de métricas (psutil) | Bajo |
+| Recolector Proxmox API (host + VMs + storage) | Medio |
 | Recolector Docker (SDK) | Medio |
 | Health checker (httpx) | Medio |
 | Lógica de alertas y NTFY | Medio |
@@ -306,6 +367,7 @@ MediDo/
 | Frontend completo | Medio-alto |
 | Tarjeta en portal | Bajo |
 | Configuración Nginx + compose | Bajo |
+| Crear API Token en Proxmox | Bajo (manual, una vez) |
 | **Total** | **Medio-alto** |
 
 ### Dependencias nuevas (solo para MediDo)
@@ -313,15 +375,43 @@ MediDo/
 | Paquete Python | Propósito |
 |---|---|
 | `docker` | SDK para interactuar con el daemon Docker |
-| `psutil` | Métricas de sistema (CPU, RAM, disco) |
-| `httpx` | Health checks HTTP |
+| `httpx` | Proxmox API + Health checks HTTP |
 | `apscheduler` | Tareas periódicas |
+
+> **Nota:** `psutil` se ha eliminado. Todas las métricas de sistema vienen de Proxmox API.
+
+### Variables de entorno nuevas
+
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `PVE_HOST` | IP o hostname del servidor Proxmox | `192.168.31.100` |
+| `PVE_NODE` | Nombre del nodo Proxmox | `pve` |
+| `PVE_TOKEN_ID` | ID del token API (usuario!token) | `root@pam!medido` |
+| `PVE_TOKEN_SECRET` | Secret del token API | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| `PVE_VERIFY_SSL` | Verificar certificado SSL (false para self-signed) | `false` |
 
 ### Consideraciones de seguridad
 
-- Socket Docker montado `:ro` — solo lectura
+- **Proxmox API Token** con permisos mínimos (solo lectura de estado/métricas)
+- **Socket Docker** montado `:ro` — solo lectura, no puede crear/eliminar contenedores
+- **SSL self-signed**: Proxmox usa certificado autofirmado por defecto; `PVE_VERIFY_SSL=false` lo acepta
 - Health checks internos no necesitan autenticación (red local)
 - Home Assistant requiere Bearer token — se reutiliza `HA_TOKEN` del `.env`
+
+### Preparación previa (manual, una sola vez)
+
+1. **Crear API Token en Proxmox:**
+   - Panel web de Proxmox → Datacenter → Permissions → API Tokens
+   - Usuario: `root@pam` (o crear usuario dedicado `medido@pve`)
+   - Token ID: `medido`
+   - Desmarcar "Privilege Separation" (hereda permisos del usuario)
+   - Copiar el secret (solo se muestra una vez)
+2. **Verificar conectividad** desde la VM 101:
+   ```bash
+   curl -k -H "Authorization: PVEAPIToken=root@pam!medido=SECRET" \
+     https://IP_PROXMOX:8006/api2/json/nodes
+   ```
+3. **Añadir variables** al `.env` de hogarOS
 
 ---
 
@@ -373,10 +463,9 @@ Se pueden retomar en cualquier momento.
 
 ## Orden global de implementación
 
-| Prioridad | Mejora | Proyecto | Esfuerzo | Valor |
-|---|---|---|---|---|
-| 1 | Tipo y zona | ReDo | Bajo-medio | Alto |
-| 2 | Presencia | ReDo | Medio | Alto |
-| 3 | MediDo | Nueva app + hogarOS | Medio-alto | Muy alto |
-
-Primero las mejoras de ReDo (rápidas, mejoran lo existente), luego MediDo (más ambicioso pero mayor impacto).
+| Prioridad | Mejora | Proyecto | Esfuerzo | Valor | Estado |
+|---|---|---|---|---|---|
+| 1 | Tipo y zona | ReDo | Bajo-medio | Alto | **Completado** (2026-03-26) |
+| 2 | Presencia + detalle | ReDo | Medio | Alto | **Completado** (2026-03-26) |
+| 3 | Auto-detección tipo | ReDo | Bajo | Medio | **Completado** (2026-03-26) |
+| 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **Pendiente** |
