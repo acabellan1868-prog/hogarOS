@@ -17,6 +17,7 @@ services:
     depends_on:
       - fido
       - hogar-api
+      - medido
     restart: unless-stopped
 
   # ── hogar-api — Gestión del lanzador ──
@@ -62,4 +63,28 @@ services:
     environment:
       - TZ=Europe/Madrid
       - FIDO_DB_PATH=/app/data/fido.db
+    restart: unless-stopped
+
+  # ── MediDo — Metricas y salud del hogar ──
+  # Se construye desde /mnt/datos/medido-build/
+  medido:
+    build: /mnt/datos/medido-build
+    container_name: medido
+    ports:
+      - "8084:8084"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /mnt/datos/medido:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=Europe/Madrid
+      - MEDIDO_DB_PATH=/app/data/medido.db
+      - PVE_HOST=${PVE_HOST}
+      - PVE_NODE=${PVE_NODE}
+      - PVE_TOKEN_ID=${PVE_TOKEN_ID}
+      - PVE_TOKEN_SECRET=${PVE_TOKEN_SECRET}
+      - PVE_VERIFY_SSL=${PVE_VERIFY_SSL:-false}
+      - HA_TOKEN=${HA_TOKEN}
+      - NTFY_TOPIC=hogaros-3ca6f61b
     restart: unless-stopped

@@ -14,7 +14,7 @@
 set -e
 
 DIRECTORIO_BASE="/mnt/datos"
-PROYECTOS=("hogarOS" "redo-build" "fido-build")
+PROYECTOS=("hogarOS" "redo-build" "fido-build" "medido-build")
 
 echo "================================================"
 echo "  hogarOS — Actualizando ecosistema"

@@ -409,9 +409,21 @@ MediDo/
 2. **Verificar conectividad** desde la VM 101:
    ```bash
    curl -k -H "Authorization: PVEAPIToken=root@pam!medido=SECRET" \
-     https://IP_PROXMOX:8006/api2/json/nodes
+     https://192.168.31.103:8006/api2/json/nodes
    ```
 3. **Añadir variables** al `.env` de hogarOS
+
+**Datos reales (configurados 2026-03-26):**
+
+| Variable | Valor |
+|---|---|
+| `PVE_HOST` | `192.168.31.103` |
+| `PVE_NODE` | `deeloco` |
+| `PVE_TOKEN_ID` | `root@pam!medido` |
+| `PVE_TOKEN_SECRET` | *(almacenado en `.env`, no en este fichero)* |
+| `PVE_VERIFY_SSL` | `false` |
+
+✅ API Token creado en Proxmox (2026-03-26)
 
 ---
 
@@ -468,4 +480,4 @@ Se pueden retomar en cualquier momento.
 | 1 | Tipo y zona | ReDo | Bajo-medio | Alto | **Completado** (2026-03-26) |
 | 2 | Presencia + detalle | ReDo | Medio | Alto | **Completado** (2026-03-26) |
 | 3 | Auto-detección tipo | ReDo | Bajo | Medio | **Completado** (2026-03-26) |
-| 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **Pendiente** |
+| 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **En curso** (API Token listo) |
