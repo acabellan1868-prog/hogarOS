@@ -480,4 +480,5 @@ Se pueden retomar en cualquier momento.
 | 1 | Tipo y zona | ReDo | Bajo-medio | Alto | **Completado** (2026-03-26) |
 | 2 | Presencia + detalle | ReDo | Medio | Alto | **Completado** (2026-03-26) |
 | 3 | Auto-detección tipo | ReDo | Bajo | Medio | **Completado** (2026-03-26) |
-| 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **En curso** (API Token listo) |
+| 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **Completado** (2026-03-27) |
+| 5 | Estandarizar drawers | ReDo + FiDo + MediDo | Bajo | Medio | **Completado** (2026-03-27) |
