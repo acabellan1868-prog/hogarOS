@@ -98,7 +98,7 @@ fi
 
 log "Dump MariaDB de Nextcloud..."
 if docker ps --format '{{.Names}}' | grep -q "^${MARIADB_CONTAINER}$"; then
-    docker exec "$MARIADB_CONTAINER" mariadb-dump -u root -p'hscmgajc:MySql' --all-databases > "$MARIADB_DUMP"
+    docker exec "$MARIADB_CONTAINER" mariadb-dump -u root -p'hscmgajc:MySql' nextcloud > "$MARIADB_DUMP"
     registrar "Nextcloud (MariaDB)" $?
     log "  → $MARIADB_DUMP generado"
 else

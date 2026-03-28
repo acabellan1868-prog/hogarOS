@@ -172,6 +172,8 @@ log "  (salida completa → $LOG_RSYNC)"
 mkdir -p "${DIR_ACTUAL}/datos"
 
 rsync -av --delete \
+    --no-owner --no-group \
+    --exclude=dockmon \
     "${VM_101_USER}@${VM_101_IP}:/mnt/datos/" \
     "${DIR_ACTUAL}/datos/" \
     2>&1 | tee "$LOG_RSYNC"
