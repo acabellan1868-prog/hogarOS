@@ -217,6 +217,32 @@
     .backup--peligro .backup-estado__dias { color: var(--peligro); }
     .backup--nunca .backup-estado__dias { color: var(--peligro); }
 
+    /* Instrucciones de backup */
+    .backup-instrucciones {
+      margin-top: var(--gap-md);
+      padding-top: var(--gap-sm);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    .backup-instrucciones__titulo {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--outline-variant);
+      margin-bottom: var(--gap-xs);
+    }
+
+    .backup-instrucciones__cmd {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+      background: var(--surface-container);
+      padding: 0.15rem 0.4rem;
+      border-radius: var(--radio-sm);
+      display: block;
+      margin-bottom: 3px;
+    }
+
     /* Tarjeta MediDo — semáforo y métricas del sistema */
     .medido-semaforo {
       display: flex;
@@ -466,6 +492,12 @@
           </div>
           <div id="backupContenido">
             <span class="cargando">Cargando...</span>
+          </div>
+          <div class="backup-instrucciones">
+            <div class="backup-instrucciones__titulo">Procedimiento</div>
+            <code class="backup-instrucciones__cmd">bash /root/montar_disco.sh</code>
+            <code class="backup-instrucciones__cmd">bash /root/backup.sh</code>
+            <code class="backup-instrucciones__cmd">umount /mnt/usb1</code>
           </div>
         </div>
 
