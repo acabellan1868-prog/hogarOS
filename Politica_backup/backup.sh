@@ -10,8 +10,14 @@
 #   3. SSH a VM 101 → ejecutar backup_dumps.sh (dumps de BDs)
 #   4. Copiar dumps de VMs (vzdump semanal de Proxmox) → disco externo
 #   5. rsync de /mnt/datos/ de la VM 101 → disco externo
-#   6. Generar MANIFIESTO.txt
+#   6. Generar MANIFIESTO.txt con resumen + detalle de errores
 #   7. Mostrar resumen por pantalla
+#
+# Logs generados en backup_actual/:
+#   dumps.log   → salida completa del script de dumps de BDs
+#   rsync.log   → salida completa del rsync de /mnt/datos/
+#   vms.log     → errores al copiar dumps de VMs
+#   MANIFIESTO.txt → resumen ejecutivo + detalle de todos los errores
 # =============================================================================
 
 set -uo pipefail
@@ -32,7 +38,6 @@ VMS="101 102"
 VZDUMP_DIR="/var/lib/vz/dump"
 
 FECHA=$(date '+%Y-%m-%d %H:%M:%S')
-FECHA_CORTA=$(date '+%Y_%m_%d')
 ERRORES=0
 RESUMEN=""
 
@@ -42,13 +47,35 @@ log() {
     echo "[$(date '+%H:%M:%S')] $1"
 }
 
+# Registra resultado de un paso en el resumen
 registrar() {
-    # $1 = nombre, $2 = código de salida
+    # $1 = descripción, $2 = código de salida
     if [ "$2" -eq 0 ]; then
-        RESUMEN="${RESUMEN}  $1: OK\n"
+        RESUMEN="${RESUMEN}  ✅ $1\n"
     else
-        RESUMEN="${RESUMEN}  $1: ERROR\n"
+        RESUMEN="${RESUMEN}  ❌ $1\n"
         ERRORES=$((ERRORES + 1))
+    fi
+}
+
+# Registra un aviso (no cuenta como error)
+registrar_aviso() {
+    RESUMEN="${RESUMEN}  ⚠️  $1\n"
+}
+
+# Extrae líneas de error de un log y las imprime con título
+errores_de_log() {
+    local fichero="$1"
+    local titulo="$2"
+    if [ ! -f "$fichero" ] || [ ! -s "$fichero" ]; then
+        return
+    fi
+    local lineas
+    lineas=$(grep -niE "error|failed|permission denied|cannot open|no such file|rsync:|bash:" "$fichero" 2>/dev/null || true)
+    if [ -n "$lineas" ]; then
+        echo ""
+        echo "  ── $titulo ──"
+        echo "$lineas" | head -100 | sed 's/^/    /'
     fi
 }
 
@@ -61,7 +88,7 @@ log "=========================================="
 log "Verificando disco externo en $DISCO..."
 if ! mountpoint -q "$DISCO"; then
     log "ERROR: $DISCO no está montado."
-    log "Monta el disco primero: mount /dev/sdb1 /mnt/usb1"
+    log "Monta el disco primero con: bash /root/montar_disco.sh"
     exit 1
 fi
 log "  → Disco montado correctamente"
@@ -85,17 +112,29 @@ else
     log "  → No hay backup actual previo, saltando rotación"
 fi
 
+# Definir y crear ficheros de log (siempre tras la rotación)
+LOG_DUMPS="${DIR_ACTUAL}/dumps.log"
+LOG_RSYNC="${DIR_ACTUAL}/rsync.log"
+LOG_VMS="${DIR_ACTUAL}/vms.log"
+> "$LOG_DUMPS"
+> "$LOG_RSYNC"
+> "$LOG_VMS"
+
 # --- 3. Dumps de BDs (SSH a VM 101) ------------------------------------------
 
 log "Ejecutando dumps de BDs en VM 101..."
-ssh "${VM_101_USER}@${VM_101_IP}" "bash ${DUMPS_SCRIPT}" && {
+log "  (salida completa → $LOG_DUMPS)"
+
+ssh "${VM_101_USER}@${VM_101_IP}" "bash ${DUMPS_SCRIPT}" 2>&1 | tee "$LOG_DUMPS"
+DUMPS_EXIT="${PIPESTATUS[0]}"
+
+if [ "$DUMPS_EXIT" -eq 0 ]; then
     registrar "Dumps BDs (VM 101)" 0
     log "  → Dumps completados"
-} || {
-    # Se ejecuta como antonio — algunos dumps pueden fallar por permisos (warning, no error)
-    RESUMEN="${RESUMEN}  Dumps BDs (VM 101): WARNING (permisos)\n"
-    log "  → AVISO: algunos dumps fallaron por permisos (ver log en VM 101)"
-}
+else
+    registrar_aviso "Dumps BDs (VM 101): algunos dumps fallaron por permisos"
+    log "  → AVISO: algunos dumps fallaron. Ver $LOG_DUMPS"
+fi
 
 # --- 4. Copiar dumps de VMs (generados por el vzdump semanal de Proxmox) -----
 
@@ -110,46 +149,49 @@ for VMID in $VMS; do
     if [ -n "$FICHERO" ]; then
         TAMANO=$(du -h "$FICHERO" | cut -f1)
         log "  → VM $VMID: $(basename "$FICHERO") ($TAMANO)"
-        cp "$FICHERO" "$DIR_DUMP/" && {
-            # Copiar también el .log y .notes si existen
+        if cp "$FICHERO" "$DIR_DUMP/" 2>>"$LOG_VMS"; then
             cp "${FICHERO%.vma.zst}.log" "$DIR_DUMP/" 2>/dev/null || true
             cp "${FICHERO}.notes" "$DIR_DUMP/" 2>/dev/null || true
             registrar "Copia VM $VMID" 0
             log "  → Copiada correctamente"
-        } || {
+        else
             registrar "Copia VM $VMID" 1
-            log "  → ERROR copiando VM $VMID"
-        }
+            log "  → ERROR copiando VM $VMID. Ver $LOG_VMS"
+        fi
     else
-        log "  → AVISO: no se encontró dump de VM $VMID en $VZDUMP_DIR"
+        echo "VM $VMID: dump no encontrado en $VZDUMP_DIR" >> "$LOG_VMS"
         registrar "Copia VM $VMID" 1
+        log "  → AVISO: no se encontró dump de VM $VMID en $VZDUMP_DIR"
     fi
 done
 
 # --- 5. rsync de /mnt/datos/ -------------------------------------------------
 
 log "Copiando /mnt/datos/ desde VM 101..."
+log "  (salida completa → $LOG_RSYNC)"
 mkdir -p "${DIR_ACTUAL}/datos"
+
 rsync -av --delete \
     "${VM_101_USER}@${VM_101_IP}:/mnt/datos/" \
-    "${DIR_ACTUAL}/datos/"
-RSYNC_EXIT=$?
+    "${DIR_ACTUAL}/datos/" \
+    2>&1 | tee "$LOG_RSYNC"
+RSYNC_EXIT="${PIPESTATUS[0]}"
+
 if [ "$RSYNC_EXIT" -eq 0 ]; then
     registrar "rsync /mnt/datos/" 0
     log "  → Copia de datos completada"
 elif [ "$RSYNC_EXIT" -eq 23 ]; then
-    # Code 23 = algunos ficheros no se pudieron copiar (permisos) — warning, no error
-    RESUMEN="${RESUMEN}  rsync /mnt/datos/: WARNING (algunos ficheros sin permisos)\n"
-    log "  → Copia completada con avisos (algunos ficheros sin permisos de lectura)"
+    # Código 23 = algunos ficheros no copiados por permisos — aviso, no error
+    registrar_aviso "rsync /mnt/datos/: completado con avisos de permisos"
+    log "  → Copia completada con avisos de permisos. Ver $LOG_RSYNC"
 else
-    registrar "rsync /mnt/datos/" 1
-    log "  → ERROR copiando /mnt/datos/ (rsync exit code: $RSYNC_EXIT)"
+    registrar "rsync /mnt/datos/ (exit code: $RSYNC_EXIT)" 1
+    log "  → ERROR en rsync. Ver $LOG_RSYNC"
 fi
 
 # --- 6. Generar MANIFIESTO.txt -----------------------------------------------
 
 log "Generando manifiesto..."
-
 MANIFIESTO="${DIR_ACTUAL}/MANIFIESTO.txt"
 
 {
@@ -159,31 +201,37 @@ MANIFIESTO="${DIR_ACTUAL}/MANIFIESTO.txt"
     echo "=========================================="
     echo ""
 
-    # Tamaño de los dumps de VMs
+    # --- Resumen por pasos ---
+    echo "RESUMEN:"
+    echo -e "$RESUMEN"
+
+    # --- Dumps de VMs ---
+    echo "DUMPS DE VMs:"
     for VMID in $VMS; do
         FICHERO=$(ls -t "${DIR_DUMP}"/vzdump-qemu-${VMID}-*.vma.zst 2>/dev/null | head -1)
         if [ -n "$FICHERO" ]; then
             TAMANO=$(du -h "$FICHERO" | cut -f1)
-            echo "VM $VMID: $(basename "$FICHERO") ($TAMANO) ✅"
+            echo "  VM $VMID: $(basename "$FICHERO") ($TAMANO) ✅"
         else
-            echo "VM $VMID: NO ENCONTRADO ❌"
+            echo "  VM $VMID: NO ENCONTRADO ❌"
         fi
     done
 
     echo ""
 
-    # Tamaño de datos copiados
+    # --- Datos copiados ---
+    echo "DATOS COPIADOS:"
     if [ -d "${DIR_ACTUAL}/datos" ]; then
         TAMANO_DATOS=$(du -sh "${DIR_ACTUAL}/datos" | cut -f1)
-        echo "Datos /mnt/datos/: $TAMANO_DATOS copiados ✅"
+        echo "  /mnt/datos/: $TAMANO_DATOS ✅"
     else
-        echo "Datos /mnt/datos/: NO COPIADOS ❌"
+        echo "  /mnt/datos/: NO COPIADO ❌"
     fi
 
     echo ""
 
-    # Estado de dumps de BDs
-    echo "Dumps de bases de datos:"
+    # --- Estado de cada BD ---
+    echo "BASES DE DATOS:"
     for F in fido/fido.db.bak redo/redo.db.bak planka/planka_dump.sql mariadb/nextcloud_dump.sql; do
         RUTA="${DIR_ACTUAL}/datos/${F}"
         NOMBRE=$(basename "$F")
@@ -197,20 +245,50 @@ MANIFIESTO="${DIR_ACTUAL}/MANIFIESTO.txt"
 
     echo ""
 
-    # Backup anterior
+    # --- Backup anterior ---
     if [ -d "$DIR_ANTERIOR" ] && [ -f "${DIR_ANTERIOR}/MANIFIESTO.txt" ]; then
-        FECHA_ANT=$(grep "^Fecha:" "${DIR_ANTERIOR}/MANIFIESTO.txt" | head -1)
+        FECHA_ANT=$(grep "^Fecha:" "${DIR_ANTERIOR}/MANIFIESTO.txt" | head -1 | cut -d' ' -f2-)
         echo "Backup anterior: $FECHA_ANT"
     else
         echo "Backup anterior: no disponible"
     fi
 
     echo ""
+    echo "Logs de detalle:"
+    echo "  $LOG_DUMPS  (dumps de BDs)"
+    echo "  $LOG_RSYNC  (rsync /mnt/datos/)"
+    echo "  $LOG_VMS    (copia de VMs)"
+
+    echo ""
+    echo "=========================================="
+    echo "DETALLE DE ERRORES"
+    echo "=========================================="
+
+    # Errores extraídos de cada log
+    HAY_ERRORES=0
+    for LOG_FICHERO in "$LOG_DUMPS" "$LOG_RSYNC" "$LOG_VMS"; do
+        TITULO=""
+        [ "$LOG_FICHERO" = "$LOG_DUMPS" ] && TITULO="dumps de BDs (dumps.log)"
+        [ "$LOG_FICHERO" = "$LOG_RSYNC" ] && TITULO="rsync /mnt/datos/ (rsync.log)"
+        [ "$LOG_FICHERO" = "$LOG_VMS"   ] && TITULO="copia de VMs (vms.log)"
+        if [ -f "$LOG_FICHERO" ] && grep -qiE "error|failed|permission denied|cannot open|no such file|rsync:|bash:" "$LOG_FICHERO" 2>/dev/null; then
+            HAY_ERRORES=1
+            errores_de_log "$LOG_FICHERO" "$TITULO"
+        fi
+    done
+
+    if [ "$HAY_ERRORES" -eq 0 ]; then
+        echo ""
+        echo "  Sin errores detectados en los logs."
+    fi
+
+    echo ""
+    echo "=========================================="
     echo "Errores totales: $ERRORES"
     echo "=========================================="
 } > "$MANIFIESTO"
 
-log "  → Manifiesto generado en $MANIFIESTO"
+log "  → Manifiesto generado: $MANIFIESTO"
 
 # --- 7. Resumen final --------------------------------------------------------
 
@@ -219,8 +297,6 @@ log "=========================================="
 log "RESUMEN DEL BACKUP"
 log "=========================================="
 echo -e "$RESUMEN"
-cat "$MANIFIESTO"
-echo ""
 
 if [ "$ERRORES" -eq 0 ]; then
     log "✅ BACKUP COMPLETADO SIN ERRORES"
@@ -229,7 +305,8 @@ else
 fi
 
 log ""
-log "Puedes desmontar el disco con: umount /mnt/usb1"
+log "Ver detalle completo: cat $MANIFIESTO"
+log "Puedes desmontar el disco con: umount $DISCO"
 log "=========================================="
 
 exit $ERRORES
