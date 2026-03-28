@@ -25,8 +25,9 @@
       }
       .portal-bento > :nth-child(1) { grid-column: span 7; }
       .portal-bento > :nth-child(2) { grid-column: span 5; }
-      .portal-bento > :nth-child(3) { grid-column: span 5; }
-      .portal-bento > :nth-child(4) { grid-column: span 7; }
+      .portal-bento > :nth-child(3) { grid-column: span 4; }
+      .portal-bento > :nth-child(4) { grid-column: span 5; }
+      .portal-bento > :nth-child(5) { grid-column: span 3; }
     }
 
     /* Tarjeta HA — temperaturas en grid orgánico */
@@ -215,6 +216,97 @@
     .backup--peligro .backup-estado__dias { color: var(--peligro); }
     .backup--nunca .backup-estado__dias { color: var(--peligro); }
 
+    /* Tarjeta MediDo — semáforo y métricas del sistema */
+    .medido-semaforo {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-sm);
+      margin-bottom: var(--gap-md);
+    }
+
+    .medido-semaforo__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .medido-semaforo--ok .medido-semaforo__dot      { background: var(--exito); }
+    .medido-semaforo--warning .medido-semaforo__dot { background: var(--aviso); }
+    .medido-semaforo--danger .medido-semaforo__dot  { background: var(--peligro); }
+
+    .medido-semaforo__texto { font-size: 0.78rem; font-weight: 600; }
+    .medido-semaforo--ok .medido-semaforo__texto      { color: var(--exito); }
+    .medido-semaforo--warning .medido-semaforo__texto { color: var(--aviso); }
+    .medido-semaforo--danger .medido-semaforo__texto  { color: var(--peligro); }
+
+    .medido-metricas {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-xs);
+    }
+
+    .medido-metrica {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-sm);
+      font-size: 0.75rem;
+    }
+
+    .medido-metrica__label {
+      width: 3rem;
+      color: var(--on-surface-variant);
+      flex-shrink: 0;
+    }
+
+    .medido-metrica__barra-fondo {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--surface-container);
+      overflow: hidden;
+    }
+
+    .medido-metrica__barra {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    .medido-metrica__barra--warning { background: var(--aviso); }
+    .medido-metrica__barra--danger  { background: var(--peligro); }
+
+    .medido-metrica__valor {
+      width: 2.5rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--on-surface);
+      flex-shrink: 0;
+    }
+
+    .medido-resumen {
+      display: flex;
+      gap: var(--gap-lg);
+      margin-top: var(--gap-sm);
+    }
+
+    .medido-resumen-item { text-align: center; }
+
+    .medido-resumen-item__valor {
+      font-family: var(--fuente-titular);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+
+    .medido-resumen-item__label {
+      font-size: 0.65rem;
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     /* Alertas lista */
     .alertas-lista {
       display: flex;
@@ -347,6 +439,22 @@
           </a>
         </div>
 
+        <!-- TARJETA MEDIDO -->
+        <div class="hogar-tarjeta" id="tarjetaMedido">
+          <div class="hogar-tarjeta__cabecera">
+            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
+              <span class="material-symbols-outlined" style="font-size:1.1rem">monitor_heart</span>
+            </div>
+            <span class="hogar-tarjeta__label">Salud del Sistema</span>
+          </div>
+          <div id="medidoContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
+          <a href="/salud/" class="hogar-tarjeta__enlace">
+            Abrir MediDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
+          </a>
+        </div>
+
         <!-- TARJETA BACKUP -->
         <div class="hogar-tarjeta" id="tarjetaBackup">
           <div class="hogar-tarjeta__cabecera">
@@ -404,8 +512,9 @@
        Configuración — URLs base de las apps
        ============================================================ */
     var REDO_API    = "/red/api";
-    var FIDO_API   = "/finanzas/api";
-    var KRYPTO_API = "/crypto/api";
+    var FIDO_API    = "/finanzas/api";
+    var KRYPTO_API  = "/crypto/api";
+    var MEDIDO_API  = "/salud/api";
 
     /* ============================================================
        Drawer de navegacion
@@ -659,6 +768,83 @@
     }
 
     /* ============================================================
+       Cargar datos de MediDo
+       ============================================================ */
+    function cargarMedido() {
+      fetch(MEDIDO_API + "/resumen")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var contenedor = document.getElementById("medidoContenido");
+          var estado = d.estado_global || "ok";
+          var textoEstado = estado === "ok" ? "Sistema OK" : estado === "warning" ? "Aviso" : "Alerta critica";
+
+          var htmlSemaforo =
+            '<div class="medido-semaforo medido-semaforo--' + estado + '">' +
+              '<div class="medido-semaforo__dot"></div>' +
+              '<span class="medido-semaforo__texto">' + textoEstado + '</span>' +
+            '</div>';
+
+          function barraMetrica(label, valor) {
+            if (valor === null || valor === undefined) return "";
+            var pct = Math.round(valor);
+            var claseBar = pct >= 90 ? "medido-metrica__barra--danger"
+                         : pct >= 80 ? "medido-metrica__barra--warning"
+                         : "";
+            return '<div class="medido-metrica">' +
+              '<span class="medido-metrica__label">' + label + '</span>' +
+              '<div class="medido-metrica__barra-fondo">' +
+                '<div class="medido-metrica__barra ' + claseBar + '" style="width:' + pct + '%"></div>' +
+              '</div>' +
+              '<span class="medido-metrica__valor">' + pct + '%</span>' +
+            '</div>';
+          }
+
+          var htmlMetricas =
+            '<div class="medido-metricas">' +
+              barraMetrica("CPU", d.pve_cpu_percent) +
+              barraMetrica("RAM", d.pve_memoria_percent) +
+              barraMetrica("Disco", d.vm_disco_percent) +
+            '</div>';
+
+          var htmlContenedores = d.contenedores_running !== null && d.contenedores_running !== undefined
+            ? '<div class="medido-resumen-item">' +
+                '<div class="medido-resumen-item__valor">' + d.contenedores_running + '/' + d.contenedores_total + '</div>' +
+                '<div class="medido-resumen-item__label">contenedores</div>' +
+              '</div>'
+            : "";
+
+          var htmlAlertas = d.alertas_activas > 0
+            ? '<div class="medido-resumen-item">' +
+                '<div class="medido-resumen-item__valor" style="color:var(--peligro)">' + d.alertas_activas + '</div>' +
+                '<div class="medido-resumen-item__label">alertas</div>' +
+              '</div>'
+            : "";
+
+          var htmlResumen =
+            '<div class="medido-resumen">' +
+              htmlContenedores +
+              '<div class="medido-resumen-item">' +
+                '<div class="medido-resumen-item__valor">' + d.servicios_ok + '/' + d.servicios_total + '</div>' +
+                '<div class="medido-resumen-item__label">servicios</div>' +
+              '</div>' +
+              htmlAlertas +
+            '</div>';
+
+          contenedor.innerHTML = htmlSemaforo + htmlMetricas + htmlResumen;
+          document.getElementById("tarjetaMedido").classList.remove("hogar-tarjeta--offline");
+
+          if (d.alertas_activas > 0) {
+            agregarAlerta("aviso", d.alertas_activas + " alerta(s) activa(s) en MediDo");
+          }
+        })
+        .catch(function() {
+          document.getElementById("medidoContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con MediDo</span>';
+          document.getElementById("tarjetaMedido").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
+    /* ============================================================
        Cargar estado del Backup
        ============================================================ */
     function cargarBackup() {
@@ -789,12 +975,14 @@
     cargarHA();
     cargarCryptoResumen();
     cargarBackup();
+    cargarMedido();
 
     // Refrescar cada 60 segundos (datos operacionales)
     setInterval(function() {
       cargarRedo();
       cargarFido();
       cargarHA();
+      cargarMedido();
     }, 60000);
 
     // Refrescar cada 10 minutos (crypto — datos menos volátiles)

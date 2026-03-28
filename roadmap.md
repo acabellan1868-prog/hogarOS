@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 10 completa. Tarjeta domótica con grid individual de dispositivos.
-> Última actualización: 2026-03-24
+> Estado actual: Fase 10 completa + tarjeta MediDo añadida al portal (Fase 11 parcial).
+> Última actualización: 2026-03-28
 
 ### Leyenda
 
