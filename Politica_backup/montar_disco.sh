@@ -6,9 +6,11 @@
 #
 # Busca particiones de discos USB (hotplug) que no estén montadas y las
 # monta en /mnt/usb1. Si hay más de una, muestra una lista para elegir.
+# Tras montar, verifica que el disco contiene la carpeta de backups esperada.
 # =============================================================================
 
 PUNTO_MONTAJE="/mnt/usb1"
+CARPETA_BACKUP="bakup_proxmox"   # creada por backup.sh en el disco externo
 
 echo "=========================================="
 echo "Detección de disco externo USB"
@@ -71,17 +73,54 @@ if ! mount "$DISPOSITIVO" "$PUNTO_MONTAJE"; then
     exit 1
 fi
 
-# --- Confirmar ----------------------------------------------------------------
+# --- Confirmar montaje --------------------------------------------------------
 
-if mountpoint -q "$PUNTO_MONTAJE"; then
-    echo ""
-    echo "✅ Disco montado correctamente en $PUNTO_MONTAJE"
-    echo ""
-    df -h "$PUNTO_MONTAJE"
-    echo ""
-    echo "Cuando termines el backup, desmonta con:"
-    echo "  umount $PUNTO_MONTAJE"
-else
+if ! mountpoint -q "$PUNTO_MONTAJE"; then
     echo "❌ El montaje falló por razón desconocida."
     exit 1
 fi
+
+echo ""
+echo "✅ Disco montado correctamente en $PUNTO_MONTAJE"
+echo ""
+df -h "$PUNTO_MONTAJE"
+
+# --- Verificar que es el disco de backups -------------------------------------
+
+echo ""
+echo "Verificando que es el disco de backups..."
+
+if [ -d "${PUNTO_MONTAJE}/${CARPETA_BACKUP}" ]; then
+    # Carpeta de backups encontrada — mostrar info del último backup
+    MANIFIESTO="${PUNTO_MONTAJE}/${CARPETA_BACKUP}/backup_actual/MANIFIESTO.txt"
+    if [ -f "$MANIFIESTO" ]; then
+        FECHA_ULT=$(grep "^Fecha:" "$MANIFIESTO" | head -1 | cut -d' ' -f2-)
+        echo "✅ Disco de backups reconocido."
+        echo "   Último backup: $FECHA_ULT"
+    else
+        echo "✅ Disco de backups reconocido (aún sin backup registrado)."
+    fi
+else
+    # Carpeta no encontrada — puede ser primer uso o disco equivocado
+    echo ""
+    echo "⚠️  AVISO: no se encontró la carpeta '${CARPETA_BACKUP}/' en el disco."
+    echo "   Puede ser la primera vez que se usa este disco,"
+    echo "   o puede ser un disco incorrecto."
+    echo ""
+    echo "Contenido raíz del disco:"
+    ls -lh "$PUNTO_MONTAJE" 2>/dev/null || echo "  (vacío)"
+    echo ""
+    read -r -p "¿Continuar igualmente? [s/N]: " CONFIRMACION
+    if [[ ! "$CONFIRMACION" =~ ^[sS]$ ]]; then
+        echo ""
+        echo "Desmontando disco..."
+        umount "$PUNTO_MONTAJE"
+        echo "Disco desmontado. Conecta el disco correcto y vuelve a intentarlo."
+        exit 1
+    fi
+    echo "Continuando. backup.sh creará la carpeta '${CARPETA_BACKUP}/' en el primer uso."
+fi
+
+echo ""
+echo "Cuando termines el backup, desmonta con:"
+echo "  umount $PUNTO_MONTAJE"
