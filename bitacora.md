@@ -2,6 +2,18 @@
 
 ## 2026-03-28
 
+### Correcciones en scripts de backup
+
+Detectados y corregidos tres errores tras ejecutar el backup completo:
+- `rsync`: añadido `--no-owner --no-group` (disco USB en FAT32/exFAT no soporta propietarios Unix)
+- `rsync`: excluido directorio `dockmon` (no legible por antonio)
+- `backup_dumps.sh`: cambiado `--all-databases` por `nextcloud` en mariadb-dump (fallo de permisos en tablas del sistema)
+
+Añadido script `montar_disco.sh` para detección y montaje automático del USB,
+con verificación de que es el disco de backups correcto.
+
+El MANIFIESTO ahora captura el detalle completo de errores de cada paso.
+
 ### Tarjeta MediDo en el portal
 
 Añadida tarjeta "Salud del Sistema" al grid bento del portal. Consume

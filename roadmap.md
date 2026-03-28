@@ -1,6 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 10 completa + tarjeta MediDo añadida al portal (Fase 11 parcial).
+> Estado actual: Fase 10 completa + tarjeta MediDo añadida al portal. Scripts de backup corregidos y mejorados.
+> Próximo paso: verificar backup limpio en la siguiente ejecución.
 > Última actualización: 2026-03-28
 
 ### Leyenda
