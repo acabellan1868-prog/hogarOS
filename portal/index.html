@@ -22,6 +22,7 @@
     @media (min-width: 768px) {
       .portal-bento {
         grid-template-columns: repeat(12, 1fr);
+        align-items: start;
       }
       .portal-bento > :nth-child(1) { grid-column: span 7; }
       .portal-bento > :nth-child(2) { grid-column: span 5; }
@@ -35,12 +36,12 @@
       display: flex;
       align-items: baseline;
       gap: var(--gap-sm);
-      margin-bottom: var(--gap-md);
+      margin-bottom: var(--gap-sm);
     }
 
     .ha-exterior__temp {
       font-family: var(--fuente-titular);
-      font-size: 2.2rem;
+      font-size: 1.5rem;
       font-weight: 800;
       color: var(--on-surface);
       letter-spacing: -0.03em;
@@ -51,43 +52,44 @@
       color: var(--on-surface-variant);
     }
 
+    /* 5 columnas: todos los sensores en una sola fila */
     .ha-interior-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--gap-sm);
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--gap-xs);
     }
 
     .ha-interior-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0.5rem;
+      padding: 0.2rem 0.1rem;
     }
 
     .ha-interior-item__nombre {
       font-family: var(--fuente-titular);
       font-size: 0.56rem;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       color: var(--outline-variant);
     }
 
     .ha-interior-item__valor {
       font-family: var(--fuente-titular);
-      font-size: 1.15rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--on-surface);
       font-variant-numeric: tabular-nums;
     }
 
     .ha-luces {
-      margin-top: var(--gap-md);
+      margin-top: var(--gap-sm);
     }
 
     .ha-luces__resumen {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--on-surface-variant);
-      margin-bottom: var(--gap-sm);
+      margin-bottom: var(--gap-xs);
     }
 
     .ha-dispositivos-grid {
@@ -99,10 +101,10 @@
     .ha-dispositivo {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.3rem 0.5rem;
+      gap: 0.3rem;
+      padding: 0.2rem 0.4rem;
       border-radius: var(--radio-sm);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--on-surface-variant);
       background: var(--surface-container);
       transition: background 0.2s;
