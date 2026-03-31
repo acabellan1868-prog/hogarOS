@@ -1276,6 +1276,7 @@
     }
 
     function eliminarAlerta(modulo, id) {
+      if (!confirm("Esta alerta se eliminara permanentemente.\n¿Estas seguro?")) return;
       var api = ALERTAS_API_MAP[modulo];
       if (!api) return;
       fetch(api + "/alertas/" + id, { method: "DELETE" })
