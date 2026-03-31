@@ -416,7 +416,7 @@ UI unificada que consulta las APIs de cada app y muestra todo junto.
 - [x] 👤 Probar: crear alerta en ReDo (conectar dispositivo nuevo) y verificar que aparece en el portal
 - [x] 👤 Probar: resolver y eliminar alertas desde el portal
 - [x] 👤 Probar: verificar que alertas de MediDo también aparecen
-- [ ] 👤 Probar en móvil (responsive)
+- [x] 👤 Probar en móvil (responsive) ✅
 
 ---
 
