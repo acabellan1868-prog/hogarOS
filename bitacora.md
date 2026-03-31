@@ -1,5 +1,43 @@
 # Bitácora — hogarOS
 
+## 2026-03-31
+
+### Centro de Alertas unificado (Fase 12)
+
+Problema detectado: las alertas de cada app (ReDo, MediDo) estaban aisladas.
+ReDo las guardaba en BD pero no las mostraba. MediDo tenía su propio tab.
+Para verlas había que ir a la app NTFY del móvil. Sin gestión posible.
+
+Se investigó si NTFY podía servir como fuente central, pero su API no permite
+eliminar, marcar como leída ni consultar histórico persistente. Solo caché de
+unas pocas horas. Conclusión: NTFY sigue como "timbre", la gestión vive en las BDs.
+
+Se evaluaron tres opciones (A: agregador, B: hub central, A+: híbrida).
+Se eligió la **Opción A** (agregación desde el portal) para no duplicar datos
+y mantener cada app como fuente de verdad de sus alertas.
+
+**Cambios realizados:**
+
+**ReDo** (`app/rutas/alertas.py` nuevo):
+- Migración: campo `resuelta` en tabla `alertas`
+- 3 endpoints: `GET /api/alertas`, `POST /api/alertas/{id}/resolver`, `DELETE /api/alertas/{id}`
+- Respuesta incluye `modulo: "redo"` para el contrato estándar
+
+**MediDo** (`app/rutas/alertas.py` modificado):
+- Campo `modulo: "medido"` en la respuesta de `GET /api/alertas`
+- Nuevo endpoint `DELETE /api/alertas/{id}`
+
+**Portal** (`portal/index.html`):
+- Sustituida sección "Alertas recientes" (solo memoria JS) por Centro de Alertas real
+- Consulta `GET /red/api/alertas` y `GET /salud/api/alertas` cada 60 segundos
+- Agrega, ordena (activas primero + fecha desc) y renderiza lista unificada
+- Filtros por estado (todas/activas/resueltas) y por módulo (todos/ReDo/MediDo)
+- Botones Resolver y Eliminar que llaman al API de cada app via proxy
+- Etiqueta visual por módulo con colores del design system
+- Si una app no responde, muestra aviso sin bloquear las demás
+
+**Documentación:** `analisis-mejoras.md` sección 3, `roadmap.md` Fase 12.
+
 ## 2026-03-28
 
 ### Correcciones en scripts de backup

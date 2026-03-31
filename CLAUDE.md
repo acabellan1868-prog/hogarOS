@@ -35,6 +35,8 @@ No contiene el código de ReDo ni FiDo — esos tienen repos propios.
 ├── fido-build/     → git clone de FiDo     (build context del contenedor fido)
 ├── redo/           → datos persistentes ReDo  (redo.db)
 ├── fido/           → datos persistentes FiDo  (fido.db)
+├── medido-build/   → git clone de MediDo  (build context del contenedor medido)
+├── medido/         → datos persistentes MediDo (medido.db)
 └── hogar-api/      → datos persistentes hogar-api (lanzador.json)
 ```
 
@@ -52,8 +54,10 @@ Usuario → http://192.168.31.131 (VM 101 Debian 12 en Proxmox)
         ├── /static/            → portal/static/  (hogar.css, favicon, etc.)
         ├── /red/static/        → portal/static/  (misma carpeta — ver nota sub_filter)
         ├── /finanzas/static/   → portal/static/  (misma carpeta — ver nota sub_filter)
+        ├── /salud/static/      → portal/static/  (misma carpeta — ver nota sub_filter)
         ├── /red/               → proxy → ReDo   (host:8083, network_mode: host)
         ├── /finanzas/          → proxy → FiDo   (contenedor fido:8080)
+        ├── /salud/             → proxy → MediDo (contenedor medido:8084)
         ├── /api/lanzador       → proxy → hogar-api
         ├── /api/backup         → proxy → hogar-api
         ├── /crypto/api/        → proxy → Kryptonite (host:5000)
