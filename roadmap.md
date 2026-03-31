@@ -1,8 +1,8 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 10 completa + tarjeta MediDo añadida al portal. Scripts de backup corregidos y mejorados.
-> Próximo paso: verificar backup limpio en la siguiente ejecución.
-> Última actualización: 2026-03-28
+> Estado actual: Fase 12 — Centro de Alertas unificado en curso.
+> Próximo paso: implementar API de alertas en ReDo (12a).
+> Última actualización: 2026-03-31
 
 ### Leyenda
 
@@ -373,6 +373,54 @@ cada dispositivo individualmente con su estado encendido/apagado.
 
 ---
 
+## Fase 12 — Centro de Alertas unificado (2026-03-31)
+
+Sistema centralizado de alertas en el portal que agrega desde cada app (Opción A).
+Diseño completo en `analisis-mejoras.md`, sección 3.
+
+### 12a — ReDo: exponer API de alertas
+
+ReDo ya guarda alertas en SQLite pero no tiene endpoints ni gestión.
+
+- [ ] 🤖 Migración BD: añadir campo `resuelta` a tabla `alertas` (`ALTER TABLE alertas ADD COLUMN resuelta INTEGER NOT NULL DEFAULT 0`)
+- [ ] 🤖 Crear `app/rutas/alertas.py` con endpoints:
+  - `GET /api/alertas` — listar alertas (activas primero, luego por fecha desc)
+  - `POST /api/alertas/{id}/resolver` — marcar como resuelta
+  - `DELETE /api/alertas/{id}` — eliminar alerta
+- [ ] 🤖 Registrar router en `principal.py`
+- [ ] 🤖 Añadir campo `modulo: "redo"` en la respuesta de `GET /api/alertas`
+
+### 12b — MediDo: adaptar API al contrato estándar
+
+MediDo ya tiene GET + resolver. Faltan pequeños ajustes.
+
+- [ ] 🤖 Añadir campo `modulo: "medido"` en la respuesta de `GET /api/alertas`
+- [ ] 🤖 Añadir endpoint `DELETE /api/alertas/{id}` — eliminar alerta
+
+### 12c — Portal: Centro de Alertas en index.html
+
+UI unificada que consulta las APIs de cada app y muestra todo junto.
+
+- [ ] 🤖 Sustituir sección "Alertas recientes" (solo memoria JS) por Centro de Alertas real
+- [ ] 🤖 Función JS que consulta `/red/api/alertas` + `/salud/api/alertas` (+ futuras apps)
+- [ ] 🤖 Agregar alertas de todos los módulos en una lista unificada
+- [ ] 🤖 Filtros: por módulo (Todas / ReDo / MediDo / ...) y por estado (activas / resueltas / todas)
+- [ ] 🤖 Ordenación: activas primero, luego por fecha descendente
+- [ ] 🤖 Acciones: botón Resolver y botón Eliminar por alerta (llaman al API de cada app)
+- [ ] 🤖 Indicador visual por módulo (color o etiqueta)
+- [ ] 🤖 Manejo de errores: si una app no responde, mostrar aviso sin bloquear las demás
+- [ ] 🤖 Refresco automático cada 60 segundos
+
+### 12d — Verificación y despliegue
+
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM
+- [ ] 👤 Probar: crear alerta en ReDo (conectar dispositivo nuevo) y verificar que aparece en el portal
+- [ ] 👤 Probar: resolver y eliminar alertas desde el portal
+- [ ] 👤 Probar: verificar que alertas de MediDo también aparecen
+- [ ] 👤 Probar en móvil (responsive)
+
+---
+
 ## Resumen de dependencias entre fases
 
 ```
@@ -393,6 +441,8 @@ Fase 1 (ReDo desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
                     Fase 9 (Kryptonite)
                               ↓
                     Fase 10 (Rediseño visual)
+                              ↓
+                    Fase 12 (Centro de Alertas) ← en curso
                               ↓
                     Fase 11 (Futuro)
 ```
