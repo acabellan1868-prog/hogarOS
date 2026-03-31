@@ -401,15 +401,15 @@ MediDo ya tiene GET + resolver. Faltan pequeños ajustes.
 
 UI unificada que consulta las APIs de cada app y muestra todo junto.
 
-- [ ] 🤖 Sustituir sección "Alertas recientes" (solo memoria JS) por Centro de Alertas real
-- [ ] 🤖 Función JS que consulta `/red/api/alertas` + `/salud/api/alertas` (+ futuras apps)
-- [ ] 🤖 Agregar alertas de todos los módulos en una lista unificada
-- [ ] 🤖 Filtros: por módulo (Todas / ReDo / MediDo / ...) y por estado (activas / resueltas / todas)
-- [ ] 🤖 Ordenación: activas primero, luego por fecha descendente
-- [ ] 🤖 Acciones: botón Resolver y botón Eliminar por alerta (llaman al API de cada app)
-- [ ] 🤖 Indicador visual por módulo (color o etiqueta)
-- [ ] 🤖 Manejo de errores: si una app no responde, mostrar aviso sin bloquear las demás
-- [ ] 🤖 Refresco automático cada 60 segundos
+- [x] 🤖 Sustituir sección "Alertas recientes" (solo memoria JS) por Centro de Alertas real
+- [x] 🤖 Función JS que consulta `/red/api/alertas` + `/salud/api/alertas` (+ futuras apps)
+- [x] 🤖 Agregar alertas de todos los módulos en una lista unificada
+- [x] 🤖 Filtros: por módulo (Todas / ReDo / MediDo / ...) y por estado (activas / resueltas / todas)
+- [x] 🤖 Ordenación: activas primero, luego por fecha descendente
+- [x] 🤖 Acciones: botón Resolver y botón Eliminar por alerta (llaman al API de cada app)
+- [x] 🤖 Indicador visual por módulo (color o etiqueta)
+- [x] 🤖 Manejo de errores: si una app no responde, mostrar aviso sin bloquear las demás
+- [x] 🤖 Refresco automático cada 60 segundos
 
 ### 12d — Verificación y despliegue
 

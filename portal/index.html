@@ -334,11 +334,164 @@
       letter-spacing: 0.05em;
     }
 
-    /* Alertas lista */
+    /* Centro de alertas */
+    .alertas-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+      margin-bottom: var(--gap-md);
+    }
+
+    .alertas-toolbar__filtro {
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radio-full);
+      border: 1px solid var(--outline-variant);
+      background: var(--surface-container-lowest);
+      color: var(--on-surface-variant);
+      font-size: 0.78rem;
+      font-family: var(--fuente-cuerpo);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .alertas-toolbar__filtro--activo {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+
+    .alertas-toolbar__filtro:hover:not(.alertas-toolbar__filtro--activo) {
+      background: var(--surface-container);
+    }
+
     .alertas-lista {
       display: flex;
       flex-direction: column;
       gap: var(--gap-sm);
+    }
+
+    .alertas-vacio {
+      text-align: center;
+      color: var(--on-surface-variant);
+      font-size: 0.85rem;
+      padding: var(--gap-lg) 0;
+    }
+
+    .alerta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap-md);
+      padding: var(--gap-md) var(--gap-lg);
+      border-radius: var(--radio-lg);
+      background: var(--surface-container-lowest);
+      border-left: 3px solid var(--outline-variant);
+    }
+
+    .alerta-item--activa {
+      border-left-color: var(--peligro);
+    }
+
+    .alerta-item--resuelta {
+      opacity: 0.5;
+      border-left-color: var(--outline-variant);
+    }
+
+    .alerta-item__cuerpo {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .alerta-item__cabecera {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      margin-bottom: 0.2rem;
+    }
+
+    .alerta-item__modulo {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radio-full);
+      background: var(--surface-container);
+      color: var(--on-surface-variant);
+    }
+
+    .alerta-item__modulo--redo { background: var(--secondary-container); color: var(--on-secondary-container); }
+    .alerta-item__modulo--medido { background: var(--primary-container); color: var(--on-primary-container); }
+    .alerta-item__modulo--local { background: var(--surface-container); color: var(--on-surface-variant); }
+
+    .alerta-item__tipo {
+      font-size: 0.65rem;
+      color: var(--on-surface-variant);
+    }
+
+    .alerta-item__mensaje {
+      font-size: 0.85rem;
+      color: var(--on-surface);
+      line-height: 1.4;
+    }
+
+    .alerta-item__fecha {
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+      margin-top: 0.2rem;
+    }
+
+    .alerta-item__acciones {
+      display: flex;
+      gap: var(--gap-xs);
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .alerta-item__btn {
+      padding: 0.3rem 0.55rem;
+      border-radius: var(--radio-full);
+      border: none;
+      font-size: 0.72rem;
+      font-family: var(--fuente-cuerpo);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      transition: opacity 0.2s;
+    }
+
+    .alerta-item__btn:hover { opacity: 0.8; }
+
+    .alerta-item__btn--resolver {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .alerta-item__btn--eliminar {
+      background: var(--peligro-fondo);
+      color: var(--peligro);
+    }
+
+    .alerta-item__btn .material-symbols-outlined {
+      font-size: 0.85rem;
+    }
+
+    .alertas-error-modulo {
+      font-size: 0.78rem;
+      color: var(--aviso);
+      padding: var(--gap-sm);
+      background: var(--aviso-fondo);
+      border-radius: var(--radio-md);
+    }
+
+    .alertas-contador {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      margin-bottom: var(--gap-sm);
+    }
+
+    .alertas-contador strong {
+      color: var(--peligro);
     }
 
     /* Accesos rápidos */
@@ -504,10 +657,23 @@
       </div>
     </section>
 
-    <!-- Feed de alertas -->
-    <section class="hogar-seccion">
-      <h2 class="hogar-seccion__titulo">Alertas recientes</h2>
-      <div class="alertas-lista" id="alertas">
+    <!-- Centro de alertas -->
+    <section class="hogar-seccion" id="centroAlertas">
+      <h2 class="hogar-seccion__titulo">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;vertical-align:-2px">notifications</span>
+        Centro de Alertas
+      </h2>
+      <div class="alertas-toolbar" id="alertasToolbar">
+        <button class="alertas-toolbar__filtro alertas-toolbar__filtro--activo" data-filtro="todas">Todas</button>
+        <button class="alertas-toolbar__filtro" data-filtro="activas">Activas</button>
+        <button class="alertas-toolbar__filtro" data-filtro="resueltas">Resueltas</button>
+        <span style="flex:1"></span>
+        <button class="alertas-toolbar__filtro" data-modulo="todas">Todos los modulos</button>
+        <button class="alertas-toolbar__filtro" data-modulo="redo">ReDo</button>
+        <button class="alertas-toolbar__filtro" data-modulo="medido">MediDo</button>
+      </div>
+      <div class="alertas-contador" id="alertasContador"></div>
+      <div class="alertas-lista" id="alertasLista">
         <span class="cargando">Cargando alertas...</span>
       </div>
     </section>
@@ -623,13 +789,6 @@
               : '');
 
           document.getElementById("tarjetaRedo").classList.remove("hogar-tarjeta--offline");
-
-          // Alimentar alertas desde ReDo
-          if (desconocidos > 0) {
-            agregarAlerta("error", desconocidos + " dispositivo(s) desconocido(s) en la red", d.ultimo_escaneo);
-          } else if (d.ultimo_escaneo) {
-            agregarAlerta("exito", "Escaneo completado sin incidencias", d.ultimo_escaneo);
-          }
         })
         .catch(function() {
           document.getElementById("redoContenido").innerHTML =
@@ -865,10 +1024,6 @@
 
           contenedor.innerHTML = htmlSemaforo + htmlMetricas + htmlResumen;
           document.getElementById("tarjetaMedido").classList.remove("hogar-tarjeta--offline");
-
-          if (d.alertas_activas > 0) {
-            agregarAlerta("aviso", d.alertas_activas + " alerta(s) activa(s) en MediDo");
-          }
         })
         .catch(function() {
           document.getElementById("medidoContenido").innerHTML =
@@ -894,7 +1049,6 @@
                 '<div class="backup-estado__dias">Sin backup</div>' +
                 '<div class="backup-estado__detalle">Nunca se ha registrado un backup</div>' +
               '</div>';
-            agregarAlerta("error", "No hay backup registrado — conecta el disco externo");
             return;
           }
 
@@ -922,11 +1076,6 @@
               (d.tamano_total ? '<div class="backup-estado__detalle">' + d.tamano_total + '</div>' : '') +
             '</div>';
 
-          if (dias >= 14) {
-            agregarAlerta("error", "Sin backup desde hace " + dias + " dias — conecta el disco externo");
-          } else if (dias >= 7) {
-            agregarAlerta("aviso", "El backup tiene " + dias + " dias — toca hacer copia");
-          }
         })
         .catch(function() {
           document.getElementById("backupContenido").innerHTML =
@@ -955,27 +1104,182 @@
         .catch(function() {
           btn.disabled = false;
           btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">radar</span> Escanear red';
-          agregarAlerta("error", "No se pudo lanzar el escaneo — ReDo no responde");
+          // Error silencioso — el centro de alertas mostrará el problema
         });
     });
 
     /* ============================================================
-       Feed de alertas
+       Centro de Alertas — consulta APIs de cada app
        ============================================================ */
-    var alertasInicializado = false;
 
-    function agregarAlerta(tipo, mensaje, fecha) {
-      var contenedor = document.getElementById("alertas");
-      if (!alertasInicializado) {
-        contenedor.innerHTML = "";
-        alertasInicializado = true;
+    // Fuentes de alertas: cada app que expone GET /api/alertas
+    var ALERTAS_FUENTES = [
+      { modulo: "redo",   api: REDO_API + "/alertas",   nombre: "ReDo" },
+      { modulo: "medido", api: MEDIDO_API + "/alertas",  nombre: "MediDo" }
+    ];
+
+    // Estado del centro de alertas
+    var alertasFiltroEstado = "todas";   // todas | activas | resueltas
+    var alertasFiltroModulo = "todas";   // todas | redo | medido | ...
+    var alertasCache = [];               // todas las alertas agregadas
+
+    // Toolbar: filtros de estado
+    document.getElementById("alertasToolbar").addEventListener("click", function(e) {
+      var btn = e.target.closest("[data-filtro]");
+      if (btn) {
+        alertasFiltroEstado = btn.dataset.filtro;
+        document.querySelectorAll("[data-filtro]").forEach(function(b) {
+          b.classList.toggle("alertas-toolbar__filtro--activo", b.dataset.filtro === alertasFiltroEstado);
+        });
+        renderizarAlertas();
+        return;
+      }
+      btn = e.target.closest("[data-modulo]");
+      if (btn) {
+        alertasFiltroModulo = btn.dataset.modulo;
+        document.querySelectorAll("[data-modulo]").forEach(function(b) {
+          b.classList.toggle("alertas-toolbar__filtro--activo", b.dataset.modulo === alertasFiltroModulo);
+        });
+        renderizarAlertas();
+      }
+    });
+
+    function cargarAlertas() {
+      var promesas = ALERTAS_FUENTES.map(function(fuente) {
+        return fetch(fuente.api)
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            return (d.alertas || []).map(function(a) {
+              a.modulo = fuente.modulo;
+              a.modulo_nombre = fuente.nombre;
+              return a;
+            });
+          })
+          .catch(function() {
+            return [{ _error: true, modulo: fuente.modulo, modulo_nombre: fuente.nombre }];
+          });
+      });
+
+      Promise.all(promesas).then(function(resultados) {
+        var todas = [];
+        var errores = [];
+
+        resultados.forEach(function(lista) {
+          lista.forEach(function(a) {
+            if (a._error) {
+              errores.push(a);
+            } else {
+              todas.push(a);
+            }
+          });
+        });
+
+        // Ordenar: activas primero, luego por fecha descendente
+        todas.sort(function(a, b) {
+          if (a.resuelta !== b.resuelta) return a.resuelta - b.resuelta;
+          return (b.fecha || "").localeCompare(a.fecha || "");
+        });
+
+        alertasCache = todas;
+        renderizarAlertas(errores);
+      });
+    }
+
+    function renderizarAlertas(errores) {
+      var contenedor = document.getElementById("alertasLista");
+      var contador = document.getElementById("alertasContador");
+
+      // Filtrar
+      var filtradas = alertasCache.filter(function(a) {
+        if (alertasFiltroEstado === "activas" && a.resuelta) return false;
+        if (alertasFiltroEstado === "resueltas" && !a.resuelta) return false;
+        if (alertasFiltroModulo !== "todas" && a.modulo !== alertasFiltroModulo) return false;
+        return true;
+      });
+
+      var totalActivas = alertasCache.filter(function(a) { return !a.resuelta; }).length;
+
+      // Contador
+      if (totalActivas > 0) {
+        contador.innerHTML = "<strong>" + totalActivas + "</strong> alerta(s) activa(s) en el ecosistema";
+      } else {
+        contador.textContent = "Sin alertas activas";
       }
 
-      var div = document.createElement("div");
-      div.className = "hogar-alerta hogar-alerta--" + tipo;
-      div.innerHTML = mensaje +
-        (fecha ? '<div class="hogar-alerta__tiempo">' + formatearFecha(fecha) + '</div>' : '');
-      contenedor.prepend(div);
+      // Errores de conexion con modulos
+      var htmlErrores = "";
+      if (errores && errores.length) {
+        errores.forEach(function(e) {
+          htmlErrores += '<div class="alertas-error-modulo">' +
+            '<span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px">cloud_off</span> ' +
+            'Sin conexion con ' + e.modulo_nombre +
+          '</div>';
+        });
+      }
+
+      // Lista vacia
+      if (!filtradas.length) {
+        contenedor.innerHTML = htmlErrores +
+          '<div class="alertas-vacio">' +
+            '<span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.4">check_circle</span>' +
+            'Sin alertas' +
+          '</div>';
+        return;
+      }
+
+      // Renderizar alertas
+      var html = htmlErrores;
+      filtradas.forEach(function(a) {
+        var claseEstado = a.resuelta ? "alerta-item--resuelta" : "alerta-item--activa";
+        var claseModulo = "alerta-item__modulo--" + a.modulo;
+
+        html += '<div class="alerta-item ' + claseEstado + '">' +
+          '<div class="alerta-item__cuerpo">' +
+            '<div class="alerta-item__cabecera">' +
+              '<span class="alerta-item__modulo ' + claseModulo + '">' + a.modulo_nombre + '</span>' +
+              '<span class="alerta-item__tipo">' + (a.tipo || "") + '</span>' +
+            '</div>' +
+            '<div class="alerta-item__mensaje">' + a.mensaje + '</div>' +
+            (a.fecha ? '<div class="alerta-item__fecha">' + formatearFecha(a.fecha) + '</div>' : '') +
+          '</div>' +
+          '<div class="alerta-item__acciones">';
+
+        if (!a.resuelta) {
+          html += '<button class="alerta-item__btn alerta-item__btn--resolver" ' +
+            'onclick="resolverAlerta(\'' + a.modulo + '\',' + a.id + ')">' +
+            '<span class="material-symbols-outlined">check</span>' +
+          '</button>';
+        }
+
+        html += '<button class="alerta-item__btn alerta-item__btn--eliminar" ' +
+          'onclick="eliminarAlerta(\'' + a.modulo + '\',' + a.id + ')">' +
+          '<span class="material-symbols-outlined">delete</span>' +
+        '</button>';
+
+        html += '</div></div>';
+      });
+
+      contenedor.innerHTML = html;
+    }
+
+    // Mapeo modulo → prefijo API del proxy nginx
+    var ALERTAS_API_MAP = {
+      "redo": REDO_API,
+      "medido": MEDIDO_API
+    };
+
+    function resolverAlerta(modulo, id) {
+      var api = ALERTAS_API_MAP[modulo];
+      if (!api) return;
+      fetch(api + "/alertas/" + id + "/resolver", { method: "POST" })
+        .then(function() { cargarAlertas(); });
+    }
+
+    function eliminarAlerta(modulo, id) {
+      var api = ALERTAS_API_MAP[modulo];
+      if (!api) return;
+      fetch(api + "/alertas/" + id, { method: "DELETE" })
+        .then(function() { cargarAlertas(); });
     }
 
     /* ============================================================
@@ -1009,6 +1313,7 @@
     cargarCryptoResumen();
     cargarBackup();
     cargarMedido();
+    cargarAlertas();
 
     // Refrescar cada 60 segundos (datos operacionales)
     setInterval(function() {
@@ -1016,6 +1321,7 @@
       cargarFido();
       cargarHA();
       cargarMedido();
+      cargarAlertas();
     }, 60000);
 
     // Refrescar cada 10 minutos (crypto — datos menos volátiles)
