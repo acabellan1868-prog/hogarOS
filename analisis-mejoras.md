@@ -11,7 +11,8 @@
 
 1. [MediDo — Métricas y salud del hogar (nueva app)](#1-medido--métricas-y-salud-del-hogar)
 2. [Integración en el portal de mejoras de ReDo](#2-integración-en-el-portal-de-mejoras-de-redo)
-3. [Otras mejoras aparcadas (no descartadas)](#3-otras-mejoras-aparcadas)
+3. [Centro de Alertas — Gestión unificada de alertas del ecosistema](#3-centro-de-alertas--gestión-unificada-de-alertas)
+4. [Otras mejoras aparcadas (no descartadas)](#4-otras-mejoras-aparcadas)
 
 ---
 
@@ -457,7 +458,172 @@ Si ReDo implementa una vista de presencia, se puede añadir un enlace rápido en
 
 ---
 
-## 3. Otras mejoras aparcadas (no descartadas)
+## 3. Centro de Alertas — Gestión unificada de alertas
+
+### Problema actual
+
+Cada app del ecosistema gestiona sus alertas de forma independiente:
+
+| App | Guarda en BD | API alertas | UI alertas | NTFY | Gestión |
+|---|---|---|---|---|---|
+| **MediDo** | ✅ SQLite (8 tipos) | ✅ GET + resolver | ✅ Tab dedicado | ✅ Solo danger | Resolver |
+| **ReDo** | ✅ SQLite (3 tipos) | ❌ No hay endpoints | ❌ No hay UI | ✅ dispositivo_nuevo | Ninguna |
+| **FiDo** | ❌ Sin alertas (v2) | ❌ | ❌ | ❌ | — |
+| **Portal** | ❌ | ❌ | ⚠️ Solo en memoria JS | ❌ | Ninguna |
+
+**Consecuencias:**
+- Para ver alertas hay que ir a la app NTFY en el móvil (sin gestión posible)
+- MediDo tiene su propio tab de alertas, pero solo muestra las suyas
+- ReDo guarda alertas en BD pero no tiene forma de verlas ni gestionarlas
+- No hay un lugar unificado para ver, filtrar, agrupar y gestionar alertas de todo el ecosistema
+
+### Qué se gana
+
+| Caso de uso | Valor |
+|---|---|
+| **Vista unificada** | Todas las alertas del ecosistema en un solo sitio |
+| **Gestión** | Resolver, eliminar, filtrar, agrupar por módulo |
+| **Histórico** | "¿Qué alertas hubo esta semana?" sin depender de NTFY |
+| **Agrupación** | Ver alertas por app (ReDo, MediDo, FiDo...) |
+| **Escalabilidad** | App nueva → expone `/api/alertas` → aparece automáticamente |
+
+### Investigación previa: ¿Por qué no usar NTFY como fuente central?
+
+Se investigó si la API de NTFY podía servir como almacén central de alertas (evitando duplicar datos). Resultado:
+
+- **NTFY es un canal de envío, no un gestor.** Su API permite:
+  - ✅ Enviar notificaciones (POST)
+  - ✅ Leer mensajes en caché con `?poll=1&since=all` (solo unas pocas horas)
+  - ❌ No permite eliminar, marcar como leída, ni gestionar estados
+  - ❌ No tiene histórico persistente
+- **Conclusión:** NTFY sigue siendo el "timbre" al móvil. La gestión real debe vivir en las BDs de cada app.
+
+### Decisión de diseño: Opción A — Agregación desde el portal
+
+Se evaluaron tres opciones:
+
+| Opción | Descripción | Pros | Contras |
+|---|---|---|---|
+| **A — Agregador** | Cada app expone `/api/alertas`. El portal consulta y agrega | Sin duplicar datos, cada app es dueña de sus alertas | Si app caída, no se ven sus alertas |
+| **B — Hub central** | Apps envían alertas a hogar-api. BD central | Independiente de apps, gestión unificada | Duplica datos, problemas de sincronización |
+| **A+ — Híbrida** | Apps envían a hogar-api + guardan local | Sin repetir lógica de gestión | Duplica almacenamiento |
+
+**Decisión: Opción A**, por las siguientes razones:
+1. No duplica datos — cada app es la fuente de verdad de sus alertas
+2. MediDo ya tiene casi todo implementado (API + UI + gestión)
+3. ReDo ya tiene la BD, solo falta exponer un API mínima
+4. Sigue la filosofía del ecosistema: apps independientes con contrato estándar
+5. La lógica compleja (agrupar, filtrar, ordenar, UI rica) se implementa una sola vez en el portal
+
+**Sobre la repetición de código en cada app:** Cada app solo necesita implementar un API REST mínima sobre su tabla de alertas existente (~30 líneas). La lógica de gestión rica (filtros, agrupación, ordenación, UI) vive exclusivamente en el portal y se implementa una sola vez. No se justifica una librería compartida para tan poco código por app.
+
+### Contrato API estándar para alertas
+
+Todas las apps que generen alertas deben exponer estos endpoints:
+
+#### `GET /api/alertas`
+
+Devuelve las alertas ordenadas por fecha descendente.
+
+```json
+{
+  "modulo": "redo",
+  "activas": 2,
+  "alertas": [
+    {
+      "id": 1,
+      "tipo": "dispositivo_nuevo",
+      "mensaje": "Nuevo dispositivo: 192.168.31.45 (mi-telefono) - Xiaomi",
+      "servicio": null,
+      "fecha": "2026-03-31T14:23:45",
+      "enviada": 1,
+      "resuelta": 0
+    }
+  ]
+}
+```
+
+Campos obligatorios:
+- `modulo` — Identificador de la app (redo, medido, fido...)
+- `activas` — Contador de alertas no resueltas
+- `alertas[]` — Array con: `id`, `tipo`, `mensaje`, `fecha`, `resuelta`
+
+Campos opcionales:
+- `servicio` — Recurso afectado (nombre de contenedor, IP, etc.)
+- `enviada` — Si se notificó por NTFY
+
+#### `POST /api/alertas/{id}/resolver`
+
+Marca una alerta como resuelta. Respuesta: `{ "ok": true, "id": 1 }`
+
+#### `DELETE /api/alertas/{id}`
+
+Elimina una alerta. Respuesta: `{ "ok": true, "id": 1 }`
+
+### Cambios necesarios por app
+
+#### ReDo (no tiene API de alertas)
+
+- Añadir `app/rutas/alertas.py` con los 3 endpoints del contrato
+- Añadir campo `resuelta` a la tabla `alertas` (migración: `ALTER TABLE alertas ADD COLUMN resuelta INTEGER NOT NULL DEFAULT 0`)
+- ~30 líneas de código nuevo
+
+#### MediDo (ya tiene GET + resolver)
+
+- Añadir campo `modulo` en la respuesta de `GET /api/alertas` → `"modulo": "medido"`
+- Añadir endpoint `DELETE /api/alertas/{id}`
+- ~10 líneas de código nuevo
+
+#### FiDo (sin alertas por ahora)
+
+- Sin cambios hasta que implemente alertas en v2
+- Cuando lo haga, seguirá el contrato estándar
+
+### Centro de alertas en el portal
+
+El portal (`index.html`) tendrá una sección "Centro de Alertas" que:
+
+1. **Consulta** periódicamente `GET /api/alertas` de cada app (via sus proxies: `/red/api/alertas`, `/salud/api/alertas`, etc.)
+2. **Agrega** todas las alertas en una lista unificada
+3. **Agrupa** por módulo (tabs o filtros: Todas / ReDo / MediDo / ...)
+4. **Ordena** por fecha (más recientes primero), con activas antes que resueltas
+5. **Permite gestionar:**
+   - Resolver → `POST /{modulo}/api/alertas/{id}/resolver`
+   - Eliminar → `DELETE /{modulo}/api/alertas/{id}`
+   - Filtrar por estado (activas / resueltas / todas)
+   - Filtrar por módulo
+6. **Refresco automático** cada 60 segundos
+
+La sección de alertas puede vivir como:
+- **Opción 1:** Nueva sección en `index.html` (como las tarjetas actuales)
+- **Opción 2:** Página propia (`alertas.html`) enlazada desde el portal
+
+> Decidir durante la implementación según el tamaño del código.
+
+### Diagrama del flujo
+
+```
+App detecta problema (MediDo, ReDo, ...)
+  ├── Guarda en su BD local (ya lo hace)
+  └── Envía NTFY al móvil (ya lo hace)
+
+Usuario abre el portal
+  └── Centro de Alertas
+       ├── GET /salud/api/alertas  → alertas de MediDo
+       ├── GET /red/api/alertas    → alertas de ReDo
+       ├── GET /finanzas/api/alertas → alertas de FiDo (futuro)
+       └── Agrega, agrupa, ordena → UI unificada
+            ├── Resolver → POST /{modulo}/api/alertas/{id}/resolver
+            └── Eliminar → DELETE /{modulo}/api/alertas/{id}
+```
+
+### Impacto en la sección "Alertas recientes" del portal
+
+Actualmente `index.html` tiene una sección "Alertas recientes" que funciona solo en memoria del cliente (JavaScript). Esta sección se **sustituirá** por el nuevo Centro de Alertas con datos reales de las BDs de cada app.
+
+---
+
+## 4. Otras mejoras aparcadas (no descartadas)
 
 | Mejora | Proyecto | Descripción breve |
 |---|---|---|
@@ -482,3 +648,4 @@ Se pueden retomar en cualquier momento.
 | 3 | Auto-detección tipo | ReDo | Bajo | Medio | **Completado** (2026-03-26) |
 | 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **Completado** (2026-03-27) |
 | 5 | Estandarizar drawers | ReDo + FiDo + MediDo | Bajo | Medio | **Completado** (2026-03-27) |
+| 6 | Centro de Alertas | hogarOS + ReDo + MediDo | Medio | Alto | Pendiente |
