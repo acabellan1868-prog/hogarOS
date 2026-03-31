@@ -1,8 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 12 — Centro de Alertas unificado en curso.
-> Próximo paso: Centro de Alertas en el portal (12c).
-> Última actualización: 2026-03-31
+> Estado actual: Fase 12 completada — Centro de Alertas unificado desplegado y verificado.
+> Última actualización: 2026-04-01
 
 ### Leyenda
 
@@ -413,10 +412,10 @@ UI unificada que consulta las APIs de cada app y muestra todo junto.
 
 ### 12d — Verificación y despliegue
 
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM
-- [ ] 👤 Probar: crear alerta en ReDo (conectar dispositivo nuevo) y verificar que aparece en el portal
-- [ ] 👤 Probar: resolver y eliminar alertas desde el portal
-- [ ] 👤 Probar: verificar que alertas de MediDo también aparecen
+- [x] 👤 Ejecutar `actualizar.sh` en la VM
+- [x] 👤 Probar: crear alerta en ReDo (conectar dispositivo nuevo) y verificar que aparece en el portal
+- [x] 👤 Probar: resolver y eliminar alertas desde el portal
+- [x] 👤 Probar: verificar que alertas de MediDo también aparecen
 - [ ] 👤 Probar en móvil (responsive)
 
 ---
@@ -442,7 +441,7 @@ Fase 1 (ReDo desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
                               ↓
                     Fase 10 (Rediseño visual)
                               ↓
-                    Fase 12 (Centro de Alertas) ← en curso
+                    Fase 12 (Centro de Alertas) ✅
                               ↓
                     Fase 11 (Futuro)
 ```
