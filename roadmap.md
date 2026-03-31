@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: Fase 12 — Centro de Alertas unificado en curso.
-> Próximo paso: implementar API de alertas en ReDo (12a).
+> Próximo paso: Centro de Alertas en el portal (12c).
 > Última actualización: 2026-03-31
 
 ### Leyenda
@@ -382,20 +382,20 @@ Diseño completo en `analisis-mejoras.md`, sección 3.
 
 ReDo ya guarda alertas en SQLite pero no tiene endpoints ni gestión.
 
-- [ ] 🤖 Migración BD: añadir campo `resuelta` a tabla `alertas` (`ALTER TABLE alertas ADD COLUMN resuelta INTEGER NOT NULL DEFAULT 0`)
-- [ ] 🤖 Crear `app/rutas/alertas.py` con endpoints:
+- [x] 🤖 Migración BD: añadir campo `resuelta` a tabla `alertas` (`ALTER TABLE alertas ADD COLUMN resuelta INTEGER NOT NULL DEFAULT 0`)
+- [x] 🤖 Crear `app/rutas/alertas.py` con endpoints:
   - `GET /api/alertas` — listar alertas (activas primero, luego por fecha desc)
   - `POST /api/alertas/{id}/resolver` — marcar como resuelta
   - `DELETE /api/alertas/{id}` — eliminar alerta
-- [ ] 🤖 Registrar router en `principal.py`
-- [ ] 🤖 Añadir campo `modulo: "redo"` en la respuesta de `GET /api/alertas`
+- [x] 🤖 Registrar router en `principal.py`
+- [x] 🤖 Añadir campo `modulo: "redo"` en la respuesta de `GET /api/alertas`
 
 ### 12b — MediDo: adaptar API al contrato estándar
 
 MediDo ya tiene GET + resolver. Faltan pequeños ajustes.
 
-- [ ] 🤖 Añadir campo `modulo: "medido"` en la respuesta de `GET /api/alertas`
-- [ ] 🤖 Añadir endpoint `DELETE /api/alertas/{id}` — eliminar alerta
+- [x] 🤖 Añadir campo `modulo: "medido"` en la respuesta de `GET /api/alertas`
+- [x] 🤖 Añadir endpoint `DELETE /api/alertas/{id}` — eliminar alerta
 
 ### 12c — Portal: Centro de Alertas en index.html
 
