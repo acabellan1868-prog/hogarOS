@@ -24,6 +24,9 @@ set -uo pipefail
 
 # --- Configuración -----------------------------------------------------------
 
+NTFY_TOPIC="hogaros-3ca6f61b"
+NTFY_URL="https://ntfy.sh/${NTFY_TOPIC}"
+
 DISCO="/mnt/usb1"
 BACKUP_DIR="${DISCO}/bakup_proxmox"
 DIR_ACTUAL="${BACKUP_DIR}/backup_actual"
@@ -310,5 +313,33 @@ log ""
 log "Ver detalle completo: cat $MANIFIESTO"
 log "Puedes desmontar el disco con: umount $DISCO"
 log "=========================================="
+
+# --- 8. Notificación NTFY ----------------------------------------------------
+
+log "Enviando notificación NTFY..."
+
+if [ "$ERRORES" -eq 0 ]; then
+    NTFY_TITULO="Backup completado sin errores"
+    NTFY_PRIORIDAD="default"
+    NTFY_TAGS="white_check_mark,floppy_disk"
+else
+    NTFY_TITULO="Backup completado con ${ERRORES} error(es)"
+    NTFY_PRIORIDAD="high"
+    NTFY_TAGS="warning,floppy_disk"
+fi
+
+NTFY_CUERPO="Fecha: ${FECHA}
+$(echo -e "$RESUMEN")"
+
+curl -s \
+    -H "Title: ${NTFY_TITULO}" \
+    -H "Priority: ${NTFY_PRIORIDAD}" \
+    -H "Tags: ${NTFY_TAGS}" \
+    -d "${NTFY_CUERPO}" \
+    "${NTFY_URL}" > /dev/null 2>&1 && {
+    log "  → Notificación enviada a NTFY"
+} || {
+    log "  → AVISO: no se pudo enviar notificación NTFY"
+}
 
 exit $ERRORES

@@ -180,26 +180,23 @@ Completado 2026-03-17.
 
 ---
 
-## Fase 7 — Estrategia de backups
+## Fase 7 — Estrategia de backups ✅
 
-Prioridad inmediata tras el despliegue. No solo bases de datos — backup integral de todo el entorno.
+Backup integral completado. Detalle en `Politica_backup/roadmap.md`.
 
-### Alcance
+### Componentes
+- `backup_dumps.sh` — dumps de BDs en VM 101 (SQLite, PostgreSQL, MariaDB)
+- `backup.sh` — orquestador desde Proxmox (dumps + VMs + rsync + NTFY)
+- `montar_disco.sh` — detección y montaje del disco externo USB
+- `restauracion.md` — guía paso a paso de restauración de cada componente
+- Tarjeta "Estado del Backup" en el portal (verde/naranja/rojo según antigüedad)
+- Notificación NTFY tras cada backup (topic `hogaros-3ca6f61b`)
 
-| Qué | Cómo | Frecuencia prevista |
-|-----|------|---------------------|
-| VMs Proxmox | Snapshots/backups programados de Proxmox | Semanal |
-| Volúmenes Docker (`/mnt/datos/`) | Script de copia a destino externo (NAS, disco, nube) | Diario |
-| Bases de datos SQLite | `sqlite3 <db> ".backup <destino>"` | Diario |
-| Código fuente | Ya en GitHub (repos) | Automático con cada push |
-
-### Tareas
-- [ ] 🤖 Diseñar estrategia de backup integral
-- [ ] 🤖 Crear script de backup automatizado para volúmenes y bases de datos
-- [ ] 👤 Configurar backups programados de VMs en Proxmox
-- [ ] 👤 Definir destino de los backups (NAS, disco externo, nube)
-- [ ] 👤 Programar cron de ejecución del script de backup
-- [ ] 👤 Verificar restauración de un backup (prueba de recuperación)
+### Estado
+- [x] 🤖 Scripts de backup creados y probados (fases 1-5)
+- [x] 🤖 Documentación de restauración (`restauracion.md`)
+- [x] 🤖 Notificación NTFY integrada en `backup.sh`
+- [ ] 👤 Verificar notificación NTFY en producción (próximo backup)
 
 ---
 
@@ -353,7 +350,7 @@ cada dispositivo individualmente con su estado encendido/apagado.
 - [x] 🤖 Iconos por tipo: `lightbulb` (bombilla), `light` (interruptores), `power` (enchufes)
 - [x] 🤖 Estado visual: encendido → fondo tintado primary, icono filled ámbar; apagado → fondo neutro, icono outline gris
 - [x] 🤖 Resumen "X de Y encendidos" conservado como subtítulo sobre el grid
-- [ ] 👤 Verificar en producción
+- [x] 👤 Verificar en producción ✅
 
 ---
 

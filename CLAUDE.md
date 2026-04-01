@@ -17,14 +17,15 @@ No contiene el código de ReDo ni FiDo — esos tienen repos propios.
 
 ### Repos locales (Windows)
 
-| Ruta local | GitHub | Propósito |
-|---|---|---|
-| `E:\Documentos\Desarrollo\claude\hogarOS\` | acabellan1868-prog/hogarOS | Este repo |
-| `E:\Documentos\Desarrollo\claude\ReDo\` | acabellan1868-prog/ReDo | Monitor de red |
-| `E:\Documentos\Desarrollo\claude\FiDo\` | acabellan1868-prog/FiDo | Finanzas domésticas |
+Los repos se clonan en el mismo directorio padre. La ruta concreta varía según el equipo.
 
-> ⚠️ **`E:\Documentos\Desarrollo\claude\network-monitor\` es una carpeta OBSOLETA** (Node.js, sin git).
-> No tiene nada que ver con ReDo. Ignorarla siempre.
+| Carpeta | GitHub | Propósito |
+|---|---|---|
+| `hogarOS/` | acabellan1868-prog/hogarOS | Este repo |
+| `ReDo/` | acabellan1868-prog/ReDo | Monitor de red |
+| `FiDo/` | acabellan1868-prog/FiDo | Finanzas domésticas |
+| `MediDo/` | acabellan1868-prog/MediDo | Métricas y salud del hogar |
+| `kryptonite/` | acabellan1868-prog/kryptonite | Crypto portfolio |
 
 ### Repos en el servidor (VM 101, `/mnt/datos/`)
 
@@ -110,7 +111,7 @@ hogarOS/
 
 1. Cambios locales → `git push` al repo correspondiente (hogarOS / ReDo / FiDo)
 2. En el servidor: ejecutar `./actualizar.sh` desde `/mnt/datos/hogarOS/`
-3. El script hace `git pull` de los 3 repos → `docker compose down` → `build` → `up -d`
+3. El script hace `git pull` de los 4 repos (hogarOS, ReDo, FiDo, MediDo) → `docker compose down` → `build` → `up -d`
 
 No hay CI/CD automático. El despliegue siempre es manual con `actualizar.sh`.
 

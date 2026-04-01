@@ -1,7 +1,7 @@
 # Política de Backup — Hoja de ruta
 
-> Estado actual: backup funcional y probado. Pendiente: documentación de restauración y NTFY.
-> Última actualización: 2026-03-20
+> Estado actual: todas las fases completadas. Pendiente solo verificar NTFY en producción.
+> Última actualización: 2026-04-01
 
 ### Leyenda
 
@@ -128,23 +128,32 @@
 
 ---
 
-## Fase 6 — Documentación de restauración
+## Fase 6 — Documentación de restauración ✅
 
-- [ ] 🤖 Crear `Politica_backup/restauracion.md` con instrucciones paso a paso:
-  - Cómo restaurar una VM completa desde vzdump (GUI de Proxmox)
-  - Cómo restaurar `/mnt/datos/` (rsync inverso)
-  - Cómo restaurar una BD SQLite desde `.bak`
-  - Cómo restaurar PostgreSQL desde `planka_dump.sql`
-  - Cómo restaurar MariaDB desde `nextcloud_dump.sql`
-- [ ] 🤖 Generar `README_backup.txt` para incluir en el disco externo (instrucciones básicas de restauración)
+- [x] 🤖 Crear `Politica_backup/restauracion.md` con instrucciones paso a paso:
+  - Restaurar VM completa desde vzdump (GUI de Proxmox y CLI)
+  - Restaurar `/mnt/datos/` (rsync inverso)
+  - Restaurar BD SQLite desde `.bak` (FiDo, ReDo, MediDo)
+  - Restaurar PostgreSQL desde `planka_dump.sql`
+  - Restaurar MariaDB desde `nextcloud_dump.sql`
+  - Restauración solo de código (git pull)
+  - Restauración completa desde cero
+  - Checklist de verificación post-restauración
 
 ---
 
-## Fase 7 — Recordatorio NTFY (opcional)
+## Fase 7 — Notificación NTFY ✅
 
-- [ ] 🤖 Crear script o workflow n8n que lea `backup_estado.json` y envíe notificación push si han pasado más de 7 días
-- [ ] 👤 Programar ejecución semanal (cron o n8n)
-- [ ] 👤 Verificar que llega la notificación al móvil
+- [x] 🤖 Añadir notificación NTFY al final de `backup.sh` (topic `hogaros-3ca6f61b`)
+  - Sin errores: prioridad normal, check verde
+  - Con errores: prioridad alta, warning
+  - Incluye resumen de pasos en el cuerpo del mensaje
+- [ ] 👤 Ejecutar un backup y verificar que llega la notificación al móvil
+- [ ] 👤 Actualizar `backup.sh` en Proxmox:
+  ```bash
+  wget -O /root/backup.sh https://raw.githubusercontent.com/acabellan1868-prog/hogarOS/main/Politica_backup/backup.sh
+  chmod +x /root/backup.sh
+  ```
 
 ---
 
@@ -161,7 +170,7 @@ Fase 4 (Script dumps VM 101)        ✅ probado
     ↓
 Fase 5 (Script orquestador Proxmox) ✅ probado
     ↓
-Fase 6 (Documentación restauración) pendiente
+Fase 6 (Documentación restauración) ✅
     ↓
-Fase 7 (Recordatorio NTFY)          pendiente (opcional)
+Fase 7 (Notificación NTFY)          ✅ (pendiente verificar en producción)
 ```
