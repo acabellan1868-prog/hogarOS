@@ -1,5 +1,32 @@
 # Bitácora — hogarOS
 
+## 2026-04-02 (noche)
+
+### Fase 13c: Tarjeta "Asistente IA" implementada
+
+Se completó la implementación de la tarjeta en el portal que consume datos de Claude Code desde MediDo.
+
+**Cambios en portal/index.html:**
+- Grid CSS: nueva tarjeta Asistente IA (span 4 columnas), Backup ajustado (span 3)
+- HTML: tarjeta con icono smart_toy, contenedor claudeContenido
+- Función JS cargarClaude(): fetch a /salud/api/claude/resumen
+- Renderiza: barra presupuesto, coste/presupuesto, sesiones, tokens, días reseteo, última sesión
+- Helper formatearNumero(): formatea 1000000 → 1M, 15000 → 15k
+- Inicialización: cargarClaude() al cargar + en setInterval (cada 60s)
+
+**Características:**
+- Presupuesto opcional: si no está configurado, solo muestra coste en grande
+- Fallback offline: clase hogar-tarjeta--offline si MediDo no responde
+- Responsivo: 100% ancho móvil, 4/12 columnas desktop
+- Colores: primario (teal) + aviso (naranja) para presupuesto alto
+- Reutiliza clases existentes: no necesita CSS nuevo
+
+**Push:** Commit 1dcb2f2 en acabellan1868-prog/hogarOS
+
+**Próxima fase:** 13d (verificación offline + despliegue en VM 101)
+
+---
+
 ## 2026-04-02 (tarde II)
 
 ### Fase 13b: Endpoints en MediDo implementados

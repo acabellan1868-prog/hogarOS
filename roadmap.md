@@ -444,21 +444,24 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 - [x] 🤖 Documentación actualizada (CLAUDE.md, roadmap.md, bitacora.md)
 - [x] 👤 Push a GitHub (commit 46c3e08 en acabellan1868-prog/MediDo)
 
-### 13c — Portal: tarjeta "Asistente IA" 🔄
+### 13c — Portal: tarjeta "Asistente IA" ✅
 
-- [ ] 🤖 Nginx: rutas `/salud/api/claude/` en `nginx.conf` (proxifica a medido:8084)
-- [ ] 🤖 Portal: tarjeta "Asistente IA" en `portal/index.html`:
-  - [ ] Coste total mes / presupuesto + barra de progreso
-  - [ ] Sesiones del mes + tokens acumulados
-  - [ ] Última sesión: proyecto + fecha + coste
-  - [ ] Días hasta próximo reseteo (si presupuesto configurado)
-  - [ ] Fallback elegante si MediDo no responde
+- [x] 🤖 Portal: tarjeta "Asistente IA" en `portal/index.html`:
+  - [x] Grid: span 4 columnas (responsivo)
+  - [x] Función `cargarClaude()` → GET `/salud/api/claude/resumen`
+  - [x] Barra de presupuesto + coste/presupuesto
+  - [x] Resumen: sesiones + tokens + días reseteo
+  - [x] Última sesión: proyecto + fecha + coste
+  - [x] Fallback: clase `hogar-tarjeta--offline` si MediDo no responde
+  - [x] Refresco cada 60 segundos (setInterval)
 
-### 13d — Verificación y despliegue
+### 13d — Verificación y despliegue 🔄
 
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM (MediDo con nuevos endpoints)
-- [ ] 👤 Verificar que el hook envía datos y aparecen en el portal
-- [ ] 👤 Probar escenario offline: desconectar de la red, terminar sesión, reconectar y verificar que los datos se sincronizan
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM (desplegar portal + MediDo)
+- [ ] 👤 Verificar en navegador: tarjeta "Asistente IA" visible y datos cargados
+- [ ] 👤 Probar MediDo offline: verificar fallback elegante
+- [ ] 👤 Probar refresco: datos actualizados cada 60 segundos
+- [ ] 👤 Probar escenario offline: hook captura en cola, datos se sincronizan al volver a red
 
 ---
 
