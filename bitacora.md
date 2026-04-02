@@ -1,5 +1,29 @@
 # Bitácora — hogarOS
 
+## 2026-04-02 (noche II)
+
+### Fase 13d: Limites de tokens en tarjeta Claude
+
+Se actualiza tarjeta "Asistente IA" para mostrar limites de tokens con barras de progreso.
+
+**Cambios en portal/index.html:**
+- Función cargarClaude(): renderiza limites_tokens (últimas 5h y última semana)
+- Nuevas barras: `[████░░] 45k/200k` para 5h, `[██░░░░] 1.2M/4M` para semana
+- Colores condicionales: warning (>=75%), danger (>=90%)
+- Números formateados con formatearNumero(): 200000 → 200k, 1000000 → 1M
+- Reorganización: limites > resumen > presupuesto > última sesión
+
+**Arquitectura:**
+- Ventanas móviles (rolling windows) sin reseteo manual
+- Limites: 200k tokens (5h), 4M tokens (1 semana)
+- Configurables por env: CLAUDE_LIMITE_5H_TOKENS, CLAUDE_LIMITE_SEMANA_TOKENS
+
+**Push:** Commit 515b058 en acabellan1868-prog/hogarOS
+
+**Próxima fase:** 13e (verificación offline + despliegue en VM 101)
+
+---
+
 ## 2026-04-02 (noche)
 
 ### Fase 13c: Tarjeta "Asistente IA" implementada
