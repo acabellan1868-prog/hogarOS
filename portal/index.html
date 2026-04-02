@@ -27,7 +27,8 @@
       .portal-bento > :nth-child(2) { grid-column: span 5; }
       .portal-bento > :nth-child(3) { grid-column: span 4; }
       .portal-bento > :nth-child(4) { grid-column: span 5; }
-      .portal-bento > :nth-child(5) { grid-column: span 3; }
+      .portal-bento > :nth-child(5) { grid-column: span 4; }
+      .portal-bento > :nth-child(6) { grid-column: span 3; }
     }
 
     /* Tarjeta HA — temperaturas en grid orgánico */
@@ -654,6 +655,22 @@
             <span class="hogar-tarjeta__label">Salud del Sistema</span>
           </div>
           <div id="medidoContenido">
+            <span class="cargando">Cargando...</span>
+          </div>
+          <a href="/salud/" class="hogar-tarjeta__enlace">
+            Abrir MediDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- TARJETA ASISTENTE IA -->
+        <div class="hogar-tarjeta hogar-tarjeta--primary" id="tarjetaClaude">
+          <div class="hogar-tarjeta__cabecera">
+            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
+              <span class="material-symbols-outlined" style="font-size:1.1rem">smart_toy</span>
+            </div>
+            <span class="hogar-tarjeta__label">Asistente IA</span>
+          </div>
+          <div id="claudeContenido">
             <span class="cargando">Cargando...</span>
           </div>
           <a href="/salud/" class="hogar-tarjeta__enlace">
@@ -1366,6 +1383,98 @@
       }
     }
 
+    function formatearNumero(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
+      if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+      return n.toString();
+    }
+
+    function cargarClaude() {
+      fetch(MEDIDO_API + "/claude/resumen?periodo=mes")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var contenedor = document.getElementById("claudeContenido");
+
+          // Barra de presupuesto (si está configurado)
+          var htmlPresupuesto = "";
+          if (d.presupuesto && d.presupuesto.presupuesto_usd) {
+            var pct = d.presupuesto.porcentaje_usado || 0;
+            var claseBar = pct >= 90 ? "medido-metrica__barra--danger"
+                         : pct >= 75 ? "medido-metrica__barra--warning"
+                         : "";
+            htmlPresupuesto =
+              '<div class="medido-metrica">' +
+                '<span class="medido-metrica__label">Presupuesto mes</span>' +
+                '<div class="medido-metrica__barra-fondo">' +
+                  '<div class="medido-metrica__barra ' + claseBar + '" style="width:' + pct + '%"></div>' +
+                '</div>' +
+                '<span class="medido-metrica__valor">' + pct.toFixed(1) + '%</span>' +
+              '</div>' +
+              '<div class="medido-metrica" style="margin-top:0.25rem">' +
+                '<span class="medido-metrica__label">Coste/Presupuesto</span>' +
+                '<span style="font-family:var(--fuente-titular);font-weight:700;color:var(--on-surface)">' +
+                  (d.coste.total_usd || 0).toFixed(2) + ' / ' + (d.presupuesto.presupuesto_usd || 0).toFixed(2) + ' USD' +
+                '</span>' +
+              '</div>';
+          } else {
+            // Sin presupuesto: solo coste
+            htmlPresupuesto =
+              '<div style="padding:var(--gap-sm);text-align:center">' +
+                '<span style="font-family:var(--fuente-titular);font-size:1.4rem;font-weight:700;color:var(--on-surface)">' +
+                  (d.coste.total_usd || 0).toFixed(2) + ' USD' +
+                '</span>' +
+                '<div style="font-size:0.75rem;color:var(--on-surface-variant);margin-top:0.25rem">Coste total mes</div>' +
+              '</div>';
+          }
+
+          // Resumen: sesiones, tokens, reseteo
+          var htmlResumen =
+            '<div class="medido-resumen" style="margin-top:var(--gap-md)">' +
+              '<div class="medido-resumen-item">' +
+                '<div class="medido-resumen-item__valor">' + (d.sesiones_totales || 0) + '</div>' +
+                '<div class="medido-resumen-item__label">sesiones</div>' +
+              '</div>' +
+              '<div class="medido-resumen-item">' +
+                '<div class="medido-resumen-item__valor">' + formatearNumero((d.tokens.input_total || 0) + (d.tokens.output_total || 0)) + '</div>' +
+                '<div class="medido-resumen-item__label">tokens</div>' +
+              '</div>';
+
+          if (d.presupuesto && d.presupuesto.dias_restantes !== null) {
+            var diasTexto = d.presupuesto.dias_restantes === 0 ? "Hoy"
+                          : d.presupuesto.dias_restantes === 1 ? "Mañana"
+                          : d.presupuesto.dias_restantes + " días";
+            htmlResumen +=
+              '<div class="medido-resumen-item">' +
+                '<div class="medido-resumen-item__valor">' + diasTexto + '</div>' +
+                '<div class="medido-resumen-item__label">reseteo</div>' +
+              '</div>';
+          }
+          htmlResumen += '</div>';
+
+          // Última sesión
+          var htmlUltimaSesion = "";
+          if (d.ultima_sesion) {
+            var fechaUltima = formatearFecha(d.ultima_sesion.fecha_fin);
+            htmlUltimaSesion =
+              '<div style="margin-top:var(--gap-md);padding-top:var(--gap-sm);border-top:1px solid var(--outline-variant)">' +
+                '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:var(--gap-xs)">Última sesión</div>' +
+                '<div style="font-size:0.78rem;color:var(--on-surface);margin-bottom:2px"><strong>' + (d.ultima_sesion.proyecto || "N/A") + '</strong></div>' +
+                '<div style="font-size:0.7rem;color:var(--on-surface-variant);margin-bottom:2px">' + fechaUltima + '</div>' +
+                '<div style="font-size:0.75rem;color:var(--aviso);font-weight:600">$' + (d.ultima_sesion.coste_usd || 0).toFixed(3) + ' · ' + formatearNumero(d.ultima_sesion.tokens_total || 0) + ' tokens</div>' +
+              '</div>';
+          }
+
+          contenedor.innerHTML = htmlPresupuesto + htmlResumen + htmlUltimaSesion;
+          document.getElementById("tarjetaClaude").classList.remove("hogar-tarjeta--offline");
+        })
+        .catch(function(err) {
+          console.error("Error cargando Claude:", err);
+          document.getElementById("claudeContenido").innerHTML =
+            '<span class="hogar-estado-offline">Sin conexion con MediDo</span>';
+          document.getElementById("tarjetaClaude").classList.add("hogar-tarjeta--offline");
+        });
+    }
+
     /* ============================================================
        Inicialización y refresco periódico
        ============================================================ */
@@ -1375,6 +1484,7 @@
     cargarCryptoResumen();
     cargarBackup();
     cargarMedido();
+    cargarClaude();
     cargarAlertas();
 
     // Refrescar cada 60 segundos (datos operacionales)
@@ -1383,6 +1493,7 @@
       cargarFido();
       cargarHA();
       cargarMedido();
+      cargarClaude();
       cargarAlertas();
     }, 60000);
 
