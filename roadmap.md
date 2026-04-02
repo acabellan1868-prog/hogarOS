@@ -427,11 +427,11 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 
 **Estrategia:** El hook `Stop` de Claude Code hace POST directo a MediDo. Offline-first: guarda en cola local y reintenta al volver a la red. Funciona desde cualquier equipo.
 
-### 13a — Hook en Windows
+### 13a — Hook en Windows ✅ VERIFICADO
 
-- [ ] 🤖 Crear `~/.claude/claude-tracker.py` — recibe payload del hook, calcula costes, guarda en cola local y hace POST a MediDo
-- [ ] 🤖 Configurar hook `Stop` en `~/.claude/settings.json`
-- [ ] 👤 Verificar funcionamiento: terminar sesión de Claude Code y comprobar que la cola local recibe la entrada
+- [x] 🤖 Crear `~/.claude/claude-tracker.py` — recibe payload del hook, calcula costes, guarda en cola local y hace POST a MediDo
+- [x] 🤖 Configurar hook `Stop` en `~/.claude/settings.json` (usa `py` en lugar de `python`)
+- [x] 👤 Verificar funcionamiento: Python 3.14.3 instalado, hook probado manualmente, cola local funciona correctamente
 
 ### 13b — Endpoints en MediDo
 

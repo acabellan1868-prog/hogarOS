@@ -1,5 +1,86 @@
 # Bitácora — hogarOS
 
+## 2026-04-02 (tarde)
+
+### Fase 13a: Hook verificado e instalación de Python
+
+**Problema:** El hook "Stop" no se ejecutaba porque `python` no estaba disponible en Windows.
+Se intentó con bash (dentro de Git Bash/WSL) pero los alias de Microsoft Store interferían.
+
+**Solución:**
+1. Instalación: Python 3.14.3 desde Microsoft Store (ejecutando `python` en PowerShell)
+2. Cambio del hook: `python` → `py` (lanzador estándar de Python en Windows que no tiene conflictos)
+3. Test manual: Script probado con JSON de prueba, creación de `cola_sync.jsonl` verificada
+
+**Cambios en `~/.claude/settings.json`:**
+```json
+"command": "py C:\\Users\\familiaAlvarezBascon\\.claude\\claude-tracker.py"
+```
+
+**Verificación:**
+- Hook funciona: ejecutado manualmente con `py claude-tracker.py` → cola creada correctamente
+- Estructura correcta: session_id, tokens, costes (input/output/cache), sincronizado: false
+- Listo para próxima sesión: al cerrar sesión de Claude Code, hook capturará datos reales
+
+---
+
+## 2026-04-02 (tarde anterior)
+
+### Fase 13a: Hook de Claude Code implementado
+
+Se implementó el sistema de tracking de sesiones de Claude Code. El objetivo es capturar
+tokens y coste de cada sesión para mostrar en una tarjeta del portal (Fase 13).
+
+**Limitaciones y alcance:**
+- Solo captura Claude Code (CLI). Claude Chat web no tiene hooks accesibles.
+- Las APIs oficiales de Anthropic requieren Admin API key (solo organizaciones), no aplica a Pro/Max.
+- Solución: hooks locales de Claude Code + envío a MediDo.
+
+**Arquitectura offline-first:**
+```
+Claude Code termina sesión (cualquier equipo)
+  └─ Hook "Stop" ejecuta claude-tracker.py
+      ├─ Guarda en cola local: ~/.claude/cola_sync.jsonl (siempre funciona)
+      ├─ Intenta POST a MediDo (http://192.168.31.131/salud/api/claude/sesion)
+      └─ Si falla → reintenta entradas pendientes al volver a red
+```
+
+**Cambios realizados:**
+
+**Script local** (`~/.claude/claude-tracker.py`):
+- Recibe JSON del hook por stdin (session_id, input/output/cache tokens)
+- Calcula coste en USD según precios Sonnet 4.6:
+  - Input: $3.0/Mtok, Output: $15.0/Mtok
+  - Cache read: $0.30/Mtok, Cache creation: $3.75/Mtok
+- Guarda en cola JSONL con estructura completa
+- Intenta POST a MediDo; si falla, queda en cola para sincronizar después
+- Si POST OK → reintenta entradas pendientes (sincronización retroactiva)
+
+**Hook configurado** (`~/.claude/settings.json`):
+- Sección `hooks.Stop[]` con comando: `python ~/.claude/claude-tracker.py`
+- Se dispara al terminar cualquier sesión de Claude Code
+
+**Estructura de datos guardada:**
+```json
+{
+  "session_id": "abc123",
+  "fecha_fin": "2026-04-02T15:30:45.123456+00:00",
+  "directorio": "C:\\...",
+  "proyecto": "Desarrollo",
+  "input_tokens": 15420,
+  "output_tokens": 3210,
+  "cache_read_tokens": 8500,
+  "cache_creation_tokens": 2100,
+  "coste_input_usd": 0.04626,
+  "coste_output_usd": 0.04815,
+  "coste_cache_usd": 0.00825,
+  "sincronizado": false
+}
+```
+
+**Próxima fase (13b):** Crear tabla `claude_sesiones` en MediDo e implementar
+endpoints POST (recibir del hook) y GET (exponer resumen para el portal).
+
 ## 2026-03-31
 
 ### Centro de Alertas unificado (Fase 12)
