@@ -13,6 +13,7 @@
 2. [Integración en el portal de mejoras de ReDo](#2-integración-en-el-portal-de-mejoras-de-redo)
 3. [Centro de Alertas — Gestión unificada de alertas del ecosistema](#3-centro-de-alertas--gestión-unificada-de-alertas)
 4. [Otras mejoras aparcadas (no descartadas)](#4-otras-mejoras-aparcadas)
+5. [Monitor de uso de Claude — Tarjeta en el portal](#5-monitor-de-uso-de-claude--tarjeta-en-el-portal)
 
 ---
 
@@ -623,6 +624,413 @@ Actualmente `index.html` tiene una sección "Alertas recientes" que funciona sol
 
 ---
 
+## 5. Monitor de uso de Claude — Tarjeta en el portal
+
+### Contexto y limitaciones
+
+Se analizó la posibilidad de integrar datos de uso de Claude en el portal hogarOS.
+
+**Lo que ofrece Anthropic oficialmente:**
+
+| Endpoint | Qué da | Requisito |
+|---|---|---|
+| `/v1/organizations/usage_report/messages` | Tokens por modelo, workspace, clave API (granularidad 1m/1h/1d) | Admin API key + cuenta de organización |
+| `/v1/organizations/cost_report` | Coste en USD por workspace/descripción | Ídem |
+
+**Problema:** Estas APIs requieren un **Admin API key** (`sk-ant-admin...`) que solo está disponible para cuentas de **organización** en `console.anthropic.com`. Con una **suscripción Claude.ai Pro/Max** (que es el caso actual), no existe ninguna API oficial para consultar el uso del plan.
+
+**Lo que NO es posible:**
+- Conocer el límite real del plan (Anthropic no lo expone vía API)
+- Saber la fecha exacta de reseteo del plan sin configuración manual
+- Obtener datos de sesiones de Claude.ai (web) sin scraping (frágil y contra ToS)
+
+**Alternativa viable:** Usar el sistema de **hooks de Claude Code** para capturar el uso de tokens de cada sesión y construir un tracker local completo.
+
+---
+
+### Alcance: Claude Code, no Claude Chat
+
+> ⚠️ **Importante:** Esta solución captura **únicamente el uso de Claude Code** (el CLI). Las conversaciones en **claude.ai web** (chat en el navegador) no tienen hooks ni API accesible para cuentas Pro, por lo que quedan **fuera del seguimiento**.
+
+### Solución: hook POST a MediDo con cola offline
+
+Claude Code ejecuta hooks (scripts externos) en eventos del ciclo de vida de cada sesión. El hook `Stop` se dispara al terminar la sesión e incluye datos de uso. El hook hace un **POST directo a MediDo**, que guarda los datos en su propia BD (SQLite en la VM 101). No hay ficheros compartidos entre Windows y la VM.
+
+Para que funcione **fuera de la red local** (trabajo desde otro lugar), el hook usa una estrategia **offline-first**: siempre guarda en una cola local primero y luego intenta el POST. Si no hay conexión, los datos quedan en la cola y se sincronizan automáticamente la próxima vez que haya acceso.
+
+#### Arquitectura
+
+```
+Claude Code termina sesión (en cualquier equipo)
+  └── Hook "Stop"
+       1. Escribe en cola local: ~/.claude/cola_sync.jsonl   ← siempre funciona
+       2. Intenta POST a http://192.168.31.131/salud/api/claude/sesion
+            ├── OK → marca entrada como sincronizada
+            └── Sin red → queda pendiente (se reintentará)
+       3. Reintenta entradas pendientes de la cola (si las hay)
+
+MediDo (VM 101, contenedor Docker)
+  └── POST /api/claude/sesion → guarda en medido.db
+  └── GET  /api/claude/resumen → datos agregados para el portal
+
+hogarOS portal
+  └── Tarjeta "Asistente IA"
+       └── fetch("/salud/api/claude/resumen")
+```
+
+**Ventajas de este enfoque:**
+- Sin ficheros compartidos entre Windows y la VM
+- Funciona desde cualquier equipo (PC de casa, portátil, etc.)
+- Funciona offline: los datos nunca se pierden, se sincronizan al volver a la red
+- MediDo es la fuente de verdad (su BD ya está respaldada por la política de backup)
+
+---
+
+### Cómo funcionan los hooks de Claude Code
+
+Los hooks se configuran en `~/.claude/settings.json` (global) o `.claude/settings.json` (por proyecto). Ejemplo para el hook `Stop`:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python C:/ruta/claude-tracker.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+El hook `Stop` recibe por stdin un JSON con información de la sesión, incluyendo uso de tokens. Ejemplo del payload:
+
+```json
+{
+  "session_id": "abc123",
+  "transcript_path": "C:/Users/.../conversation.jsonl",
+  "usage": {
+    "input_tokens": 15420,
+    "output_tokens": 3210,
+    "cache_read_input_tokens": 8500,
+    "cache_creation_input_tokens": 2100
+  }
+}
+```
+
+> **Nota:** La estructura exacta del payload del hook `Stop` debe verificarse durante la implementación. Los campos de usage pueden variar entre versiones de Claude Code.
+
+---
+
+### Datos que se pueden capturar y calcular
+
+#### Datos directos del hook
+
+| Campo | Fuente |
+|---|---|
+| `session_id` | Hook payload |
+| `fecha_inicio` / `fecha_fin` | Fichero de transcripción (primer y último mensaje) |
+| `input_tokens` | Hook payload |
+| `output_tokens` | Hook payload |
+| `cache_read_tokens` | Hook payload |
+| `cache_creation_tokens` | Hook payload |
+| `directorio_trabajo` | Variable de entorno `$CWD` en el hook |
+| `modelo` | Parsear transcripción o variable de entorno |
+
+#### Datos calculados
+
+| Métrica | Cálculo |
+|---|---|
+| **Coste estimado (input)** | `input_tokens / 1_000_000 * 3.0` (Sonnet 4.6: $3/Mtok) |
+| **Coste estimado (output)** | `output_tokens / 1_000_000 * 15.0` (Sonnet 4.6: $15/Mtok) |
+| **Coste estimado (cache read)** | `cache_read_tokens / 1_000_000 * 0.30` ($0.30/Mtok) |
+| **Coste estimado (cache creation)** | `cache_creation_tokens / 1_000_000 * 3.75` ($3.75/Mtok) |
+| **Coste total sesión** | Suma de los anteriores |
+| **Tokens totales día/semana/mes** | Suma agrupada por fecha |
+| **Coste acumulado mes** | Suma desde inicio de mes |
+| **% del presupuesto** | `coste_mes / presupuesto_configurado * 100` |
+| **Duración sesión** | `fecha_fin - fecha_inicio` |
+| **Proyecto activo** | Basename del `directorio_trabajo` |
+
+---
+
+### Esquema de base de datos
+
+```sql
+-- Sesiones de Claude Code
+CREATE TABLE IF NOT EXISTS claude_sesiones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT UNIQUE NOT NULL,
+    fecha_inicio TEXT,
+    fecha_fin TEXT NOT NULL DEFAULT (datetime('now')),
+    duracion_segundos INTEGER,
+    directorio TEXT,
+    proyecto TEXT,                    -- basename del directorio
+    modelo TEXT DEFAULT 'claude-sonnet-4-6',
+    -- Tokens
+    input_tokens INTEGER DEFAULT 0,
+    output_tokens INTEGER DEFAULT 0,
+    cache_read_tokens INTEGER DEFAULT 0,
+    cache_creation_tokens INTEGER DEFAULT 0,
+    tokens_totales INTEGER GENERATED ALWAYS AS
+        (input_tokens + output_tokens + cache_read_tokens + cache_creation_tokens) STORED,
+    -- Coste estimado (USD)
+    coste_input_usd REAL DEFAULT 0.0,
+    coste_output_usd REAL DEFAULT 0.0,
+    coste_cache_usd REAL DEFAULT 0.0,
+    coste_total_usd REAL GENERATED ALWAYS AS
+        (coste_input_usd + coste_output_usd + coste_cache_usd) STORED
+);
+
+CREATE INDEX IF NOT EXISTS idx_claude_fecha ON claude_sesiones(fecha_fin);
+CREATE INDEX IF NOT EXISTS idx_claude_proyecto ON claude_sesiones(proyecto);
+```
+
+---
+
+### Script del hook: `claude-tracker.py`
+
+El script recibe el payload, calcula costes, guarda en cola local y hace POST a MediDo. Si el POST falla (sin red), reintenta las entradas pendientes de la cola en la misma ejecución.
+
+```python
+#!/usr/bin/env python3
+"""
+Hook 'Stop' de Claude Code — envía uso de tokens a MediDo.
+Offline-first: guarda en cola local y hace POST. Si falla, reintenta al volver a la red.
+Ruta: C:/Users/familiaAlvarezBascon/.claude/claude-tracker.py
+"""
+import json, sys, os
+from datetime import datetime, timezone
+from pathlib import Path
+from urllib.request import urlopen, Request
+from urllib.error import URLError
+
+MEDIDO_URL = "http://192.168.31.131/salud/api/claude/sesion"
+COLA_PATH  = Path.home() / ".claude" / "cola_sync.jsonl"
+
+# Precios Claude Sonnet 4.6 (USD por millón de tokens)
+PRECIOS = {"input": 3.0, "output": 15.0, "cache_read": 0.30, "cache_creation": 3.75}
+
+def calcular_coste(input_tok, output_tok, cache_read, cache_crea):
+    return {
+        "coste_input_usd":  input_tok  / 1_000_000 * PRECIOS["input"],
+        "coste_output_usd": output_tok / 1_000_000 * PRECIOS["output"],
+        "coste_cache_usd":  (cache_read / 1_000_000 * PRECIOS["cache_read"] +
+                             cache_crea / 1_000_000 * PRECIOS["cache_creation"]),
+    }
+
+def post_a_medido(entrada):
+    """Intenta POST a MediDo. Devuelve True si OK, False si sin red."""
+    try:
+        req = Request(
+            MEDIDO_URL,
+            data=json.dumps(entrada).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        urlopen(req, timeout=5)
+        return True
+    except (URLError, OSError):
+        return False
+
+def guardar_cola(entrada):
+    with open(COLA_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps({**entrada, "sincronizado": False}) + "\n")
+
+def reintentar_cola():
+    """Reenvía entradas pendientes. Reescribe el fichero con las que siguen fallando."""
+    if not COLA_PATH.exists():
+        return
+    pendientes = []
+    with open(COLA_PATH, encoding="utf-8") as f:
+        for linea in f:
+            linea = linea.strip()
+            if not linea:
+                continue
+            entrada = json.loads(linea)
+            if not entrada.get("sincronizado"):
+                pendientes.append(entrada)
+    if not pendientes:
+        return
+    restantes = []
+    for entrada in pendientes:
+        payload = {k: v for k, v in entrada.items() if k != "sincronizado"}
+        if not post_a_medido(payload):
+            restantes.append(entrada)
+    with open(COLA_PATH, "w", encoding="utf-8") as f:
+        for entrada in restantes:
+            f.write(json.dumps(entrada) + "\n")
+
+def main():
+    data = json.load(sys.stdin)
+    uso  = data.get("usage", {})
+
+    input_tok  = uso.get("input_tokens", 0)
+    output_tok = uso.get("output_tokens", 0)
+    cache_read = uso.get("cache_read_input_tokens", 0)
+    cache_crea = uso.get("cache_creation_input_tokens", 0)
+
+    directorio = os.getcwd()
+    entrada = {
+        "session_id":          data.get("session_id", "desconocido"),
+        "fecha_fin":           datetime.now(timezone.utc).isoformat(),
+        "directorio":          directorio,
+        "proyecto":            Path(directorio).name,
+        "input_tokens":        input_tok,
+        "output_tokens":       output_tok,
+        "cache_read_tokens":   cache_read,
+        "cache_creation_tokens": cache_crea,
+        **calcular_coste(input_tok, output_tok, cache_read, cache_crea),
+    }
+
+    guardar_cola(entrada)           # 1. Guardar siempre en cola local
+    ok = post_a_medido(entrada)     # 2. Intentar POST a MediDo
+    if ok:
+        reintentar_cola()           # 3. Si hay red, reintentar pendientes anteriores
+
+if __name__ == "__main__":
+    main()
+```
+
+> **Nota de CRLF:** Si este script se edita en Windows, ejecutar con `python claude-tracker.py` o convertir con `sed -i 's/\r$//' claude-tracker.py` antes de usarlo directamente.
+
+---
+
+### Módulo en MediDo: endpoints de Claude
+
+MediDo añade dos endpoints: uno para recibir sesiones (POST del hook) y otro para exponer el resumen (GET para el portal).
+
+```
+POST /api/claude/sesion   ← recibe datos del hook
+GET  /api/claude/resumen  ← devuelve datos agregados para el portal
+```
+
+```json
+{
+  "hoy": {
+    "sesiones": 3,
+    "tokens": 42500,
+    "coste_usd": 0.48
+  },
+  "semana": {
+    "sesiones": 12,
+    "tokens": 185000,
+    "coste_usd": 2.15
+  },
+  "mes": {
+    "sesiones": 38,
+    "tokens": 620000,
+    "coste_usd": 7.30,
+    "presupuesto_usd": 20.0,
+    "porcentaje_presupuesto": 36.5,
+    "reseteo_estimado": "2026-05-01"
+  },
+  "ultima_sesion": {
+    "proyecto": "hogarOS",
+    "fecha": "2026-04-02T18:45:00",
+    "tokens": 18200,
+    "coste_usd": 0.22
+  },
+  "por_proyecto": [
+    { "proyecto": "hogarOS", "sesiones": 15, "coste_usd": 3.10 },
+    { "proyecto": "MediDo",  "sesiones": 10, "coste_usd": 2.40 },
+    { "proyecto": "FiDo",    "sesiones":  8, "coste_usd": 1.50 }
+  ]
+}
+```
+
+**Variables de entorno nuevas para MediDo:**
+
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `CLAUDE_PRESUPUESTO_USD` | Presupuesto mensual configurado por el usuario | `20.0` |
+| `CLAUDE_DIA_RESETEO` | Día del mes en que se renueva el plan | `1` |
+
+---
+
+### Tarjeta en el portal
+
+Nueva tarjeta "Asistente IA" en `portal/index.html`:
+
+```
+┌─────────────────────────────────────┐
+│  🤖 Asistente IA                    │
+│                                     │
+│  Este mes: $7.30 / $20.00  (36%)   │
+│  ████████░░░░░░░░░░░░░░  36%        │
+│                                     │
+│  Hoy: 3 sesiones · 42.5K tokens    │
+│  Último: hogarOS · hace 23 min     │
+│                                     │
+│  Reseteo: en 29 días                │
+└─────────────────────────────────────┘
+```
+
+Datos mostrados:
+- Coste acumulado del mes / presupuesto configurado + barra de progreso
+- Sesiones y tokens del día
+- Última sesión: proyecto + tiempo transcurrido
+- Días hasta el próximo reseteo
+
+---
+
+### Flujo completo de la información
+
+```
+Claude Code termina sesión (cualquier equipo, dentro o fuera de la red)
+  └── Hook "Stop" → claude-tracker.py
+       ├── Guarda en cola local: ~/.claude/cola_sync.jsonl
+       ├── Intenta POST → http://192.168.31.131/salud/api/claude/sesion
+       │    ├── En red local: OK, MediDo guarda en medido.db
+       │    └── Sin red: falla silenciosamente, dato queda en cola
+       └── Si hay red: reintenta entradas pendientes de la cola
+
+hogarOS Nginx
+  └── POST /salud/api/claude/sesion → proxifica a medido:8084/api/claude/sesion
+  └── GET  /salud/api/claude/resumen → proxifica a medido:8084/api/claude/resumen
+
+portal/index.html
+  └── Tarjeta "Asistente IA" → fetch("/salud/api/claude/resumen")
+```
+
+---
+
+### Lo que se puede mostrar vs. lo que no
+
+| Métrica | Disponible | Cómo |
+|---|---|---|
+| Tokens por sesión | ✅ | Hook `Stop` |
+| Coste estimado | ✅ | Calculado con precios oficiales |
+| Sesiones del día/semana/mes | ✅ | Agrupación en SQLite |
+| Proyecto más activo | ✅ | Directorio de trabajo del hook |
+| % del presupuesto | ✅ | Con presupuesto configurado manualmente |
+| Fecha de reseteo | ✅ (aproximada) | Día del mes configurado manualmente |
+| Límite real del plan Pro | ❌ | Anthropic no lo expone via API |
+| Sesiones de Claude.ai web | ❌ | Sin API oficial |
+| Histórico antes de activar el hook | ❌ | Solo desde que se instala el hook |
+
+---
+
+### Pasos de implementación
+
+| Paso | Qué | Dónde | Esfuerzo |
+|---|---|---|---|
+| 1 | Crear `claude-tracker.py` con cola offline + POST | Windows: `~/.claude/` | Bajo |
+| 2 | Configurar hook `Stop` en `~/.claude/settings.json` | Windows | Bajo |
+| 3 | Verificar que el hook funciona (test manual: terminar sesión y revisar cola) | Test | Bajo |
+| 4 | Añadir tabla `claude_sesiones` a MediDo + endpoint `POST /api/claude/sesion` | MediDo | Bajo-medio |
+| 5 | Añadir endpoint `GET /api/claude/resumen` a MediDo | MediDo | Bajo |
+| 6 | Añadir rutas `/salud/api/claude/` en `nginx.conf` | hogarOS | Bajo |
+| 7 | Añadir tarjeta "Asistente IA" en `portal/index.html` | hogarOS | Bajo |
+| **Total** | | | **Bajo-medio** |
+
+---
+
 ## 4. Otras mejoras aparcadas (no descartadas)
 
 | Mejora | Proyecto | Descripción breve |
@@ -649,3 +1057,4 @@ Se pueden retomar en cualquier momento.
 | 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **Completado** (2026-03-27) |
 | 5 | Estandarizar drawers | ReDo + FiDo + MediDo | Bajo | Medio | **Completado** (2026-03-27) |
 | 6 | Centro de Alertas | hogarOS + ReDo + MediDo | Medio | Alto | Pendiente |
+| 7 | Monitor de uso de Claude | Windows hook + MediDo + hogarOS | Bajo-medio | Medio | Pendiente |

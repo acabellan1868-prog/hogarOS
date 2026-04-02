@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
 > Estado actual: Fase 12 completada — Centro de Alertas unificado desplegado y verificado.
-> Última actualización: 2026-04-01
+> Última actualización: 2026-04-02
 
 ### Leyenda
 
@@ -417,6 +417,48 @@ UI unificada que consulta las APIs de cada app y muestra todo junto.
 
 ---
 
+---
+
+## Fase 13 — Monitor de uso de Claude
+
+Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado de las sesiones de Claude Code. Análisis completo en `analisis-mejoras.md`, sección 5.
+
+**Alcance:** Solo Claude Code (CLI). Claude Chat web no tiene hooks ni API de uso para cuentas Pro.
+
+**Estrategia:** El hook `Stop` de Claude Code hace POST directo a MediDo. Offline-first: guarda en cola local y reintenta al volver a la red. Funciona desde cualquier equipo.
+
+### 13a — Hook en Windows
+
+- [ ] 🤖 Crear `~/.claude/claude-tracker.py` — recibe payload del hook, calcula costes, guarda en cola local y hace POST a MediDo
+- [ ] 🤖 Configurar hook `Stop` en `~/.claude/settings.json`
+- [ ] 👤 Verificar funcionamiento: terminar sesión de Claude Code y comprobar que la cola local recibe la entrada
+
+### 13b — Endpoints en MediDo
+
+- [ ] 🤖 Añadir tabla `claude_sesiones` al esquema de BD de MediDo
+- [ ] 🤖 Crear `app/rutas/claude.py` con:
+  - `POST /api/claude/sesion` — recibe sesión del hook, guarda en BD
+  - `GET /api/claude/resumen` — agrega datos por día/semana/mes, calcula % del presupuesto
+- [ ] 🤖 Registrar router en `principal.py`
+- [ ] 🤖 Variables de entorno: `CLAUDE_PRESUPUESTO_USD`, `CLAUDE_DIA_RESETEO`
+
+### 13c — Portal: tarjeta "Asistente IA"
+
+- [ ] 🤖 Añadir rutas `/salud/api/claude/` en `nginx.conf` (proxifica a medido:8084)
+- [ ] 🤖 Añadir tarjeta "Asistente IA" en `portal/index.html`:
+  - Coste mes / presupuesto configurado + barra de progreso
+  - Sesiones y tokens del día
+  - Última sesión: proyecto + tiempo transcurrido
+  - Días hasta el próximo reseteo
+
+### 13d — Verificación y despliegue
+
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM (MediDo con nuevos endpoints)
+- [ ] 👤 Verificar que el hook envía datos y aparecen en el portal
+- [ ] 👤 Probar escenario offline: desconectar de la red, terminar sesión, reconectar y verificar que los datos se sincronizan
+
+---
+
 ## Resumen de dependencias entre fases
 
 ```
@@ -439,6 +481,8 @@ Fase 1 (ReDo desde cero)  +  Fase 2 (FiDo /api/resumen)  +  Fase 3 (CSS)
                     Fase 10 (Rediseño visual)
                               ↓
                     Fase 12 (Centro de Alertas) ✅
+                              ↓
+                    Fase 13 (Monitor Claude)
                               ↓
                     Fase 11 (Futuro)
 ```
