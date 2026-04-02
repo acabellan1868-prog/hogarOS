@@ -1413,7 +1413,7 @@
               '<div class="medido-metrica" style="margin-top:0.25rem">' +
                 '<span class="medido-metrica__label">Coste/Presupuesto</span>' +
                 '<span style="font-family:var(--fuente-titular);font-weight:700;color:var(--on-surface)">' +
-                  (d.coste.total_usd || 0).toFixed(2) + ' / ' + (d.presupuesto.presupuesto_usd || 0).toFixed(2) + ' USD' +
+                  (d.coste.total_usd || 0).toFixed(2) + ' / ' + (d.presupuesto.presupuesto_usd || 0).toFixed(2) + ' €' +
                 '</span>' +
               '</div>';
           } else {
@@ -1423,7 +1423,7 @@
                 '<span style="font-family:var(--fuente-titular);font-size:1.4rem;font-weight:700;color:var(--on-surface)">' +
                   (d.coste.total_usd || 0).toFixed(2) + ' USD' +
                 '</span>' +
-                '<div style="font-size:0.75rem;color:var(--on-surface-variant);margin-top:0.25rem">Coste total mes</div>' +
+                '<div style="font-size:0.75rem;color:var(--on-surface-variant);margin-top:0.25rem">Coste total mes (€)</div>' +
               '</div>';
           }
 
@@ -1460,7 +1460,7 @@
                 '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:var(--gap-xs)">Última sesión</div>' +
                 '<div style="font-size:0.78rem;color:var(--on-surface);margin-bottom:2px"><strong>' + (d.ultima_sesion.proyecto || "N/A") + '</strong></div>' +
                 '<div style="font-size:0.7rem;color:var(--on-surface-variant);margin-bottom:2px">' + fechaUltima + '</div>' +
-                '<div style="font-size:0.75rem;color:var(--aviso);font-weight:600">$' + (d.ultima_sesion.coste_usd || 0).toFixed(3) + ' · ' + formatearNumero(d.ultima_sesion.tokens_total || 0) + ' tokens</div>' +
+                '<div style="font-size:0.75rem;color:var(--aviso);font-weight:600">' + (d.ultima_sesion.coste_usd || 0).toFixed(3) + ' € · ' + formatearNumero(d.ultima_sesion.tokens_total || 0) + ' tokens</div>' +
               '</div>';
           }
 
