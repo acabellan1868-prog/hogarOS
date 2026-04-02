@@ -1397,7 +1397,7 @@
 
           // Barra de presupuesto (si está configurado)
           var htmlPresupuesto = "";
-          if (d.presupuesto && d.presupuesto.presupuesto_usd) {
+          if (d.presupuesto && d.presupuesto.presupuesto_eur) {
             var pct = d.presupuesto.porcentaje_usado || 0;
             var claseBar = pct >= 90 ? "medido-metrica__barra--danger"
                          : pct >= 75 ? "medido-metrica__barra--warning"
@@ -1413,7 +1413,7 @@
               '<div class="medido-metrica" style="margin-top:0.25rem">' +
                 '<span class="medido-metrica__label">Coste/Presupuesto</span>' +
                 '<span style="font-family:var(--fuente-titular);font-weight:700;color:var(--on-surface)">' +
-                  (d.coste.total_usd || 0).toFixed(2) + ' / ' + (d.presupuesto.presupuesto_usd || 0).toFixed(2) + ' €' +
+                  (d.coste.total_usd || 0).toFixed(2) + ' / ' + (d.presupuesto.presupuesto_eur || 0).toFixed(2) + ' €' +
                 '</span>' +
               '</div>';
           } else {
