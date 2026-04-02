@@ -433,23 +433,26 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 - [x] 🤖 Configurar hook `Stop` en `~/.claude/settings.json` (usa `py` en lugar de `python`)
 - [x] 👤 Verificar funcionamiento: Python 3.14.3 instalado, hook probado manualmente, cola local funciona correctamente
 
-### 13b — Endpoints en MediDo
+### 13b — Endpoints en MediDo ✅
 
-- [ ] 🤖 Añadir tabla `claude_sesiones` al esquema de BD de MediDo
-- [ ] 🤖 Crear `app/rutas/claude.py` con:
-  - `POST /api/claude/sesion` — recibe sesión del hook, guarda en BD
-  - `GET /api/claude/resumen` — agrega datos por día/semana/mes, calcula % del presupuesto
-- [ ] 🤖 Registrar router en `principal.py`
-- [ ] 🤖 Variables de entorno: `CLAUDE_PRESUPUESTO_USD`, `CLAUDE_DIA_RESETEO`
+- [x] 🤖 Tabla `tracking_claude` en esquema.sql (UNIQUE en session_id para idempotencia)
+- [x] 🤖 Router `app/rutas/claude.py` con:
+  - [x] POST `/api/claude/sesion` — recibe evento del hook, guarda en BD (idempotente)
+  - [x] GET `/api/claude/resumen` — agrega por período (día/semana/mes), presupuesto, última sesión
+- [x] 🤖 Registrado router en `principal.py`
+- [x] 🤖 Variables en config.py: `CLAUDE_PRESUPUESTO_USD`, `CLAUDE_DIA_RESETEO`
+- [x] 🤖 Documentación actualizada (CLAUDE.md, roadmap.md, bitacora.md)
+- [x] 👤 Push a GitHub (commit 46c3e08 en acabellan1868-prog/MediDo)
 
-### 13c — Portal: tarjeta "Asistente IA"
+### 13c — Portal: tarjeta "Asistente IA" 🔄
 
-- [ ] 🤖 Añadir rutas `/salud/api/claude/` en `nginx.conf` (proxifica a medido:8084)
-- [ ] 🤖 Añadir tarjeta "Asistente IA" en `portal/index.html`:
-  - Coste mes / presupuesto configurado + barra de progreso
-  - Sesiones y tokens del día
-  - Última sesión: proyecto + tiempo transcurrido
-  - Días hasta el próximo reseteo
+- [ ] 🤖 Nginx: rutas `/salud/api/claude/` en `nginx.conf` (proxifica a medido:8084)
+- [ ] 🤖 Portal: tarjeta "Asistente IA" en `portal/index.html`:
+  - [ ] Coste total mes / presupuesto + barra de progreso
+  - [ ] Sesiones del mes + tokens acumulados
+  - [ ] Última sesión: proyecto + fecha + coste
+  - [ ] Días hasta próximo reseteo (si presupuesto configurado)
+  - [ ] Fallback elegante si MediDo no responde
 
 ### 13d — Verificación y despliegue
 

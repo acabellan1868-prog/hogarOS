@@ -1,5 +1,30 @@
 # Bitácora — hogarOS
 
+## 2026-04-02 (tarde II)
+
+### Fase 13b: Endpoints en MediDo implementados
+
+Se completó la implementación de endpoints en MediDo para recolectar datos de Claude Code.
+
+**Cambios en MediDo:**
+- Tabla `tracking_claude`: almacena eventos del hook con UNIQUE en session_id (idempotencia)
+- Router `app/rutas/claude.py`: POST /sesion (recibe evento), GET /resumen (agrega por período)
+- Config: variables `CLAUDE_PRESUPUESTO_USD`, `CLAUDE_DIA_RESETEO`
+- Integración: registrado router en principal.py
+- Documentación: actualizado CLAUDE.md, roadmap.md, bitacora.md de MediDo
+
+**Arquitectura:**
+- POST idempotente: UNIQUE en session_id previene duplicados en reintentos del hook
+- GET /resumen: agrega tokens por período (día/semana/mes)
+- Presupuesto opcional: calcula saldo, porcentaje, días restantes
+- Reseteo flexible: día configurable (no siempre el 1ro del mes)
+
+**Push:** Commit 46c3e08 en acabellan1868-prog/MediDo
+
+**Próxima fase:** 13c (tarjeta portal consumiendo GET /resumen)
+
+---
+
 ## 2026-04-02 (tarde)
 
 ### Fase 13a: Hook verificado e instalación de Python
