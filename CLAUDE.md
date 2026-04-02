@@ -134,3 +134,30 @@ No hay CI/CD automático. El despliegue siempre es manual con `actualizar.sh`.
 - HTML/CSS/JS vanilla (sin frameworks en el frontend)
 - Python + FastAPI en los backends
 - Sin TypeScript, sin npm, sin bundlers
+
+---
+
+## Integración con Claude Code — Monitor de uso (Fase 13)
+
+### Script de tracking: `~/.claude/claude-tracker.py`
+
+**Ubicación:** `C:\Users\familiaAlvarezBascon\.claude\claude-tracker.py` (no está en el repo, vive en la máquina local)
+
+**Propósito:** Capturar uso de tokens y coste estimado cada vez que se cierra una sesión de Claude Code.
+
+**Configuración:**
+- Hook `Stop` en `~/.claude/settings.json` → ejecuta `py ~/.claude/claude-tracker.py`
+- El script recibe JSON del hook con: session_id, input_tokens, output_tokens, cache_read_input_tokens, cache_creation_input_tokens
+- Calcula coste en USD según precios Sonnet 4.6 (input $3/Mtok, output $15/Mtok, cache $0.30+$3.75/Mtok)
+
+**Almacenamiento offline-first:**
+- Guarda siempre en `~/.claude/cola_sync.jsonl` (cola local de sesiones)
+- Intenta POST a MediDo (`http://192.168.31.131/salud/api/claude/sesion`)
+- Si falla (sin red) → entrada queda en cola para sincronizar después
+- Si POST OK → reintenta enviar entradas pendientes de sesiones anteriores
+
+**Próxima fase (13b):**
+- Crear tabla `claude_sesiones` en MediDo BD
+- Implementar endpoint `POST /api/claude/sesion` (recibe del hook)
+- Implementar endpoint `GET /api/claude/resumen` (agrega datos por período)
+- Tarjeta "Asistente IA" en portal (coste/presupuesto, sesiones del día, última sesión)
