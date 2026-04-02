@@ -1395,39 +1395,54 @@
         .then(function(d) {
           var contenedor = document.getElementById("claudeContenido");
 
-          // Barra de presupuesto (si está configurado)
-          var htmlPresupuesto = "";
-          if (d.presupuesto && d.presupuesto.presupuesto_eur) {
-            var pct = d.presupuesto.porcentaje_usado || 0;
-            var claseBar = pct >= 90 ? "medido-metrica__barra--danger"
-                         : pct >= 75 ? "medido-metrica__barra--warning"
-                         : "";
-            htmlPresupuesto =
+          // Limites de tokens (5h y semanal)
+          var htmlLimitesTokens = "";
+          if (d.limites_tokens) {
+            // Últimas 5 horas
+            var lim5h = d.limites_tokens.ultimas_5h || {};
+            var pct5h = lim5h.porcentaje_usado || 0;
+            var clase5h = pct5h >= 90 ? "medido-metrica__barra--danger"
+                        : pct5h >= 75 ? "medido-metrica__barra--warning"
+                        : "";
+            htmlLimitesTokens +=
               '<div class="medido-metrica">' +
-                '<span class="medido-metrica__label">Presupuesto mes</span>' +
+                '<span class="medido-metrica__label">Últimas 5h</span>' +
                 '<div class="medido-metrica__barra-fondo">' +
-                  '<div class="medido-metrica__barra ' + claseBar + '" style="width:' + pct + '%"></div>' +
+                  '<div class="medido-metrica__barra ' + clase5h + '" style="width:' + pct5h + '%"></div>' +
                 '</div>' +
-                '<span class="medido-metrica__valor">' + pct.toFixed(1) + '%</span>' +
-              '</div>' +
-              '<div class="medido-metrica" style="margin-top:0.25rem">' +
-                '<span class="medido-metrica__label">Coste/Presupuesto</span>' +
-                '<span style="font-family:var(--fuente-titular);font-weight:700;color:var(--on-surface)">' +
-                  (d.coste.total_usd || 0).toFixed(2) + ' / ' + (d.presupuesto.presupuesto_eur || 0).toFixed(2) + ' €' +
-                '</span>' +
+                '<span class="medido-metrica__valor">' + formatearNumero(lim5h.tokens_usados || 0) + ' / ' + formatearNumero(lim5h.limite || 0) + '</span>' +
               '</div>';
-          } else {
-            // Sin presupuesto: solo coste
-            htmlPresupuesto =
-              '<div style="padding:var(--gap-sm);text-align:center">' +
-                '<span style="font-family:var(--fuente-titular);font-size:1.4rem;font-weight:700;color:var(--on-surface)">' +
-                  (d.coste.total_usd || 0).toFixed(2) + ' USD' +
-                '</span>' +
-                '<div style="font-size:0.75rem;color:var(--on-surface-variant);margin-top:0.25rem">Coste total mes (€)</div>' +
+
+            // Última semana
+            var lim7d = d.limites_tokens.ultima_semana || {};
+            var pct7d = lim7d.porcentaje_usado || 0;
+            var clase7d = pct7d >= 90 ? "medido-metrica__barra--danger"
+                        : pct7d >= 75 ? "medido-metrica__barra--warning"
+                        : "";
+            htmlLimitesTokens +=
+              '<div class="medido-metrica" style="margin-top:0.25rem">' +
+                '<span class="medido-metrica__label">Esta semana</span>' +
+                '<div class="medido-metrica__barra-fondo">' +
+                  '<div class="medido-metrica__barra ' + clase7d + '" style="width:' + pct7d + '%"></div>' +
+                '</div>' +
+                '<span class="medido-metrica__valor">' + formatearNumero(lim7d.tokens_usados || 0) + ' / ' + formatearNumero(lim7d.limite || 0) + '</span>' +
               '</div>';
           }
 
-          // Resumen: sesiones, tokens, reseteo
+          // Presupuesto en EUR (si está configurado) — informativo
+          var htmlPresupuesto = "";
+          if (d.presupuesto && d.presupuesto.presupuesto_eur) {
+            htmlPresupuesto =
+              '<div style="margin-top:var(--gap-md);padding-top:var(--gap-sm);border-top:1px solid var(--outline-variant)">' +
+                '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:var(--gap-xs)">Presupuesto mes</div>' +
+                '<div style="font-size:0.9rem;color:var(--on-surface);margin-bottom:0.25rem">' +
+                  '<span style="font-weight:600">' + (d.coste.total_usd || 0).toFixed(2) + ' USD</span> / ' +
+                  '<span style="color:var(--on-surface-variant)">' + (d.presupuesto.presupuesto_eur || 0).toFixed(2) + ' €</span>' +
+                '</div>' +
+              '</div>';
+          }
+
+          // Resumen: sesiones, tokens del mes
           var htmlResumen =
             '<div class="medido-resumen" style="margin-top:var(--gap-md)">' +
               '<div class="medido-resumen-item">' +
@@ -1436,20 +1451,9 @@
               '</div>' +
               '<div class="medido-resumen-item">' +
                 '<div class="medido-resumen-item__valor">' + formatearNumero((d.tokens.input_total || 0) + (d.tokens.output_total || 0)) + '</div>' +
-                '<div class="medido-resumen-item__label">tokens</div>' +
-              '</div>';
-
-          if (d.presupuesto && d.presupuesto.dias_restantes !== null) {
-            var diasTexto = d.presupuesto.dias_restantes === 0 ? "Hoy"
-                          : d.presupuesto.dias_restantes === 1 ? "Mañana"
-                          : d.presupuesto.dias_restantes + " días";
-            htmlResumen +=
-              '<div class="medido-resumen-item">' +
-                '<div class="medido-resumen-item__valor">' + diasTexto + '</div>' +
-                '<div class="medido-resumen-item__label">reseteo</div>' +
-              '</div>';
-          }
-          htmlResumen += '</div>';
+                '<div class="medido-resumen-item__label">tokens mes</div>' +
+              '</div>' +
+            '</div>';
 
           // Última sesión
           var htmlUltimaSesion = "";
@@ -1460,11 +1464,11 @@
                 '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:var(--gap-xs)">Última sesión</div>' +
                 '<div style="font-size:0.78rem;color:var(--on-surface);margin-bottom:2px"><strong>' + (d.ultima_sesion.proyecto || "N/A") + '</strong></div>' +
                 '<div style="font-size:0.7rem;color:var(--on-surface-variant);margin-bottom:2px">' + fechaUltima + '</div>' +
-                '<div style="font-size:0.75rem;color:var(--aviso);font-weight:600">' + (d.ultima_sesion.coste_usd || 0).toFixed(3) + ' € · ' + formatearNumero(d.ultima_sesion.tokens_total || 0) + ' tokens</div>' +
+                '<div style="font-size:0.75rem;color:var(--aviso);font-weight:600">' + (d.ultima_sesion.coste_usd || 0).toFixed(3) + ' USD · ' + formatearNumero(d.ultima_sesion.tokens_total || 0) + ' tokens</div>' +
               '</div>';
           }
 
-          contenedor.innerHTML = htmlPresupuesto + htmlResumen + htmlUltimaSesion;
+          contenedor.innerHTML = htmlLimitesTokens + htmlResumen + htmlPresupuesto + htmlUltimaSesion;
           document.getElementById("tarjetaClaude").classList.remove("hogar-tarjeta--offline");
         })
         .catch(function(err) {
