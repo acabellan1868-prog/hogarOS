@@ -195,6 +195,32 @@
     .redo-metrica--ok .redo-metrica__valor { color: var(--exito); }
     .redo-metrica--alerta .redo-metrica__valor { color: var(--peligro); }
 
+    /* Tarjeta ReDo — desglose por tipo */
+    .redo-tipos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-sm) var(--gap-md);
+      margin-top: var(--gap-md);
+      justify-content: center;
+    }
+
+    .redo-tipo {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+    }
+
+    .redo-tipo .material-symbols-outlined {
+      font-size: 1rem;
+    }
+
+    .redo-tipo__cantidad {
+      font-weight: 600;
+      color: var(--on-surface);
+    }
+
     /* Tarjeta Backup */
     .backup-estado {
       margin-top: var(--gap-sm);
@@ -764,6 +790,20 @@
     /* ============================================================
        Cargar datos de ReDo
        ============================================================ */
+    var TIPOS_ICONO = {
+      telefono: 'smartphone',
+      portatil: 'laptop',
+      sobremesa: 'desktop_windows',
+      tablet: 'tablet',
+      tv: 'tv',
+      impresora: 'print',
+      router: 'router',
+      iot: 'sensors',
+      servidor: 'dns',
+      consola: 'videogame_asset',
+      otro: 'device_unknown'
+    };
+
     function cargarRedo() {
       fetch(REDO_API + "/resumen")
         .then(function(r) { return r.json(); })
@@ -771,19 +811,40 @@
           var contenedor = document.getElementById("redoContenido");
           var desconocidos = d.dispositivos_desconocidos || 0;
 
+          /* Desglose por tipo — orden visual predefinido */
+          var tiposHtml = '';
+          if (d.por_tipo && Object.keys(d.por_tipo).length > 0) {
+            // Orden preferido para la visualización
+            var orden = ['telefono', 'portatil', 'escritorio', 'television', 'impresora', 'iot', 'router', 'consola', 'servidor', 'otro'];
+
+            // Filtrar tipos existentes en el orden preferido
+            var tiposOrdenados = orden.filter(function(tipo) { return d.por_tipo[tipo] !== undefined; });
+
+            // Añadir tipos no previstos al final
+            Object.keys(d.por_tipo).forEach(function(tipo) {
+              if (tiposOrdenados.indexOf(tipo) === -1) {
+                tiposOrdenados.push(tipo);
+              }
+            });
+
+            var items = tiposOrdenados.map(function(tipo) {
+              var icono = TIPOS_ICONO[tipo] || 'device_unknown';
+              return '<span class="redo-tipo" title="' + tipo + '">' +
+                '<span class="material-symbols-outlined">' + icono + '</span>' +
+                '<span class="redo-tipo__cantidad">' + d.por_tipo[tipo] + '</span>' +
+              '</span>';
+            }).join('');
+            tiposHtml = '<div class="redo-tipos">' + items + '</div>';
+          }
+
           contenedor.innerHTML =
             '<div class="hogar-tarjeta__valor">' + d.dispositivos_activos + '</div>' +
-            '<div class="hogar-tarjeta__detalle">dispositivos activos</div>' +
-            '<div class="redo-metricas">' +
-              '<div class="redo-metrica redo-metrica--ok">' +
-                '<div class="redo-metrica__valor">' + d.dispositivos_confiables + '</div>' +
-                '<div class="redo-metrica__label">confiables</div>' +
-              '</div>' +
-              '<div class="redo-metrica ' + (desconocidos > 0 ? 'redo-metrica--alerta' : 'redo-metrica--ok') + '">' +
-                '<div class="redo-metrica__valor">' + desconocidos + '</div>' +
-                '<div class="redo-metrica__label">desconocidos</div>' +
-              '</div>' +
+            '<div class="hogar-tarjeta__detalle">dispositivos activos' +
+              (desconocidos > 0
+                ? ' · <span style="color:var(--peligro)">' + desconocidos + ' desconocidos</span>'
+                : '') +
             '</div>' +
+            tiposHtml +
             (d.ultimo_escaneo
               ? '<div class="hogar-tarjeta__detalle">Ultimo escaneo: ' + formatearFecha(d.ultimo_escaneo) + '</div>'
               : '');
