@@ -1,5 +1,20 @@
 # Bitácora — hogarOS
 
+## 2026-04-04
+
+### Reorganización bento grid: 3 tarjetas por fila
+
+Se reorganiza el layout del portal para distribuir las 6 tarjetas en 2 filas de 3.
+
+**Cambios en portal/index.html:**
+- Fila 1: Domótica(5) + Finanzas Domésticas(4) + Red Doméstica(3) = 12 columnas
+- Fila 2: Salud del Sistema(4) + Asistente IA(4) + Estado Backup(4) = 12 columnas
+- Antes: Domótica(7) + Finanzas(5) en fila 1, resto distribuido en filas 2 y 3
+
+**Push:** Commit a89aade en acabellan1868-prog/hogarOS
+
+---
+
 ## 2026-04-02 (noche II)
 
 ### Fase 13d: Limites de tokens en tarjeta Claude

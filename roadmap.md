@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 12 completada — Centro de Alertas unificado desplegado y verificado.
-> Última actualización: 2026-04-02
+> Estado actual: Fase 13d en curso — bento grid reorganizado, pendiente despliegue en VM 101.
+> Última actualización: 2026-04-04
 
 ### Leyenda
 
@@ -462,6 +462,12 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 - [ ] 👤 Probar MediDo offline: verificar fallback elegante
 - [ ] 👤 Probar refresco: datos actualizados cada 60 segundos
 - [ ] 👤 Probar escenario offline: hook captura en cola, datos se sincronizan al volver a red
+
+### 13e — Ajustes visuales portal ✅
+
+- [x] 🤖 Reorganizar bento grid: 2 filas de 3 tarjetas (antes: fila 1 con 2, filas 2-3 irregulares)
+  - Fila 1: Domótica(5) + Finanzas(4) + Red(3)
+  - Fila 2: Salud(4) + Asistente IA(4) + Backup(4)
 
 ---
 
