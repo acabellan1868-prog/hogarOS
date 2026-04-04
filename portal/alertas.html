@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alertas — HogarOS</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="stylesheet" href="/static/hogar.css">
+  <style>
+    /* Centro de alertas */
+    .alertas-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-sm);
+      margin-bottom: var(--gap-md);
+    }
+
+    .alertas-toolbar__filtro {
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radio-full);
+      border: 1px solid var(--outline-variant);
+      background: var(--surface-container-lowest);
+      color: var(--on-surface-variant);
+      font-size: 0.78rem;
+      font-family: var(--fuente-cuerpo);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .alertas-toolbar__filtro--activo {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+
+    .alertas-toolbar__filtro:hover:not(.alertas-toolbar__filtro--activo) {
+      background: var(--surface-container);
+    }
+
+    .alertas-lista {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-sm);
+    }
+
+    .alertas-vacio {
+      text-align: center;
+      color: var(--on-surface-variant);
+      font-size: 0.85rem;
+      padding: var(--gap-lg) 0;
+    }
+
+    .alerta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap-md);
+      padding: var(--gap-md) var(--gap-lg);
+      border-radius: var(--radio-lg);
+      background: var(--surface-container-lowest);
+      border-left: 3px solid var(--outline-variant);
+    }
+
+    .alerta-item--activa {
+      border-left-color: var(--peligro);
+    }
+
+    .alerta-item--resuelta {
+      opacity: 0.5;
+      border-left-color: var(--outline-variant);
+    }
+
+    .alerta-item__cuerpo {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .alerta-item__cabecera {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-xs);
+      margin-bottom: 0.2rem;
+    }
+
+    .alerta-item__modulo {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radio-full);
+      background: var(--surface-container);
+      color: var(--on-surface-variant);
+    }
+
+    .alerta-item__modulo--redo   { background: var(--secondary-container); color: var(--on-secondary-container); }
+    .alerta-item__modulo--medido { background: var(--primary-container);   color: var(--on-primary-container); }
+
+    .alerta-item__tipo {
+      font-size: 0.65rem;
+      color: var(--on-surface-variant);
+    }
+
+    .alerta-item__mensaje {
+      font-size: 0.85rem;
+      color: var(--on-surface);
+      line-height: 1.4;
+    }
+
+    .alerta-item__fecha {
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+      margin-top: 0.2rem;
+    }
+
+    .alerta-item__acciones {
+      display: flex;
+      gap: var(--gap-xs);
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .alerta-item__btn {
+      padding: 0.3rem 0.55rem;
+      border-radius: var(--radio-full);
+      border: none;
+      font-size: 0.72rem;
+      font-family: var(--fuente-cuerpo);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      transition: opacity 0.2s;
+    }
+
+    .alerta-item__btn:hover { opacity: 0.8; }
+
+    .alerta-item__btn--resolver {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .alerta-item__btn--eliminar {
+      background: var(--peligro-fondo);
+      color: var(--peligro);
+    }
+
+    .alerta-item__btn .material-symbols-outlined { font-size: 0.85rem; }
+
+    .alertas-error-modulo {
+      font-size: 0.78rem;
+      color: var(--aviso);
+      padding: var(--gap-sm);
+      background: var(--aviso-fondo);
+      border-radius: var(--radio-md);
+      margin-bottom: var(--gap-sm);
+    }
+
+    .alertas-contador {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      margin-bottom: var(--gap-sm);
+    }
+
+    .alertas-contador strong { color: var(--peligro); }
+  </style>
+</head>
+<body>
+
+  <div class="hogar-lumina"></div>
+
+  <header class="hogar-header">
+    <div class="hogar-header__barra">
+      <a href="/" class="hogar-header__marca">
+        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
+        <div>
+          <div class="hogar-header__titulo">HogarOS</div>
+          <div class="hogar-header__subtitulo">El refugio del silencio</div>
+        </div>
+      </a>
+      <button class="hogar-header__menu-btn" id="btnMenu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="hogar-drawer-overlay oculto" id="drawerOverlay"></div>
+  <nav class="hogar-drawer oculto" id="drawerNav">
+    <button class="hogar-drawer__cerrar" id="btnCerrarDrawer">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <span class="hogar-drawer__titulo">Navegacion</span>
+    <a href="/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">roofing</span>
+      <span>Inicio</span>
+    </a>
+    <a href="/red/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">lan</span>
+      <span>Red</span>
+    </a>
+    <a href="/finanzas/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">payments</span>
+      <span>Finanzas</span>
+    </a>
+    <a href="/salud/" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">monitor_heart</span>
+      <span>Salud</span>
+    </a>
+    <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-drawer__enlace" target="_blank">
+      <span class="material-symbols-outlined">home_iot_device</span>
+      <span>Domotica</span>
+    </a>
+    <a href="/lanzador.html" class="hogar-drawer__enlace">
+      <span class="material-symbols-outlined">apps</span>
+      <span>Lanzador</span>
+    </a>
+    <a href="/alertas.html" class="hogar-drawer__enlace hogar-drawer__enlace--activo">
+      <span class="material-symbols-outlined">notifications</span>
+      <span>Alertas</span>
+    </a>
+    <div class="hogar-drawer__separador"></div>
+    <button class="hogar-drawer__enlace" id="btnTema">
+      <span class="material-symbols-outlined" id="iconoTema">dark_mode</span>
+      <span>Cambiar tema</span>
+    </button>
+  </nav>
+
+  <main class="hogar-contenedor">
+
+    <section class="hogar-seccion">
+      <h2 class="hogar-seccion__titulo">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;vertical-align:-2px">notifications</span>
+        Centro de Alertas
+      </h2>
+
+      <div class="alertas-toolbar" id="alertasToolbar">
+        <button class="alertas-toolbar__filtro alertas-toolbar__filtro--activo" data-filtro="todas">Todas</button>
+        <button class="alertas-toolbar__filtro" data-filtro="activas">Activas</button>
+        <button class="alertas-toolbar__filtro" data-filtro="resueltas">Resueltas</button>
+        <span style="flex:1"></span>
+        <button class="alertas-toolbar__filtro alertas-toolbar__filtro--activo" data-modulo="todas">Todos los modulos</button>
+        <button class="alertas-toolbar__filtro" data-modulo="redo">ReDo</button>
+        <button class="alertas-toolbar__filtro" data-modulo="medido">MediDo</button>
+      </div>
+
+      <div class="alertas-contador" id="alertasContador"></div>
+      <div class="alertas-lista" id="alertasLista">
+        <span class="cargando">Cargando alertas...</span>
+      </div>
+    </section>
+
+    <div class="hogar-linea-glow"></div>
+
+  </main>
+
+  <script>
+    var REDO_API   = "/red/api";
+    var MEDIDO_API = "/salud/api";
+
+    /* Drawer */
+    var drawer  = document.getElementById("drawerNav");
+    var overlay = document.getElementById("drawerOverlay");
+    function toggleDrawer() {
+      drawer.classList.toggle("oculto");
+      overlay.classList.toggle("oculto");
+    }
+    document.getElementById("btnMenu").addEventListener("click", toggleDrawer);
+    document.getElementById("drawerOverlay").addEventListener("click", toggleDrawer);
+    document.getElementById("btnCerrarDrawer").addEventListener("click", toggleDrawer);
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && !drawer.classList.contains("oculto")) toggleDrawer();
+    });
+
+    /* Tema */
+    (function initTema() {
+      if (localStorage.getItem("hogar-tema") === "oscuro")
+        document.documentElement.setAttribute("data-tema", "oscuro");
+      actualizarIconoTema();
+    })();
+    document.getElementById("btnTema").addEventListener("click", function() {
+      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
+      if (oscuro) {
+        document.documentElement.removeAttribute("data-tema");
+        localStorage.setItem("hogar-tema", "claro");
+      } else {
+        document.documentElement.setAttribute("data-tema", "oscuro");
+        localStorage.setItem("hogar-tema", "oscuro");
+      }
+      actualizarIconoTema();
+    });
+    function actualizarIconoTema() {
+      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
+      document.getElementById("iconoTema").textContent = oscuro ? "light_mode" : "dark_mode";
+    }
+
+    /* Alertas */
+    var ALERTAS_FUENTES = [
+      { modulo: "redo",   api: REDO_API + "/alertas",  nombre: "ReDo" },
+      { modulo: "medido", api: MEDIDO_API + "/alertas", nombre: "MediDo" }
+    ];
+    var ALERTAS_API_MAP = { redo: REDO_API, medido: MEDIDO_API };
+
+    var filtroEstado = "todas";
+    var filtroModulo = "todas";
+    var alertasCache = [];
+
+    document.getElementById("alertasToolbar").addEventListener("click", function(e) {
+      var btn = e.target.closest("[data-filtro]");
+      if (btn) {
+        filtroEstado = btn.dataset.filtro;
+        document.querySelectorAll("[data-filtro]").forEach(function(b) {
+          b.classList.toggle("alertas-toolbar__filtro--activo", b.dataset.filtro === filtroEstado);
+        });
+        renderizar();
+        return;
+      }
+      btn = e.target.closest("[data-modulo]");
+      if (btn) {
+        filtroModulo = btn.dataset.modulo;
+        document.querySelectorAll("[data-modulo]").forEach(function(b) {
+          b.classList.toggle("alertas-toolbar__filtro--activo", b.dataset.modulo === filtroModulo);
+        });
+        renderizar();
+      }
+    });
+
+    function cargarAlertas() {
+      var promesas = ALERTAS_FUENTES.map(function(fuente) {
+        return fetch(fuente.api)
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            return (d.alertas || []).map(function(a) {
+              a.modulo = fuente.modulo;
+              a.modulo_nombre = fuente.nombre;
+              return a;
+            });
+          })
+          .catch(function() {
+            return [{ _error: true, modulo: fuente.modulo, modulo_nombre: fuente.nombre }];
+          });
+      });
+
+      Promise.all(promesas).then(function(resultados) {
+        var todas = [], errores = [];
+        resultados.forEach(function(lista) {
+          lista.forEach(function(a) {
+            if (a._error) errores.push(a);
+            else todas.push(a);
+          });
+        });
+        todas.sort(function(a, b) {
+          if (a.resuelta !== b.resuelta) return a.resuelta - b.resuelta;
+          return (b.fecha || "").localeCompare(a.fecha || "");
+        });
+        alertasCache = todas;
+        renderizar(errores);
+      });
+    }
+
+    function renderizar(errores) {
+      var contenedor = document.getElementById("alertasLista");
+      var contador   = document.getElementById("alertasContador");
+
+      var filtradas = alertasCache.filter(function(a) {
+        if (filtroEstado === "activas"   && a.resuelta)  return false;
+        if (filtroEstado === "resueltas" && !a.resuelta) return false;
+        if (filtroModulo !== "todas" && a.modulo !== filtroModulo) return false;
+        return true;
+      });
+
+      var totalActivas = alertasCache.filter(function(a) { return !a.resuelta; }).length;
+      contador.innerHTML = totalActivas > 0
+        ? "<strong>" + totalActivas + "</strong> alerta(s) activa(s)"
+        : "Sin alertas activas";
+
+      var htmlErrores = "";
+      if (errores && errores.length) {
+        errores.forEach(function(e) {
+          htmlErrores += '<div class="alertas-error-modulo">' +
+            '<span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:-2px">cloud_off</span> ' +
+            'Sin conexion con ' + e.modulo_nombre + '</div>';
+        });
+      }
+
+      if (!filtradas.length) {
+        contenedor.innerHTML = htmlErrores +
+          '<div class="alertas-vacio">' +
+            '<span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.4">check_circle</span>' +
+            'Sin alertas' +
+          '</div>';
+        return;
+      }
+
+      var html = htmlErrores;
+      filtradas.forEach(function(a) {
+        html += '<div class="alerta-item ' + (a.resuelta ? "alerta-item--resuelta" : "alerta-item--activa") + '">' +
+          '<div class="alerta-item__cuerpo">' +
+            '<div class="alerta-item__cabecera">' +
+              '<span class="alerta-item__modulo alerta-item__modulo--' + a.modulo + '">' + a.modulo_nombre + '</span>' +
+              '<span class="alerta-item__tipo">' + (a.tipo || "") + '</span>' +
+            '</div>' +
+            '<div class="alerta-item__mensaje">' + a.mensaje + '</div>' +
+            (a.fecha ? '<div class="alerta-item__fecha">' + formatearFecha(a.fecha) + '</div>' : '') +
+          '</div>' +
+          '<div class="alerta-item__acciones">';
+
+        if (!a.resuelta) {
+          html += '<button class="alerta-item__btn alerta-item__btn--resolver" onclick="resolverAlerta(\'' + a.modulo + '\',' + a.id + ')">' +
+            '<span class="material-symbols-outlined">check</span>' +
+          '</button>';
+        }
+
+        html += '<button class="alerta-item__btn alerta-item__btn--eliminar" onclick="eliminarAlerta(\'' + a.modulo + '\',' + a.id + ')">' +
+          '<span class="material-symbols-outlined">delete</span>' +
+        '</button>' +
+        '</div></div>';
+      });
+
+      contenedor.innerHTML = html;
+    }
+
+    function resolverAlerta(modulo, id) {
+      var api = ALERTAS_API_MAP[modulo];
+      if (!api) return;
+      fetch(api + "/alertas/" + id + "/resolver", { method: "POST" })
+        .then(function() { cargarAlertas(); });
+    }
+
+    function eliminarAlerta(modulo, id) {
+      if (!confirm("Esta alerta se eliminara permanentemente.\n¿Estas seguro?")) return;
+      var api = ALERTAS_API_MAP[modulo];
+      if (!api) return;
+      fetch(api + "/alertas/" + id, { method: "DELETE" })
+        .then(function() { cargarAlertas(); });
+    }
+
+    function formatearFecha(iso) {
+      if (!iso) return "";
+      try {
+        var d = new Date(iso);
+        return d.toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+      } catch(e) { return iso; }
+    }
+
+    cargarAlertas();
+    setInterval(cargarAlertas, 30000);
+  </script>
+</body>
+</html>
