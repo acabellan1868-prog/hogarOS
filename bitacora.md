@@ -2,6 +2,42 @@
 
 ## 2026-04-04
 
+### Alertas: página propia + tarjeta compacta en portal
+
+Se separa la gestión de alertas del portal principal.
+
+**Nueva página `portal/alertas.html`:**
+- Listado completo con filtros por estado (todas/activas/resueltas) y módulo (ReDo/MediDo)
+- Botones resolver y eliminar por alerta
+- Refresco automático cada 30 segundos
+- Accesible desde el drawer y desde la tarjeta del portal
+
+**Cambios en `portal/index.html`:**
+- Eliminado el bloque "Centro de Alertas" (sección completa con listado)
+- Nueva tarjeta compacta: nº activas (rojo/verde), nº resueltas, última alerta con mensaje y fecha
+- Enlace "Gestionar alertas" → `/alertas.html`
+- Drawer: nuevo enlace a Alertas
+- Fila 2 del bento pasa a 4 tarjetas span 3: Salud + IA + Backup + Alertas
+
+**Push:** Commit 4d16938 en acabellan1868-prog/hogarOS
+
+---
+
+### Fix tarjeta Asistente IA: sesiones y tokens incorrectos
+
+El endpoint `/api/claude/resumen` de MediDo contaba filas individuales en lugar de sesiones únicas.
+
+**Causa:** `COUNT(*)` contaba cada respuesta del hook como una sesión distinta. `SUM(tokens)` sumaba acumulados parciales en lugar del valor final por sesión.
+
+**Fix en `MediDo/app/rutas/claude.py`:**
+- La query de agregación ahora agrupa por `session_id` usando `MAX()` por campo (igual que `/sesiones`)
+- `sesiones_totales` devuelve sesiones únicas reales
+- Tokens y coste reflejan el valor final de cada sesión, sin duplicados
+
+**Push:** Commit 78b9278 en acabellan1868-prog/MediDo
+
+---
+
 ### Reorganización bento grid: 3 tarjetas por fila
 
 Se reorganiza el layout del portal para distribuir las 6 tarjetas en 2 filas de 3.

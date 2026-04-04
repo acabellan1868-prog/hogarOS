@@ -463,11 +463,16 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 - [ ] 👤 Probar refresco: datos actualizados cada 60 segundos
 - [ ] 👤 Probar escenario offline: hook captura en cola, datos se sincronizan al volver a red
 
-### 13e — Ajustes visuales portal ✅
+### 13e — Ajustes visuales y correcciones portal ✅
 
 - [x] 🤖 Reorganizar bento grid: 2 filas de 3 tarjetas (antes: fila 1 con 2, filas 2-3 irregulares)
   - Fila 1: Domótica(5) + Finanzas(4) + Red(3)
   - Fila 2: Salud(4) + Asistente IA(4) + Backup(4)
+- [x] 🤖 Fix `/api/claude/resumen` en MediDo: `COUNT(*)` → sesiones únicas con `MAX()` por session_id
+- [x] 🤖 Alertas: mover gestión a `portal/alertas.html` (página propia con listado + filtros + acciones)
+- [x] 🤖 Portal: tarjeta compacta de alertas (activas/resueltas/última) + enlace a `/alertas.html`
+- [x] 🤖 Drawer: añadir enlace a Alertas
+- [x] 🤖 Bento fila 2: 4 tarjetas (Salud+IA+Backup+Alertas, span 3 c/u)
 
 ---
 
