@@ -1,5 +1,45 @@
 # Bitácora — hogarOS
 
+## 2026-04-07
+
+### Gestión de datos sensibles — convención .env para todo el ecosistema
+
+Los repositorios del ecosistema son públicos en GitHub. Había valores sensibles
+(topics NTFY, rango de red doméstica) escritos directamente en los
+`docker-compose.yml`. Se establece una convención uniforme para todos los proyectos.
+
+**Convención:**
+- `.env` — valores reales, nunca en git (ya estaba en `.gitignore` en todos los proyectos)
+- `.env.example` — plantilla pública con nombres de variables y descripciones, sin valores reales
+- `docker-compose.yml` — usa `${VARIABLE}` para todos los valores sensibles
+
+**Cambios en hogarOS:**
+- `docker-compose.yml`: `NTFY_TOPIC=hogaros-3ca6f61b` → `${NTFY_TOPIC_ALERTAS}` (servicios redo y medido)
+- `docker-compose.yml`: `REDO_NETWORK=192.168.31.0/24` → `${REDO_NETWORK}`
+- `docker-compose.yml`: añadidas variables NTFY al servicio fido (`${NTFY_TOPIC_FIDO}`)
+- `.env.example`: reescrito completamente con todas las variables del ecosistema y sin valores reales (el anterior tenía `PVE_HOST`, `PVE_NODE`, `PVE_TOKEN_ID` con valores reales)
+
+**Nota sobre nomenclatura en hogarOS/.env:**
+En el `.env` del orquestador los topics NTFY tienen nombres distintos para evitar
+colisión entre los dos canales:
+- `NTFY_TOPIC_FIDO` → topic de movimientos bancarios (solo FiDo)
+- `NTFY_TOPIC_ALERTAS` → topic de alertas del sistema (ReDo y MediDo)
+
+Cada servicio recibe la variable internamente como `NTFY_TOPIC` — sin cambios en el código.
+
+**Aplicado también en:** FiDo, ReDo, MediDo (ver bitácoras respectivas)
+
+---
+
+### Listener NTFY en FiDo — captura automática de movimientos desde el móvil
+
+Ver bitácora de FiDo (2026-04-06) para el detalle técnico completo.
+
+El topic `fido-mov-ea3172c15373bf4a` es exclusivo para movimientos financieros,
+separado del topic de alertas del ecosistema (`hogaros-3ca6f61b`).
+
+---
+
 ## 2026-04-04
 
 ### Alertas: página propia + tarjeta compacta en portal

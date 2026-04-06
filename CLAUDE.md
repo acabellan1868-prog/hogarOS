@@ -66,12 +66,39 @@ hogarOS/
 └── .env.example
 ```
 
+## Variables de entorno — convención del ecosistema
+
+Todos los repos son públicos. Los valores sensibles van en `.env` (nunca en git).
+
+| Archivo | Dónde | Propósito |
+|---------|-------|-----------|
+| `.env` | Solo en la VM, nunca en git | Valores reales |
+| `.env.example` | En git, sin valores reales | Plantilla para saber qué configurar |
+
+**Variables en hogarOS/.env** (orquestador — contiene las de todos los servicios):
+
+| Variable | Servicio | Descripción |
+|----------|----------|-------------|
+| `HA_TOKEN` | Nginx, MediDo | Token de Home Assistant |
+| `REDO_NETWORK` | ReDo | Red doméstica a escanear (ej: `192.168.31.0/24`) |
+| `NTFY_TOPIC_FIDO` | FiDo | Topic NTFY (intermediario de transporte) para movimientos bancarios |
+| `NTFY_TOPIC_ALERTAS` | ReDo, MediDo | Topic NTFY para alertas del sistema |
+| `NTFY_CUENTA_DEFAULT` | FiDo | ID de cuenta por defecto para movimientos NTFY |
+| `PVE_HOST` | MediDo | IP del servidor Proxmox (hipervisor de virtualización) |
+| `PVE_NODE` | MediDo | Nombre del nodo Proxmox |
+| `PVE_TOKEN_ID` | MediDo | ID del token de API (Interfaz de Programación) de Proxmox |
+| `PVE_TOKEN_SECRET` | MediDo | Secreto del token de Proxmox |
+| `PVE_VERIFY_SSL` | MediDo | Verificar certificado SSL (Capa de Conexión Segura) |
+
+Nota: en los `docker-compose.yml` individuales (desarrollo local) cada proyecto
+usa solo sus propias variables con el nombre `NTFY_TOPIC` (sin sufijo).
+
 ## Despliegue
 
 1. `git push` al repo correspondiente
 2. En VM 101: `./actualizar.sh` desde `/mnt/datos/hogarOS/`
 
-Sin CI/CD. Siempre manual.
+Sin CI/CD (Integración y Despliegue Continuo). Siempre manual.
 
 ## Design system — Living Sanctuary
 
