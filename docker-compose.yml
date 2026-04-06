@@ -46,9 +46,9 @@ services:
     environment:
       - TZ=Europe/Madrid
       - REDO_DB_PATH=/app/data/redo.db
-      - REDO_NETWORK=192.168.31.0/24
+      - REDO_NETWORK=${REDO_NETWORK}
       - REDO_SCAN_INTERVAL=300
-      - NTFY_TOPIC=hogaros-3ca6f61b
+      - NTFY_TOPIC=${NTFY_TOPIC_ALERTAS}
     restart: unless-stopped
 
   # ── FiDo — Finanzas Domésticas ──
@@ -63,6 +63,9 @@ services:
     environment:
       - TZ=Europe/Madrid
       - FIDO_DB_PATH=/app/data/fido.db
+      - NTFY_URL=https://ntfy.sh
+      - NTFY_TOPIC=${NTFY_TOPIC_FIDO}
+      - NTFY_CUENTA_DEFAULT=${NTFY_CUENTA_DEFAULT:-1}
     restart: unless-stopped
 
   # ── MediDo — Metricas y salud del hogar ──
@@ -86,5 +89,5 @@ services:
       - PVE_TOKEN_SECRET=${PVE_TOKEN_SECRET}
       - PVE_VERIFY_SSL=${PVE_VERIFY_SSL:-false}
       - HA_TOKEN=${HA_TOKEN}
-      - NTFY_TOPIC=hogaros-3ca6f61b
+      - NTFY_TOPIC=${NTFY_TOPIC_ALERTAS}
     restart: unless-stopped
