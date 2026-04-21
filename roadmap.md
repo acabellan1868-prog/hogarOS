@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 13d en curso — bento grid reorganizado, pendiente despliegue en VM 101.
-> Última actualización: 2026-04-04
+> Estado actual: Fase 13 completada ✅ — portal y MediDo desplegados en VM 101 y funcionando.
+> Última actualización: 2026-04-18
 
 ### Leyenda
 
@@ -457,11 +457,11 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 
 ### 13d — Verificación y despliegue 🔄
 
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM (desplegar portal + MediDo)
-- [ ] 👤 Verificar en navegador: tarjeta "Asistente IA" visible y datos cargados
-- [ ] 👤 Probar MediDo offline: verificar fallback elegante
-- [ ] 👤 Probar refresco: datos actualizados cada 60 segundos
-- [ ] 👤 Probar escenario offline: hook captura en cola, datos se sincronizan al volver a red
+- [x] 👤 Ejecutar `actualizar.sh` en la VM (desplegar portal + MediDo)
+- [x] 👤 Verificar en navegador: tarjeta "Asistente IA" visible y datos cargados
+- [x] 👤 Probar MediDo offline: verificar fallback elegante
+- [x] 👤 Probar refresco: datos actualizados cada 60 segundos
+- [x] 👤 Probar escenario offline: hook captura en cola, datos se sincronizan al volver a red
 
 ### 13e — Ajustes visuales y correcciones portal ✅
 

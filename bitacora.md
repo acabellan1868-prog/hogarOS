@@ -1,5 +1,14 @@
 # Bitácora — hogarOS
 
+## 2026-04-18
+
+### Fase 13 completada — despliegue en VM 101
+
+Ejecutado `actualizar.sh` en VM 101. Portal y MediDo desplegados con la tarjeta
+"Asistente IA" funcionando. Fase 13d verificada en producción — todas las tareas manuales completadas.
+
+---
+
 ## 2026-04-07
 
 ### Gestión de datos sensibles — convención .env para todo el ecosistema
