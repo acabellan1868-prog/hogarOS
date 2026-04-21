@@ -18,6 +18,7 @@ services:
       - fido
       - hogar-api
       - medido
+      - kryptonite
     restart: unless-stopped
 
   # ── hogar-api — Gestión del lanzador ──
@@ -66,6 +67,22 @@ services:
       - NTFY_URL=https://ntfy.sh
       - NTFY_TOPIC=${NTFY_TOPIC_FIDO}
       - NTFY_CUENTA_DEFAULT=${NTFY_CUENTA_DEFAULT:-1}
+    restart: unless-stopped
+
+  # ── Kryptonite — Análisis de portfolio crypto ──
+  # Se construye desde /mnt/datos/kryptonite-build/
+  kryptonite:
+    build: /mnt/datos/kryptonite-build
+    container_name: kryptonite
+    ports:
+      - "5000:5000"
+    volumes:
+      - /mnt/datos/kryptonite/data:/app/data
+      - /mnt/datos/kryptonite/logs:/app/logs
+    env_file:
+      - /mnt/datos/kryptonite/parametros.env
+    environment:
+      - TZ=Europe/Madrid
     restart: unless-stopped
 
   # ── MediDo — Metricas y salud del hogar ──
