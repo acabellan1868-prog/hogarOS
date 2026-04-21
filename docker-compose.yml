@@ -75,7 +75,7 @@ services:
     build: /mnt/datos/kryptonite-build
     container_name: kryptonite
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - /mnt/datos/kryptonite/data:/app/data
       - /mnt/datos/kryptonite/logs:/app/logs
