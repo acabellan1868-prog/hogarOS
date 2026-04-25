@@ -1,5 +1,20 @@
 # Bitácora — hogarOS
 
+## 2026-04-25
+
+### Portada — tesela de Finanzas Domésticas filtrada
+
+La tesela de Finanzas Domésticas del portal deja de consumir el resumen global de FiDo
+y pasa a pedir `GET /finanzas/api/resumen?cuenta_nombre=Cuenta%20Antonio&banco=caixa`.
+
+Motivo: el resumen global suma movimientos de todas las cuentas, incluyendo transferencias
+entre cuentas propias, por lo que ingresos/gastos aparecen duplicados. De momento se usa
+`Cuenta Antonio (Caixa)` como cuenta operativa principal para la lectura mensual.
+
+Ficheros modificados: `portal/index.html`
+
+---
+
 ## 2026-04-18
 
 ### Fase 13 completada — despliegue en VM 101

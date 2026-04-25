@@ -719,14 +719,15 @@
        Cargar datos de FiDo
        ============================================================ */
     function cargarFido() {
-      fetch(FIDO_API + "/resumen")
+      fetch(FIDO_API + "/resumen?cuenta_nombre=Cuenta%20Antonio&banco=caixa")
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var contenedor = document.getElementById("fidoContenido");
+          var detalle = d.mes + " · Cuenta Antonio (Caixa)";
 
           contenedor.innerHTML =
             '<div class="hogar-tarjeta__valor">' + formatearEuros(d.balance) + '</div>' +
-            '<div class="hogar-tarjeta__detalle">' + d.mes + '</div>' +
+            '<div class="hogar-tarjeta__detalle">' + detalle + '</div>' +
             '<div class="fido-metricas">' +
               '<div class="fido-metrica fido-metrica--ingreso">' +
                 '<div class="fido-metrica__valor">+' + formatearEuros(d.ingresos) + '</div>' +
