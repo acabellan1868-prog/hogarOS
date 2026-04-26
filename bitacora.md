@@ -2,6 +2,27 @@
 
 ## 2026-04-26
 
+### Backup — validación real de dumps generados
+
+Ajustado `Politica_backup/backup_dumps.sh` para que no marque como generado un dump
+si el comando falla o el fichero resultante queda vacío.
+
+El caso detectado fue MariaDB/Nextcloud: `mariadb-dump` podía fallar por permisos
+y aun así dejar una línea confusa en `backup_dumps.log` indicando que el SQL se
+había generado.
+
+Ahora el script:
+- registra ERROR si el código de salida no es 0 o el fichero pesa 0 bytes;
+- elimina el fichero de dump fallido para que no se copie como si fuera válido;
+- solo notifica como OK los dumps que existen y tienen contenido.
+
+Pendiente: revisar permisos reales de la base de datos `nextcloud` en el contenedor
+MariaDB de la VM 101.
+
+---
+
+## 2026-04-26
+
 ### Backup — estado estructurado básico para la portada
 
 Implementada la v1 rápida de mejora del backup:

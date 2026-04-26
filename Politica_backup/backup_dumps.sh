@@ -51,6 +51,18 @@ registrar() {
     fi
 }
 
+validar_generado() {
+    # $1 = nombre, $2 = fichero, $3 = código de salida
+    if [ "$3" -eq 0 ] && [ -s "$2" ]; then
+        registrar "$1" 0
+        log "  → $2 generado"
+    else
+        registrar "$1" 1
+        rm -f "$2"
+        log "  → ERROR: no se pudo generar $2"
+    fi
+}
+
 # --- Inicio ------------------------------------------------------------------
 
 echo "" >> "$LOG"
@@ -63,8 +75,7 @@ log "=========================================="
 log "Dump SQLite de FiDo..."
 if [ -f "$FIDO_DB" ]; then
     sqlite3 "$FIDO_DB" ".backup ${FIDO_DB}.bak"
-    registrar "FiDo (SQLite)" $?
-    log "  → ${FIDO_DB}.bak generado"
+    validar_generado "FiDo (SQLite)" "${FIDO_DB}.bak" $?
 else
     log "  → AVISO: $FIDO_DB no encontrado, saltando"
     registrar "FiDo (SQLite)" 1
@@ -75,8 +86,7 @@ fi
 log "Dump SQLite de ReDo..."
 if [ -f "$REDO_DB" ]; then
     sqlite3 "$REDO_DB" ".backup ${REDO_DB}.bak"
-    registrar "ReDo (SQLite)" $?
-    log "  → ${REDO_DB}.bak generado"
+    validar_generado "ReDo (SQLite)" "${REDO_DB}.bak" $?
 else
     log "  → AVISO: $REDO_DB no encontrado, saltando"
     registrar "ReDo (SQLite)" 1
@@ -87,8 +97,7 @@ fi
 log "Dump PostgreSQL de Planka..."
 if docker ps --format '{{.Names}}' | grep -q "^${PLANKA_CONTAINER}$"; then
     docker exec "$PLANKA_CONTAINER" pg_dump -U planka planka > "$PLANKA_DUMP"
-    registrar "Planka (PostgreSQL)" $?
-    log "  → $PLANKA_DUMP generado"
+    validar_generado "Planka (PostgreSQL)" "$PLANKA_DUMP" $?
 else
     log "  → AVISO: contenedor $PLANKA_CONTAINER no está corriendo, saltando"
     registrar "Planka (PostgreSQL)" 1
@@ -99,8 +108,7 @@ fi
 log "Dump MariaDB de Nextcloud..."
 if docker ps --format '{{.Names}}' | grep -q "^${MARIADB_CONTAINER}$"; then
     docker exec "$MARIADB_CONTAINER" mariadb-dump -u root -p'hscmgajc:MySql' --no-tablespaces nextcloud > "$MARIADB_DUMP"
-    registrar "Nextcloud (MariaDB)" $?
-    log "  → $MARIADB_DUMP generado"
+    validar_generado "Nextcloud (MariaDB)" "$MARIADB_DUMP" $?
 else
     log "  → AVISO: contenedor $MARIADB_CONTAINER no está corriendo, saltando"
     registrar "Nextcloud (MariaDB)" 1
@@ -119,10 +127,10 @@ log "  → $DOCKER_ESTADO y $DOCKER_VOLUMENES generados"
 log "Notificando a hogar-api..."
 
 DUMPS_OK=""
-[ -f "${FIDO_DB}.bak" ] && DUMPS_OK="${DUMPS_OK}\"fido.db\","
-[ -f "${REDO_DB}.bak" ] && DUMPS_OK="${DUMPS_OK}\"redo.db\","
-[ -f "$PLANKA_DUMP" ] && DUMPS_OK="${DUMPS_OK}\"planka\","
-[ -f "$MARIADB_DUMP" ] && DUMPS_OK="${DUMPS_OK}\"nextcloud\","
+[ -s "${FIDO_DB}.bak" ] && DUMPS_OK="${DUMPS_OK}\"fido.db\","
+[ -s "${REDO_DB}.bak" ] && DUMPS_OK="${DUMPS_OK}\"redo.db\","
+[ -s "$PLANKA_DUMP" ] && DUMPS_OK="${DUMPS_OK}\"planka\","
+[ -s "$MARIADB_DUMP" ] && DUMPS_OK="${DUMPS_OK}\"nextcloud\","
 DUMPS_OK="[${DUMPS_OK%,}]"
 
 curl -s -X POST "$HOGAR_API" \

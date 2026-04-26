@@ -173,8 +173,10 @@ del resultado en `hogar-api`.
 - [x] 🤖 `backup.sh` envía el JSON final a `POST /api/backup`
 - [x] 🤖 `hogar-api` mantiene compatibilidad con el formato antiguo y normaliza la respuesta
 - [x] 🤖 La tarjeta del portal muestra dumps, VMs, tamaño y duración si esos datos existen
+- [x] 🤖 `backup_dumps.sh` no da por bueno un dump si el comando falla o el fichero queda vacío
 - [ ] 👤 Copiar/actualizar `backup.sh` en Proxmox y ejecutar backup real
 - [ ] 👤 Verificar en portada que aparecen los datos enriquecidos
+- [ ] 👤 Revisar permisos de MariaDB/Nextcloud si `mariadb-dump` sigue fallando con `errno: 13`
 
 ---
 
