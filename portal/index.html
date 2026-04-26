@@ -960,6 +960,18 @@
         .then(function(d) {
           var contenedor = document.getElementById("backupContenido");
           var tarjeta = document.getElementById("tarjetaBackup");
+          var estado = d.estado || "ok";
+          var conteos = d.conteos || {};
+          var resumen = d.resumen || {};
+
+          function formatearDuracion(segundos) {
+            if (!segundos && segundos !== 0) return "";
+            var minutos = Math.round(segundos / 60);
+            if (minutos < 60) return minutos + " min";
+            var horas = Math.floor(minutos / 60);
+            var resto = minutos % 60;
+            return horas + " h" + (resto ? " " + resto + " min" : "");
+          }
 
           if (!d.ultima_fecha) {
             tarjeta.className = "hogar-tarjeta backup--nunca";
@@ -976,7 +988,13 @@
           var dias = Math.floor((ahora - fecha) / (1000 * 60 * 60 * 24));
 
           var clase, texto;
-          if (dias < 7) {
+          if (estado === "error") {
+            clase = "backup--peligro";
+            texto = "Backup con errores";
+          } else if (estado === "warning") {
+            clase = "backup--aviso";
+            texto = "Backup con avisos";
+          } else if (dias < 7) {
             clase = "backup--ok";
             texto = "Hace " + dias + " dia" + (dias !== 1 ? "s" : "");
           } else if (dias < 14) {
@@ -987,12 +1005,29 @@
             texto = "SIN BACKUP DESDE HACE " + dias + " DIAS";
           }
 
+          var detalleTecnico = "";
+          if (conteos.dumps_total) {
+            detalleTecnico += '<div class="backup-estado__detalle">Dumps ' + conteos.dumps_ok + '/' + conteos.dumps_total + '</div>';
+          } else if (d.dumps_ok && d.dumps_ok.length) {
+            detalleTecnico += '<div class="backup-estado__detalle">Dumps ' + d.dumps_ok.length + ' registrados</div>';
+          }
+          if (conteos.vms_total) {
+            detalleTecnico += '<div class="backup-estado__detalle">VMs ' + conteos.vms_ok + '/' + conteos.vms_total + '</div>';
+          }
+          if (resumen.datos) {
+            detalleTecnico += '<div class="backup-estado__detalle">Datos: ' + resumen.datos + '</div>';
+          }
+          if (d.duracion_segundos || d.duracion_segundos === 0) {
+            detalleTecnico += '<div class="backup-estado__detalle">Duracion: ' + formatearDuracion(d.duracion_segundos) + '</div>';
+          }
+
           tarjeta.className = "hogar-tarjeta " + clase;
           contenedor.innerHTML =
             '<div class="backup-estado">' +
               '<div class="backup-estado__dias">' + texto + '</div>' +
               '<div class="backup-estado__detalle">Ultimo: ' + formatearFecha(d.ultima_fecha) + '</div>' +
               (d.tamano_total ? '<div class="backup-estado__detalle">' + d.tamano_total + '</div>' : '') +
+              detalleTecnico +
             '</div>';
 
         })

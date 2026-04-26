@@ -2,6 +2,28 @@
 
 ## 2026-04-26
 
+### Backup — estado estructurado básico para la portada
+
+Implementada la v1 rápida de mejora del backup:
+
+- `Politica_backup/backup.sh` genera `backup_estado.json` al final del proceso.
+- El JSON incluye estado general, duración, destino, tamaño total, conteos de dumps,
+  conteos de VMs, estado de datos y resultado de NTFY.
+- La verificación de dumps es básica: comprueba que los ficheros esperados existen
+  y pesan más de 0 bytes tras el `rsync`.
+- `backup.sh` envía ese JSON final a `POST /api/backup`, sobrescribiendo la notificación
+  parcial que ya enviaba `backup_dumps.sh`.
+- `hogar-api` normaliza la respuesta para mantener compatibilidad con el formato antiguo.
+- La tarjeta "Estado del Backup" de `portal/index.html` muestra dumps, VMs, duración
+  y tamaño si el JSON enriquecido está disponible.
+
+Pendiente: actualizar `/root/backup.sh` en Proxmox, ejecutar backup real y verificar
+en portada que se muestran los nuevos datos.
+
+---
+
+## 2026-04-26
+
 ### Propuestas de evolución añadidas a analisis-mejoras.md
 
 Añadida una sección nueva en `analisis-mejoras.md` con 10 propuestas candidatas

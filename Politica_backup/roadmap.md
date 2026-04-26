@@ -157,6 +157,27 @@
 
 ---
 
+## Fase 8 — Estado estructurado para portal ✅
+
+Mejora rápida para que el backup no solo registre fecha, sino también detalle básico
+del resultado en `hogar-api`.
+
+- [x] 🤖 `backup.sh` genera `backup_estado.json` al final del proceso
+- [x] 🤖 `backup.sh` verifica de forma básica los dumps esperados tras el `rsync`:
+  - `fido/fido.db.bak`
+  - `redo/redo.db.bak`
+  - `medido/medido.db.bak`
+  - `planka/planka_dump.sql`
+  - `mariadb/nextcloud_dump.sql`
+- [x] 🤖 `backup.sh` cuenta VMs copiadas y tamaño de `backup_actual`
+- [x] 🤖 `backup.sh` envía el JSON final a `POST /api/backup`
+- [x] 🤖 `hogar-api` mantiene compatibilidad con el formato antiguo y normaliza la respuesta
+- [x] 🤖 La tarjeta del portal muestra dumps, VMs, tamaño y duración si esos datos existen
+- [ ] 👤 Copiar/actualizar `backup.sh` en Proxmox y ejecutar backup real
+- [ ] 👤 Verificar en portada que aparecen los datos enriquecidos
+
+---
+
 ## Resumen de dependencias
 
 ```
@@ -173,4 +194,6 @@ Fase 5 (Script orquestador Proxmox) ✅ probado
 Fase 6 (Documentación restauración) ✅
     ↓
 Fase 7 (Notificación NTFY)          ✅ (pendiente verificar en producción)
+    ↓
+Fase 8 (Estado estructurado)        ✅ (pendiente verificar con backup real)
 ```

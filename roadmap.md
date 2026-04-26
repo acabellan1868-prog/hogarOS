@@ -3,6 +3,7 @@
 > Estado actual: Fase 13 completada ✅ — portal y MediDo desplegados en VM 101 y funcionando.
 > Última actualización: 2026-04-18
 > Nota 2026-04-25: la tesela de Finanzas Domésticas consume el resumen filtrado de FiDo para `Cuenta Antonio (Caixa)`, evitando duplicados por transferencias internas.
+> Nota 2026-04-26: backup estructurado v1 implementado en código. Próximo paso: actualizar `/root/backup.sh` en Proxmox, ejecutar backup real y verificar la tarjeta enriquecida en portada.
 
 ### Leyenda
 

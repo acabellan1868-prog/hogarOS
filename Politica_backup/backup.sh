@@ -11,7 +11,8 @@
 #   4. Copiar dumps de VMs (vzdump semanal de Proxmox) → disco externo
 #   5. rsync de /mnt/datos/ de la VM 101 → disco externo
 #   6. Generar MANIFIESTO.txt con resumen + detalle de errores
-#   7. Mostrar resumen por pantalla
+#   7. Generar backup_estado.json y notificar a hogar-api
+#   8. Mostrar resumen por pantalla
 #
 # Logs generados en backup_actual/:
 #   dumps.log   → salida completa del script de dumps de BDs
@@ -26,6 +27,7 @@ set -uo pipefail
 
 NTFY_TOPIC="hogaros-3ca6f61b"
 NTFY_URL="https://ntfy.sh/${NTFY_TOPIC}"
+HOGAR_API="http://192.168.31.131/api/backup"
 
 DISCO="/mnt/usb1"
 BACKUP_DIR="${DISCO}/bakup_proxmox"
@@ -41,8 +43,13 @@ VMS="101 102"
 VZDUMP_DIR="/var/lib/vz/dump"
 
 FECHA=$(date '+%Y-%m-%d %H:%M:%S')
+INICIO_EPOCH=$(date +%s)
 ERRORES=0
 RESUMEN=""
+DUMPS_ESTADO="pendiente"
+VMS_ESTADO="pendiente"
+DATOS_ESTADO="pendiente"
+NTFY_ESTADO="pendiente"
 
 # --- Funciones ---------------------------------------------------------------
 
@@ -64,6 +71,36 @@ registrar() {
 # Registra un aviso (no cuenta como error)
 registrar_aviso() {
     RESUMEN="${RESUMEN}  ⚠️  $1\n"
+}
+
+estado_por_conteo() {
+    local ok="$1"
+    local total="$2"
+    if [ "$ok" -eq "$total" ]; then
+        echo "ok"
+    elif [ "$ok" -gt 0 ]; then
+        echo "warning"
+    else
+        echo "error"
+    fi
+}
+
+tamano_bytes() {
+    local ruta="$1"
+    if [ -e "$ruta" ]; then
+        du -sb "$ruta" 2>/dev/null | cut -f1
+    else
+        echo 0
+    fi
+}
+
+tamano_humano() {
+    local ruta="$1"
+    if [ -e "$ruta" ]; then
+        du -sh "$ruta" 2>/dev/null | cut -f1
+    else
+        echo "0"
+    fi
 }
 
 # Extrae líneas de error de un log y las imprime con título
@@ -133,9 +170,11 @@ DUMPS_EXIT="${PIPESTATUS[0]}"
 
 if [ "$DUMPS_EXIT" -eq 0 ]; then
     registrar "Dumps BDs (VM 101)" 0
+    DUMPS_ESTADO="ok"
     log "  → Dumps completados"
 else
     registrar_aviso "Dumps BDs (VM 101): algunos dumps fallaron por permisos"
+    DUMPS_ESTADO="warning"
     log "  → AVISO: algunos dumps fallaron. Ver $LOG_DUMPS"
 fi
 
@@ -168,6 +207,16 @@ for VMID in $VMS; do
     fi
 done
 
+VMS_OK=0
+VMS_TOTAL=0
+for VMID in $VMS; do
+    VMS_TOTAL=$((VMS_TOTAL + 1))
+    if ls "${DIR_DUMP}"/vzdump-qemu-${VMID}-*.vma.zst >/dev/null 2>&1; then
+        VMS_OK=$((VMS_OK + 1))
+    fi
+done
+VMS_ESTADO=$(estado_por_conteo "$VMS_OK" "$VMS_TOTAL")
+
 # --- 5. rsync de /mnt/datos/ -------------------------------------------------
 
 log "Copiando /mnt/datos/ desde VM 101..."
@@ -184,13 +233,16 @@ RSYNC_EXIT="${PIPESTATUS[0]}"
 
 if [ "$RSYNC_EXIT" -eq 0 ]; then
     registrar "rsync /mnt/datos/" 0
+    DATOS_ESTADO="ok"
     log "  → Copia de datos completada"
 elif [ "$RSYNC_EXIT" -eq 23 ]; then
     # Código 23 = algunos ficheros no copiados por permisos — aviso, no error
     registrar_aviso "rsync /mnt/datos/: completado con avisos de permisos"
+    DATOS_ESTADO="warning"
     log "  → Copia completada con avisos de permisos. Ver $LOG_RSYNC"
 else
     registrar "rsync /mnt/datos/ (exit code: $RSYNC_EXIT)" 1
+    DATOS_ESTADO="error"
     log "  → ERROR en rsync. Ver $LOG_RSYNC"
 fi
 
@@ -237,7 +289,7 @@ MANIFIESTO="${DIR_ACTUAL}/MANIFIESTO.txt"
 
     # --- Estado de cada BD ---
     echo "BASES DE DATOS:"
-    for F in fido/fido.db.bak redo/redo.db.bak planka/planka_dump.sql mariadb/nextcloud_dump.sql; do
+    for F in fido/fido.db.bak redo/redo.db.bak medido/medido.db.bak planka/planka_dump.sql mariadb/nextcloud_dump.sql; do
         RUTA="${DIR_ACTUAL}/datos/${F}"
         NOMBRE=$(basename "$F")
         if [ -f "$RUTA" ]; then
@@ -340,6 +392,119 @@ curl -s \
     log "  → Notificación enviada a NTFY"
 } || {
     log "  → AVISO: no se pudo enviar notificación NTFY"
+    NTFY_ESTADO="warning"
+}
+
+if [ "$NTFY_ESTADO" = "pendiente" ]; then
+    NTFY_ESTADO="ok"
+fi
+
+# --- 9. Estado estructurado para hogar-api -----------------------------------
+
+log "Generando estado JSON del backup..."
+
+FIN_EPOCH=$(date +%s)
+DURACION=$((FIN_EPOCH - INICIO_EPOCH))
+
+DUMPS_JSON=""
+DUMPS_OK=0
+DUMPS_TOTAL=0
+for ITEM in \
+    "fido|sqlite|fido/fido.db.bak" \
+    "redo|sqlite|redo/redo.db.bak" \
+    "medido|sqlite|medido/medido.db.bak" \
+    "planka|postgres|planka/planka_dump.sql" \
+    "nextcloud|mariadb|mariadb/nextcloud_dump.sql"
+do
+    IFS='|' read -r NOMBRE TIPO RUTA_REL <<< "$ITEM"
+    RUTA_ABS="${DIR_ACTUAL}/datos/${RUTA_REL}"
+    DUMPS_TOTAL=$((DUMPS_TOTAL + 1))
+    if [ -s "$RUTA_ABS" ]; then
+        ESTADO_DUMP="ok"
+        DUMPS_OK=$((DUMPS_OK + 1))
+    else
+        ESTADO_DUMP="error"
+    fi
+    TAMANO_DUMP=$(tamano_bytes "$RUTA_ABS")
+    [ -n "$DUMPS_JSON" ] && DUMPS_JSON="${DUMPS_JSON},"
+    DUMPS_JSON="${DUMPS_JSON}{\"nombre\":\"${NOMBRE}\",\"tipo\":\"${TIPO}\",\"estado\":\"${ESTADO_DUMP}\",\"ruta\":\"datos/${RUTA_REL}\",\"tamano_bytes\":${TAMANO_DUMP}}"
+done
+
+DUMPS_ARCHIVOS_ESTADO=$(estado_por_conteo "$DUMPS_OK" "$DUMPS_TOTAL")
+if [ "$DUMPS_ARCHIVOS_ESTADO" = "ok" ] && [ "$DUMPS_EXIT" -ne 0 ]; then
+    DUMPS_ESTADO="warning"
+else
+    DUMPS_ESTADO="$DUMPS_ARCHIVOS_ESTADO"
+fi
+
+VMS_JSON=""
+for VMID in $VMS; do
+    FICHERO_VM=$(ls -t "${DIR_DUMP}"/vzdump-qemu-${VMID}-*.vma.zst 2>/dev/null | head -1)
+    if [ -n "$FICHERO_VM" ]; then
+        ESTADO_VM="ok"
+        NOMBRE_VM=$(basename "$FICHERO_VM")
+        TAMANO_VM=$(tamano_bytes "$FICHERO_VM")
+    else
+        ESTADO_VM="error"
+        NOMBRE_VM=""
+        TAMANO_VM=0
+    fi
+    [ -n "$VMS_JSON" ] && VMS_JSON="${VMS_JSON},"
+    VMS_JSON="${VMS_JSON}{\"vmid\":\"${VMID}\",\"estado\":\"${ESTADO_VM}\",\"fichero\":\"${NOMBRE_VM}\",\"tamano_bytes\":${TAMANO_VM}}"
+done
+
+if [ "$ERRORES" -gt 0 ]; then
+    ESTADO_GENERAL="error"
+elif [ "$DUMPS_ESTADO" = "warning" ] || [ "$DATOS_ESTADO" = "warning" ] || [ "$NTFY_ESTADO" = "warning" ]; then
+    ESTADO_GENERAL="warning"
+else
+    ESTADO_GENERAL="ok"
+fi
+
+TAMANO_DATOS_BYTES=$(tamano_bytes "${DIR_ACTUAL}/datos")
+TAMANO_TOTAL_BYTES=$(tamano_bytes "$DIR_ACTUAL")
+TAMANO_TOTAL_HUMANO=$(tamano_humano "$DIR_ACTUAL")
+BACKUP_JSON="${DIR_ACTUAL}/backup_estado.json"
+
+cat > "$BACKUP_JSON" <<EOF
+{
+  "ultima_fecha": "$(date -Iseconds)",
+  "estado": "${ESTADO_GENERAL}",
+  "duracion_segundos": ${DURACION},
+  "destino": "${DIR_ACTUAL}",
+  "manifiesto": "MANIFIESTO.txt",
+  "tamano_total": "${TAMANO_TOTAL_HUMANO}",
+  "tamanos": {
+    "total_bytes": ${TAMANO_TOTAL_BYTES},
+    "datos_bytes": ${TAMANO_DATOS_BYTES}
+  },
+  "resumen": {
+    "dumps": "${DUMPS_ESTADO}",
+    "vms": "${VMS_ESTADO}",
+    "datos": "${DATOS_ESTADO}",
+    "ntfy": "${NTFY_ESTADO}"
+  },
+  "conteos": {
+    "dumps_ok": ${DUMPS_OK},
+    "dumps_total": ${DUMPS_TOTAL},
+    "vms_ok": ${VMS_OK},
+    "vms_total": ${VMS_TOTAL},
+    "errores": ${ERRORES}
+  },
+  "dumps": [${DUMPS_JSON}],
+  "vms": [${VMS_JSON}]
+}
+EOF
+
+log "  → Estado JSON generado: $BACKUP_JSON"
+log "Notificando estado final a hogar-api..."
+
+curl -s -X POST "$HOGAR_API" \
+    -H "Content-Type: application/json" \
+    --data-binary "@${BACKUP_JSON}" > /dev/null 2>&1 && {
+    log "  → Estado final enviado a hogar-api"
+} || {
+    log "  → AVISO: no se pudo enviar estado final a hogar-api"
 }
 
 exit $ERRORES

@@ -76,11 +76,28 @@ async def guardar_lanzador(peticion: Request):
 
 # ── Backup: estado del ultimo backup ──
 
+def normalizar_backup(datos: dict) -> dict:
+    """Asegura una respuesta estable aunque el script mande formatos antiguos."""
+    if not datos:
+        return {"ultima_fecha": None}
+
+    respuesta = dict(datos)
+    errores = int(respuesta.get("errores", respuesta.get("conteos", {}).get("errores", 0)) or 0)
+    if "estado" not in respuesta:
+        respuesta["estado"] = "ok" if errores == 0 else "warning"
+    if "detalle" not in respuesta:
+        respuesta["detalle"] = {
+            clave: valor for clave, valor in respuesta.items()
+            if clave not in ("ultima_fecha", "estado", "detalle")
+        }
+    return respuesta
+
+
 @aplicacion.get("/backup")
 def obtener_backup():
     if os.path.exists(RUTA_BACKUP_JSON):
         with open(RUTA_BACKUP_JSON, encoding="utf-8") as f:
-            return json.load(f)
+            return normalizar_backup(json.load(f))
     return {"ultima_fecha": None}
 
 
