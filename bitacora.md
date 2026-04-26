@@ -2,6 +2,28 @@
 
 ## 2026-04-26
 
+### Backup — diagnóstico pendiente de MariaDB/Nextcloud
+
+Durante la primera prueba se detectaron dos pistas de permisos:
+
+- Dentro del contenedor `next-cloud-db-1`, MariaDB corre como usuario `mysql`
+  con UID/GID `999:999`.
+- El directorio de datos aparecía como propietario `1000:1000`:
+  `/var/lib/mysql` y `/var/lib/mysql/nextcloud`.
+- En una prueba posterior apareció también permiso denegado al escribir
+  `/mnt/datos/mariadb/nextcloud_dump.sql`.
+
+Queda pendiente verificar en la próxima copia real:
+- que la VM 101 tiene actualizado `Politica_backup/backup_dumps.sh`;
+- si el fallo real está en permisos del volumen de MariaDB, en permisos de
+  escritura de `/mnt/datos/mariadb`, o en ambos.
+
+No se modificaron permisos durante esta sesión.
+
+---
+
+## 2026-04-26
+
 ### Backup — validación real de dumps generados
 
 Ajustado `Politica_backup/backup_dumps.sh` para que no marque como generado un dump

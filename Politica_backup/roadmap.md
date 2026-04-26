@@ -176,7 +176,11 @@ del resultado en `hogar-api`.
 - [x] 🤖 `backup_dumps.sh` no da por bueno un dump si el comando falla o el fichero queda vacío
 - [ ] 👤 Copiar/actualizar `backup.sh` en Proxmox y ejecutar backup real
 - [ ] 👤 Verificar en portada que aparecen los datos enriquecidos
-- [ ] 👤 Revisar permisos de MariaDB/Nextcloud si `mariadb-dump` sigue fallando con `errno: 13`
+- [ ] 👤 Verificar que la VM 101 tiene actualizado `backup_dumps.sh` (`grep validar_generado`)
+- [ ] 👤 Revisar permisos de MariaDB/Nextcloud si `mariadb-dump` sigue fallando:
+  - proceso MariaDB observado como `mysql` UID/GID `999:999`
+  - `/var/lib/mysql` y `/var/lib/mysql/nextcloud` observados como `1000:1000`
+  - revisar también escritura en `/mnt/datos/mariadb/nextcloud_dump.sql`
 
 ---
 
