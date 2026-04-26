@@ -14,6 +14,7 @@
 3. [Centro de Alertas — Gestión unificada de alertas del ecosistema](#3-centro-de-alertas--gestión-unificada-de-alertas)
 4. [Otras mejoras aparcadas (no descartadas)](#4-otras-mejoras-aparcadas)
 5. [Monitor de uso de Claude — Tarjeta en el portal](#5-monitor-de-uso-de-claude--tarjeta-en-el-portal)
+6. [Propuestas de evolución del ecosistema](#6-propuestas-de-evolución-del-ecosistema)
 
 ---
 
@@ -1044,6 +1045,153 @@ portal/index.html
 | TareDo | Nueva app | Tareas domésticas compartidas tipo Kanban |
 
 Se pueden retomar en cualquier momento.
+
+---
+
+## 6. Propuestas de evolución del ecosistema
+
+> Ideas candidatas para próximas fases de hogarOS y aplicaciones satélite.
+> No son tareas comprometidas todavía; sirven como cartera de evolución para discutir
+> y priorizar antes de pasarlas a `roadmap.md`.
+
+### 6.1 FiDo — Sistema serio de transferencias internas
+
+**Problema:** las transferencias entre cuentas propias duplican ingresos y gastos cuando los informes agregan todas las cuentas.
+
+**Propuesta:** modelar explícitamente las transferencias internas, con relación entre movimiento origen y movimiento destino. Una transferencia interna no debería contar como ingreso/gasto real en informes operativos, aunque sí debe conservarse en el histórico contable.
+
+**Cómo podría hacerse:**
+- Campo o tabla específica para marcar movimientos como `transferencia_interna`.
+- Vinculación opcional entre dos movimientos por importe, fecha cercana y cuentas distintas.
+- Exclusión automática de informes de gastos/ingresos cuando el movimiento esté conciliado.
+- Vista de revisión para confirmar emparejamientos dudosos.
+
+**Valor:** corrige la base de lectura financiera y evita decisiones basadas en datos inflados.
+
+### 6.2 FiDo — Presupuesto mensual por categoría
+
+**Problema:** FiDo muestra lo gastado, pero todavía no contrasta contra límites definidos.
+
+**Propuesta:** permitir presupuestos mensuales por categoría padre o subcategoría. El panel y la portada podrían mostrar el consumo del presupuesto en porcentaje.
+
+**Cómo podría hacerse:**
+- Tabla `presupuestos` con categoría, importe, mes de inicio y activo.
+- Endpoint de resumen presupuestario.
+- Alertas cuando una categoría supere el 75%, 90% y 100%.
+- Tarjeta compacta en hogarOS: categorías en riesgo del mes.
+
+**Valor:** convierte FiDo en una herramienta de control, no solo de registro.
+
+### 6.3 FiDo — Movimientos recurrentes y suscripciones
+
+**Problema:** los gastos fijos se mezclan con los variables y cuesta saber qué parte del mes ya está comprometida.
+
+**Propuesta:** detectar movimientos recurrentes como hipoteca, seguros, suscripciones, Internet, móvil, colegio o servicios digitales.
+
+**Cómo podría hacerse:**
+- Detección por descripción similar, importe parecido y periodicidad mensual/anual.
+- Marca `recurrente` y grupo de recurrencia.
+- Vista de “gasto fijo mensual”.
+- Aviso si una suscripción sube de precio o aparece duplicada.
+
+**Valor:** separa gasto fijo y gasto variable, una de las lecturas más útiles para finanzas domésticas.
+
+### 6.4 hogarOS — Briefing diario del hogar
+
+**Problema:** el portal tiene tarjetas útiles, pero no una síntesis diaria accionable.
+
+**Propuesta:** crear una sección “Hoy” o “Briefing” con el parte de situación: salud del sistema, backup, alertas, gasto del mes, dispositivos nuevos, próximas tareas o anomalías.
+
+**Cómo podría hacerse:**
+- Endpoint agregador en `hogar-api` o composición directa en el frontend.
+- Reglas simples primero: no hace falta IA para la v1.
+- Texto corto, priorizado y con enlaces a cada módulo.
+
+**Valor:** reduce el tiempo de inspección: en un vistazo se sabe qué requiere atención.
+
+### 6.5 hogarOS / MediDo — Estado real de backups con detalle
+
+**Problema:** la tarjeta de backup indica antigüedad, pero el diagnóstico puede ser más rico.
+
+**Propuesta:** convertir el resultado del backup en datos estructurados: duración, tamaño, destino, dumps OK/error, VMs incluidas, ruta del manifiesto y último error.
+
+**Cómo podría hacerse:**
+- Hacer que `backup.sh` genere un JSON además de `MANIFIESTO.txt`.
+- `hogar-api` expone ese JSON vía `/api/backup`.
+- Portal muestra estado resumido y enlace a detalle.
+- MediDo puede alertar por fallos concretos, no solo por antigüedad.
+
+**Valor:** aumenta la confianza en la recuperación, que es lo que de verdad importa en backups.
+
+### 6.6 MediDo — Panel de degradación, no solo caídas
+
+**Problema:** un servicio puede estar “vivo” pero ir cada vez peor.
+
+**Propuesta:** detectar degradación por latencia, errores intermitentes o consumo anómalo antes de que haya caída total.
+
+**Cómo podría hacerse:**
+- Guardar línea base de latencia por servicio.
+- Alertar si un servicio supera varias veces su media histórica.
+- Detectar patrones horarios: picos recurrentes, backups, tareas cron.
+- Vista de “servicios degradados”.
+
+**Valor:** permite anticiparse a problemas en lugar de reaccionar cuando algo ya se ha roto.
+
+### 6.7 ReDo — Mapa de presencia familiar/doméstica
+
+**Problema:** ReDo ya guarda presencia, pero puede evolucionar de dato técnico a lectura doméstica.
+
+**Propuesta:** vista de patrones de presencia por dispositivos principales: horarios habituales, ausencias raras, dispositivos IoT que desaparecen, actividad nocturna sospechosa.
+
+**Cómo podría hacerse:**
+- Marcar dispositivos principales del hogar.
+- Resumen diario/semanal de primera y última presencia.
+- Detección de presencia fuera de patrón.
+- Vista por zonas y tipos usando los datos ya existentes.
+
+**Valor:** aprovecha una capacidad ya implementada y la convierte en información útil.
+
+### 6.8 hogarOS — Centro de Alertas 2.0
+
+**Problema:** el centro de alertas unifica avisos, pero puede crecer hacia gestión real.
+
+**Propuesta:** añadir severidad, agrupación, silenciado temporal, histórico por módulo y reglas de escalado.
+
+**Cómo podría hacerse:**
+- Campos estándar: severidad, origen, recurso afectado, silenciada_hasta.
+- Acción “silenciar 24h”.
+- Agrupar alertas repetidas en una sola entrada con contador.
+- Filtro por módulo, severidad y estado.
+
+**Valor:** evita ruido y mejora la capacidad de respuesta cuando haya más módulos.
+
+### 6.9 Kryptonite — Integración Revolut X
+
+**Problema:** las recompensas de staking de DOT y ADA requieren registro manual o quedan fuera de la cartera.
+
+**Propuesta:** implementar la integración con Revolut X para importar recompensas automáticamente hacia la tabla `operaciones`.
+
+**Cómo podría hacerse:**
+- Autenticación Ed25519.
+- Módulo `app/revolut_x.py`.
+- Endpoint `/revolut/sincronizar`.
+- Carga histórica inicial y flujo semanal en Node-RED.
+
+**Valor:** mejora la calidad de datos del portfolio y reduce trabajo manual.
+
+### 6.10 Nueva app — Inventario doméstico ligero
+
+**Problema:** información doméstica útil como garantías, números de serie, manuales o fechas de compra suele estar dispersa.
+
+**Propuesta:** crear una app sencilla de inventario del hogar: electrodomésticos, dispositivos, garantías, coste, ubicación, manuales y próxima revisión.
+
+**Cómo podría hacerse:**
+- FastAPI + SQLite + frontend vanilla.
+- Entidades: objeto, categoría, ubicación, fecha de compra, garantía, documento asociado.
+- Integración con hogarOS mediante tarjeta de resumen.
+- Relación futura con ReDo para dispositivos detectados en red.
+
+**Valor:** encaja con la filosofía hogarOS: convertir información doméstica dispersa en gestión tranquila y accesible.
 
 ---
 

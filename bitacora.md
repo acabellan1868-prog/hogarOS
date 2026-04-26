@@ -1,5 +1,41 @@
 # Bitácora — hogarOS
 
+## 2026-04-26
+
+### Propuestas de evolución añadidas a analisis-mejoras.md
+
+Añadida una sección nueva en `analisis-mejoras.md` con 10 propuestas candidatas
+para la evolución de hogarOS y sus aplicaciones satélite:
+
+- Transferencias internas en FiDo
+- Presupuestos por categoría
+- Movimientos recurrentes y suscripciones
+- Briefing diario del hogar
+- Estado detallado de backups
+- Degradación de servicios en MediDo
+- Mapa de presencia en ReDo
+- Centro de Alertas 2.0
+- Integración Revolut X en Kryptonite
+- Inventario doméstico ligero
+
+Quedan como ideas para discutir y priorizar antes de pasarlas a `roadmap.md`.
+
+---
+
+## 2026-04-25
+
+### AGENTS.md local para Codex
+
+Creado `AGENTS.md` en el repo de hogarOS a partir de `CLAUDE.md`, con contexto
+operativo para Codex: arquitectura Nginx, rutas de despliegue, `sub_filter`,
+variables de entorno, design system y monitor de Claude.
+
+Añadidas dos normas locales:
+- No meter fases, historial ni estado del proyecto en `AGENTS.md`.
+- No subir `Politica_backup/MANIFIESTO.txt` salvo indicación explícita.
+
+---
+
 ## 2026-04-25
 
 ### Portada — tesela de Finanzas Domésticas filtrada
