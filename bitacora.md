@@ -41,10 +41,20 @@ NTFY es el canal natural al ser el ya usado para alertas.
 🌡️ Exterior: 14°C · ↓9° ↑22°
 ```
 
-**Pendiente (acción manual):**
-1. Averiguar el entity_id exacto de la entidad weather en Home Assistant.
-2. Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM.
-3. Desplegar con `actualizar.sh` y probar con `POST /api/briefing/enviar`.
+**Pruebas realizadas el mismo día:**
+- Desplegado con `actualizar.sh`. El endpoint devuelve OK y los datos se recopilan
+  correctamente: CPU 5%, RAM 76%, backup hace 1 día, gasto semanal 0€, temperatura 18.8°C.
+- Fix adicional (`commit 4e21a1a`): la primera versión posteaba a `ntfy.sh/TOPIC` con JSON body,
+  lo que hacía que la app NTFY mostrase el JSON crudo. Corregido usando la API JSON de NTFY:
+  POST al URL base con el topic como campo en el body.
+- **Pendiente:** la notificación no llega al móvil. Causa probable: `NTFY_TOPIC_ALERTAS`
+  no está configurado en el `.env` de la VM para el servicio hogar-api, o está vacío.
+  Diagnóstico: `docker logs hogar-api --tail=20` en la VM.
+
+**Pendiente (próxima sesión):**
+1. Ejecutar `docker logs hogar-api --tail=20` para confirmar la causa del NTFY silencioso.
+2. Añadir `NTFY_TOPIC_ALERTAS` al `.env` si falta.
+3. Averiguar el entity_id de la entidad weather en HA para obtener min/max del día.
 
 ## 2026-04-26
 

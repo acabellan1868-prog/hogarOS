@@ -1,10 +1,10 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 14 en código ✅ — briefing diario implementado, pendiente de desplegar.
+> Estado actual: Fase 14 desplegada pero pendiente de verificar NTFY.
 > Última actualización: 2026-04-27
 > Nota 2026-04-25: la tesela de Finanzas Domésticas consume el resumen filtrado de FiDo para `Cuenta Antonio (Caixa)`, evitando duplicados por transferencias internas.
 > Nota 2026-04-26: backup estructurado v1 implementado en código. Próximo paso: actualizar `/root/backup.sh` en Proxmox, ejecutar backup real y verificar la tarjeta enriquecida en portada.
-> Nota 2026-04-27: briefing diario implementado en hogar-api. Antes de desplegar: averiguar entity_id de la entidad weather en Home Assistant y añadirlo al `.env` de la VM.
+> Nota 2026-04-27: briefing desplegado. El endpoint POST /api/briefing/enviar devuelve OK y los datos se recopilan correctamente (CPU/RAM/backup/FiDo/HA), pero la notificación no llega al móvil. Próximo paso: ejecutar `docker logs hogar-api --tail=20` en la VM para ver si hay warning de NTFY_TOPIC_ALERTAS vacío.
 
 ### Leyenda
 
@@ -495,11 +495,12 @@ Implementado en hogar-api como orquestador natural. Análisis en `analisis-mejor
 - [x] 🤖 hogar-api: APScheduler + endpoint manual `POST /briefing/enviar`
 - [x] 🤖 docker-compose.yml: variables de entorno para briefing
 - [x] 🤖 .env.example: documentar `BRIEFING_HA_WEATHER_ENTITY`, `BRIEFING_HORA`, `BRIEFING_MINUTO`
+- [x] 👤 Ejecutar `actualizar.sh` en la VM ✅
+- [x] 👤 Probar: `curl -X POST http://192.168.31.131/api/briefing/enviar` → devuelve OK, datos correctos ✅
+- [ ] 👤 Diagnosticar NTFY: `docker logs hogar-api --tail=20` (probable causa: `NTFY_TOPIC_ALERTAS` vacío en `.env`)
 - [ ] 👤 Averiguar entity_id de la entidad weather en HA (HA → Ajustes → Entidades → filtrar 'weather')
-- [ ] 👤 Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM
-- [ ] 👤 Probar: `curl -X POST http://192.168.31.131/api/briefing/enviar` y verificar NTFY
-- [ ] 👤 Verificar que llega a las 8:30 al día siguiente
+- [ ] 👤 Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM para obtener min/max
+- [ ] 👤 Verificar que llega a las 8:30
 
 ---
 
