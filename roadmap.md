@@ -1,9 +1,10 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 13 completada ✅ — portal y MediDo desplegados en VM 101 y funcionando.
-> Última actualización: 2026-04-18
+> Estado actual: Fase 14 en código ✅ — briefing diario implementado, pendiente de desplegar.
+> Última actualización: 2026-04-27
 > Nota 2026-04-25: la tesela de Finanzas Domésticas consume el resumen filtrado de FiDo para `Cuenta Antonio (Caixa)`, evitando duplicados por transferencias internas.
 > Nota 2026-04-26: backup estructurado v1 implementado en código. Próximo paso: actualizar `/root/backup.sh` en Proxmox, ejecutar backup real y verificar la tarjeta enriquecida en portada.
+> Nota 2026-04-27: briefing diario implementado en hogar-api. Antes de desplegar: averiguar entity_id de la entidad weather en Home Assistant y añadirlo al `.env` de la VM.
 
 ### Leyenda
 
@@ -475,6 +476,30 @@ Tarjeta "Asistente IA" en el portal con seguimiento de tokens y coste estimado d
 - [x] 🤖 Portal: tarjeta compacta de alertas (activas/resueltas/última) + enlace a `/alertas.html`
 - [x] 🤖 Drawer: añadir enlace a Alertas
 - [x] 🤖 Bento fila 2: 4 tarjetas (Salud+IA+Backup+Alertas, span 3 c/u)
+
+---
+
+## Fase 14 — Briefing diario por NTFY
+
+Resumen matutino enviado automáticamente a las 8:30 al topic NTFY del ecosistema.
+Implementado en hogar-api como orquestador natural. Análisis en `analisis-mejoras.md`, sección 6.4.
+
+### Componentes
+- `hogar-api/app/briefing.py` — recopilación de datos y envío NTFY
+- `hogar-api/app/principal.py` — APScheduler con CronTrigger 8:30 + endpoint manual `/briefing/enviar`
+- `FiDo/app/rutas/resumen.py` — nuevo parámetro `?periodo=semana`
+
+### Tareas
+- [x] 🤖 FiDo: añadir `?periodo=semana` a `/api/resumen`
+- [x] 🤖 hogar-api: módulo `briefing.py` (MediDo + backup + FiDo + HA + NTFY)
+- [x] 🤖 hogar-api: APScheduler + endpoint manual `POST /briefing/enviar`
+- [x] 🤖 docker-compose.yml: variables de entorno para briefing
+- [x] 🤖 .env.example: documentar `BRIEFING_HA_WEATHER_ENTITY`, `BRIEFING_HORA`, `BRIEFING_MINUTO`
+- [ ] 👤 Averiguar entity_id de la entidad weather en HA (HA → Ajustes → Entidades → filtrar 'weather')
+- [ ] 👤 Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM
+- [ ] 👤 Probar: `curl -X POST http://192.168.31.131/api/briefing/enviar` y verificar NTFY
+- [ ] 👤 Verificar que llega a las 8:30 al día siguiente
 
 ---
 

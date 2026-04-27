@@ -1,13 +1,31 @@
+"""
+hogar-api — Microservicio orquestador de hogarOS.
+Gestiona el lanzador de apps, el estado del backup y el briefing diario.
+"""
+
 import json
+import logging
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
-aplicacion = FastAPI()
+from app.briefing import enviar_briefing
 
-RUTA_JSON = os.getenv("LANZADOR_JSON", "/app/data/lanzador.json")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+)
+logger = logging.getLogger("hogar-api")
+
+RUTA_JSON        = os.getenv("LANZADOR_JSON", "/app/data/lanzador.json")
 RUTA_BACKUP_JSON = os.getenv("BACKUP_JSON", "/app/data/backup_estado.json")
+BRIEFING_HORA    = int(os.getenv("BRIEFING_HORA", "8"))
+BRIEFING_MINUTO  = int(os.getenv("BRIEFING_MINUTO", "30"))
+
+planificador = BackgroundScheduler(timezone="Europe/Madrid")
 
 # Config por defecto si no existe el fichero persistido
 CONFIG_DEFECTO = {
@@ -57,8 +75,36 @@ CONFIG_DEFECTO = {
 }
 
 
+@asynccontextmanager
+async def ciclo_vida(app: FastAPI):
+    """Lanza el planificador al arrancar y lo detiene al cerrar."""
+    planificador.add_job(
+        enviar_briefing,
+        CronTrigger(hour=BRIEFING_HORA, minute=BRIEFING_MINUTO),
+        id="briefing_diario",
+        name="Briefing diario del hogar",
+        replace_existing=True,
+    )
+    planificador.start()
+    logger.info(f"Briefing programado a las {BRIEFING_HORA:02d}:{BRIEFING_MINUTO:02d} (Europe/Madrid)")
+    yield
+    planificador.shutdown(wait=False)
+    logger.info("Planificador detenido")
+
+
+aplicacion = FastAPI(
+    title="hogar-api",
+    description="Orquestador del ecosistema hogarOS: lanzador, backup y briefing diario",
+    version="1.0.0",
+    lifespan=ciclo_vida,
+)
+
+
+# ── Lanzador ──────────────────────────────────────────────────────────────────
+
 @aplicacion.get("/lanzador")
 def obtener_lanzador():
+    """Devuelve la configuración del lanzador de apps."""
     if os.path.exists(RUTA_JSON):
         with open(RUTA_JSON, encoding="utf-8") as f:
             return json.load(f)
@@ -67,6 +113,7 @@ def obtener_lanzador():
 
 @aplicacion.put("/lanzador")
 async def guardar_lanzador(peticion: Request):
+    """Persiste la configuración del lanzador de apps."""
     datos = await peticion.json()
     os.makedirs(os.path.dirname(RUTA_JSON), exist_ok=True)
     with open(RUTA_JSON, "w", encoding="utf-8") as f:
@@ -74,13 +121,12 @@ async def guardar_lanzador(peticion: Request):
     return {"ok": True}
 
 
-# ── Backup: estado del ultimo backup ──
+# ── Backup ────────────────────────────────────────────────────────────────────
 
-def normalizar_backup(datos: dict) -> dict:
+def _normalizar_backup(datos: dict) -> dict:
     """Asegura una respuesta estable aunque el script mande formatos antiguos."""
     if not datos:
         return {"ultima_fecha": None}
-
     respuesta = dict(datos)
     errores = int(respuesta.get("errores", respuesta.get("conteos", {}).get("errores", 0)) or 0)
     if "estado" not in respuesta:
@@ -95,16 +141,27 @@ def normalizar_backup(datos: dict) -> dict:
 
 @aplicacion.get("/backup")
 def obtener_backup():
+    """Devuelve el estado del último backup."""
     if os.path.exists(RUTA_BACKUP_JSON):
         with open(RUTA_BACKUP_JSON, encoding="utf-8") as f:
-            return normalizar_backup(json.load(f))
+            return _normalizar_backup(json.load(f))
     return {"ultima_fecha": None}
 
 
 @aplicacion.post("/backup")
 async def registrar_backup(peticion: Request):
+    """Recibe y persiste el resultado de un backup desde el script de Proxmox."""
     datos = await peticion.json()
     os.makedirs(os.path.dirname(RUTA_BACKUP_JSON), exist_ok=True)
     with open(RUTA_BACKUP_JSON, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
     return {"ok": True}
+
+
+# ── Briefing ──────────────────────────────────────────────────────────────────
+
+@aplicacion.post("/briefing/enviar")
+def forzar_briefing():
+    """Fuerza el envío inmediato del briefing diario. Útil para probar."""
+    enviar_briefing()
+    return {"ok": True, "mensaje": "Briefing enviado"}

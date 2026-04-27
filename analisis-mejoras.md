@@ -1096,7 +1096,7 @@ Se pueden retomar en cualquier momento.
 
 **Valor:** separa gasto fijo y gasto variable, una de las lecturas más útiles para finanzas domésticas.
 
-### 6.4 hogarOS — Briefing diario del hogar
+### 6.4 hogarOS — Briefing diario del hogar ✅ Implementado (2026-04-27)
 
 **Problema:** el portal tiene tarjetas útiles, pero no una síntesis diaria accionable.
 

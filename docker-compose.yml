@@ -21,7 +21,7 @@ services:
       - kryptonite
     restart: unless-stopped
 
-  # ── hogar-api — Gestión del lanzador ──
+  # ── hogar-api — Orquestador: lanzador, backup y briefing diario ──
   hogar-api:
     build: ./hogar-api
     container_name: hogar-api
@@ -30,6 +30,13 @@ services:
     environment:
       - TZ=Europe/Madrid
       - LANZADOR_JSON=/app/data/lanzador.json
+      - HA_TOKEN=${HA_TOKEN}
+      - HA_HOST=192.168.31.132
+      - NTFY_URL=https://ntfy.sh
+      - NTFY_TOPIC_ALERTAS=${NTFY_TOPIC_ALERTAS}
+      - BRIEFING_HA_WEATHER_ENTITY=${BRIEFING_HA_WEATHER_ENTITY:-weather.forecast_home}
+      - BRIEFING_HORA=${BRIEFING_HORA:-8}
+      - BRIEFING_MINUTO=${BRIEFING_MINUTO:-30}
     restart: unless-stopped
 
   # ── ReDo — Red Doméstica ──

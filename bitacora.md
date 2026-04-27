@@ -1,5 +1,51 @@
 # Bitácora — hogarOS
 
+## 2026-04-27
+
+### Briefing diario — implementación completa
+
+Se implementa el briefing diario del hogar: un mensaje NTFY (protocolo de notificaciones)
+que se envía automáticamente a las 8:30 con el parte de situación del ecosistema.
+
+**Motivación:** el portal hogarOS no se mira por las mañanas, pero sí el móvil.
+NTFY es el canal natural al ser el ya usado para alertas.
+
+**Cambios en hogar-api** (orquestador del ecosistema, lugar correcto para esta lógica):
+- `requirements.txt`: añadidos `apscheduler` (planificador de tareas) y `httpx` (cliente HTTP).
+- `app/briefing.py`: nuevo módulo con toda la lógica de recopilación y envío.
+  - `_obtener_sistema()` → consulta MediDo: CPU, RAM, disco y servicios caídos.
+  - `_obtener_backup()` → lee `backup_estado.json` del volumen local (sin HTTP).
+  - `_obtener_gasto_semana()` → consulta FiDo con `?periodo=semana`.
+  - `_obtener_temperatura()` → consulta HA vía API REST con la entidad weather configurada.
+  - `_componer()` → ensambla título + cuerpo; prioridad `high` si hay servicios caídos o backup viejo.
+  - `_enviar_ntfy()` → POST JSON a NTFY.
+  - `enviar_briefing()` → punto de entrada del job.
+- `app/principal.py`: añadido APScheduler con `CronTrigger` a las 8:30 (configurable).
+  Añadido endpoint `POST /briefing/enviar` para lanzar el briefing manualmente al probar.
+- `docker-compose.yml`: nuevas variables para hogar-api: `HA_TOKEN`, `HA_HOST`,
+  `NTFY_URL`, `NTFY_TOPIC_ALERTAS`, `BRIEFING_HA_WEATHER_ENTITY`, `BRIEFING_HORA`, `BRIEFING_MINUTO`.
+- `.env.example`: documentadas las tres nuevas variables de briefing.
+
+**Cambio en FiDo:**
+- `app/rutas/resumen.py`: nuevo parámetro `?periodo=semana` que devuelve gastos
+  desde el lunes de la semana actual hasta hoy. Compatible con el parámetro anterior
+  (`?periodo=mes` sigue siendo el comportamiento por defecto).
+
+**Formato del mensaje NTFY:**
+```
+☀️ Buenos días — lunes 27 abr
+
+🖥️ Sistema: CPU 12% · RAM 54% · Disco 67% ✅
+💾 Backup: hace 1 día ✅
+💶 Semana del 21 al 27 abr: 143.50 € gastados
+🌡️ Exterior: 14°C · ↓9° ↑22°
+```
+
+**Pendiente (acción manual):**
+1. Averiguar el entity_id exacto de la entidad weather en Home Assistant.
+2. Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM.
+3. Desplegar con `actualizar.sh` y probar con `POST /api/briefing/enviar`.
+
 ## 2026-04-26
 
 ### Backup — diagnóstico pendiente de MariaDB/Nextcloud
