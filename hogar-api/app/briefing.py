@@ -174,14 +174,19 @@ def _componer(sistema: dict, backup: dict, finanzas: dict, temperatura: dict) ->
 # ── Envío NTFY ────────────────────────────────────────────────────────────────
 
 def _enviar_ntfy(titulo: str, cuerpo: str, prioridad: str):
-    """Publica el briefing en el topic NTFY configurado."""
+    """
+    Publica el briefing en el topic NTFY configurado.
+    Usa la API JSON de NTFY: POST al URL base con el topic en el body.
+    Esto evita que la app muestre el JSON crudo como texto del mensaje.
+    """
     if not NTFY_TOPIC:
         logger.warning("NTFY_TOPIC_ALERTAS no configurado, briefing no enviado")
         return
     try:
         httpx.post(
-            f"{NTFY_URL}/{NTFY_TOPIC}",
+            NTFY_URL,
             json={
+                "topic": NTFY_TOPIC,
                 "title": titulo,
                 "message": cuerpo,
                 "priority": prioridad,
