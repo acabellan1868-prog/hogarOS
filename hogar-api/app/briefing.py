@@ -3,11 +3,11 @@ hogar-api — Módulo de briefing diario.
 Recopila datos del ecosistema y envía el resumen matutino por NTFY.
 """
 
+import base64
 import json
 import logging
 import os
 from datetime import date, datetime, timedelta
-from urllib.parse import quote
 
 import httpx
 
@@ -184,11 +184,14 @@ def _enviar_ntfy(titulo: str, cuerpo: str, prioridad: str):
         logger.warning("NTFY_TOPIC_ALERTAS no configurado, briefing no enviado")
         return
     try:
+        # RFC 2047 base64: único encoding que NTFY decodifica correctamente
+        # en la cabecera Title para emojis y caracteres no ASCII.
+        titulo_b64 = base64.b64encode(titulo.encode("utf-8")).decode("ascii")
         httpx.post(
             f"{NTFY_URL}/{NTFY_TOPIC}",
             content=cuerpo.encode("utf-8"),
             headers={
-                "Title":        quote(titulo),
+                "Title":        f"=?UTF-8?B?{titulo_b64}?=",
                 "Priority":     prioridad,
                 "Tags":         "house,calendar",
                 "Content-Type": "text/plain; charset=utf-8",
