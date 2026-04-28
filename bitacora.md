@@ -51,10 +51,17 @@ NTFY es el canal natural al ser el ya usado para alertas.
   no está configurado en el `.env` de la VM para el servicio hogar-api, o está vacío.
   Diagnóstico: `docker logs hogar-api --tail=20` en la VM.
 
-**Pendiente (próxima sesión):**
-1. Ejecutar `docker logs hogar-api --tail=20` para confirmar la causa del NTFY silencioso.
-2. Añadir `NTFY_TOPIC_ALERTAS` al `.env` si falta.
-3. Averiguar el entity_id de la entidad weather en HA para obtener min/max del día.
+**Resolución completa (2026-04-28):**
+- `NTFY_TOPIC_ALERTAS` estaba configurado correctamente en el `.env`.
+- Fix 2 (`commit 38b5947`): título URL-codificado con `urllib.parse.quote` — NTFY no lo decodifica,
+  muestra los códigos `%E2%98%80...` en el título.
+- Fix 3 (`commit 147a8ad`): título con RFC 2047 base64 (`=?UTF-8?B?...?=`) — NTFY lo decodifica
+  correctamente en Android. Notificación verificada en producción ✅.
+
+**Pendiente menor:**
+- Temperatura llega (20.4°C) pero sin min/max del día. Requiere configurar `BRIEFING_HA_WEATHER_ENTITY`
+  con una entidad weather que tenga forecast. Actualmente cae en el sensor de temperatura directo
+  sin array de previsión.
 
 ## 2026-04-26
 
