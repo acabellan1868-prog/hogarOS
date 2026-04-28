@@ -7,6 +7,7 @@ import json
 import logging
 import os
 from datetime import date, datetime, timedelta
+from urllib.parse import quote
 
 import httpx
 
@@ -176,21 +177,21 @@ def _componer(sistema: dict, backup: dict, finanzas: dict, temperatura: dict) ->
 def _enviar_ntfy(titulo: str, cuerpo: str, prioridad: str):
     """
     Publica el briefing en el topic NTFY configurado.
-    Usa la API JSON de NTFY: POST al URL base con el topic en el body.
-    Esto evita que la app muestre el JSON crudo como texto del mensaje.
+    Usa cabeceras HTTP para título y metadatos; el cuerpo es texto plano.
+    El título se URL-codifica para soportar emojis y caracteres UTF-8.
     """
     if not NTFY_TOPIC:
         logger.warning("NTFY_TOPIC_ALERTAS no configurado, briefing no enviado")
         return
     try:
         httpx.post(
-            NTFY_URL,
-            json={
-                "topic": NTFY_TOPIC,
-                "title": titulo,
-                "message": cuerpo,
-                "priority": prioridad,
-                "tags": ["house", "calendar"],
+            f"{NTFY_URL}/{NTFY_TOPIC}",
+            content=cuerpo.encode("utf-8"),
+            headers={
+                "Title":        quote(titulo),
+                "Priority":     prioridad,
+                "Tags":         "house,calendar",
+                "Content-Type": "text/plain; charset=utf-8",
             },
             timeout=10,
         )
