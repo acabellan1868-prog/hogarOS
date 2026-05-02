@@ -1,1281 +1,1117 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema-cockpit="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HogarOS</title>
+  <title>HogarOS — Cockpit</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/favicon.svg">
-  <link rel="manifest" href="/static/site.webmanifest">
-  <meta name="theme-color" content="#1a6a60">
+  <meta name="theme-color" content="#00e5c4">
   <link rel="stylesheet" href="/static/hogar.css">
   <style>
-    /* Estilos específicos del portal (no del design system) */
-
-    /* Grid bento para tarjetas principales */
-    .portal-bento {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
-    @media (min-width: 768px) {
-      .portal-bento {
-        grid-template-columns: repeat(12, 1fr);
-      }
-      .portal-bento > :nth-child(1) { grid-column: span 5; }
-      .portal-bento > :nth-child(2) { grid-column: span 4; }
-      .portal-bento > :nth-child(3) { grid-column: span 3; }
-      .portal-bento > :nth-child(4) { grid-column: span 3; }
-      .portal-bento > :nth-child(5) { grid-column: span 3; }
-      .portal-bento > :nth-child(6) { grid-column: span 3; }
-      .portal-bento > :nth-child(7) { grid-column: span 3; }
-    }
-
-    /* Tarjeta HA — temperaturas en grid orgánico */
-    .ha-exterior {
-      display: flex;
-      align-items: baseline;
-      gap: var(--gap-sm);
-      margin-bottom: var(--gap-sm);
-    }
-
-    .ha-exterior__temp {
-      font-family: var(--fuente-titular);
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--on-surface);
-      letter-spacing: -0.03em;
-    }
-
-    .ha-exterior__rango {
-      font-size: 0.78rem;
-      color: var(--on-surface-variant);
-    }
-
-    /* 5 columnas: todos los sensores en una sola fila */
-    .ha-interior-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: var(--gap-xs);
-    }
-
-    .ha-interior-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0.2rem 0.1rem;
-    }
-
-    .ha-interior-item__nombre {
-      font-family: var(--fuente-titular);
-      font-size: 0.56rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--outline-variant);
-    }
-
-    .ha-interior-item__valor {
-      font-family: var(--fuente-titular);
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--on-surface);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .ha-luces {
-      margin-top: var(--gap-sm);
-    }
-
-    .ha-luces__resumen {
-      font-size: 0.75rem;
-      color: var(--on-surface-variant);
-      margin-bottom: var(--gap-xs);
-    }
-
-    .ha-dispositivos-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--gap-xs);
-    }
-
-    .ha-dispositivo {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.2rem 0.4rem;
-      border-radius: var(--radio-sm);
-      font-size: 0.72rem;
-      color: var(--on-surface-variant);
-      background: var(--surface-container);
-      transition: background 0.2s;
-    }
-
-    .ha-dispositivo--on {
-      background: color-mix(in srgb, var(--primary) 15%, transparent);
-      color: var(--on-surface);
-    }
-
-    .ha-dispositivo--on .ha-dispositivo__icono {
-      color: var(--aviso);
-    }
-
-    .ha-dispositivo__icono {
-      font-size: 1rem;
-      color: var(--outline-variant);
-    }
-
-    .ha-dispositivo__nombre {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Tarjeta FiDo — sub-métricas */
-    .fido-metricas {
-      display: flex;
-      gap: var(--gap-xl);
-      margin-top: var(--gap-md);
-    }
-
-    .fido-metrica {
-      text-align: center;
-    }
-
-    .fido-metrica__valor {
-      font-family: var(--fuente-titular);
-      font-size: 1rem;
-      font-weight: 700;
-    }
-
-    .fido-metrica__label {
-      font-size: 0.68rem;
-      color: var(--on-surface-variant);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .fido-metrica--ingreso .fido-metrica__valor { color: var(--exito); }
-    .fido-metrica--gasto .fido-metrica__valor { color: var(--peligro); }
-
-    /* Resumen crypto */
-    .fido-crypto-resumen {
-      margin-top: var(--gap-md);
-      padding-top: var(--gap-sm);
-      font-size: 0.78rem;
-      font-variant-numeric: tabular-nums;
-      color: var(--on-surface-variant);
-    }
-
-    .crypto-positivo { color: var(--exito); font-weight: 700; }
-    .crypto-negativo { color: var(--peligro); font-weight: 700; }
-
-    /* Tarjeta ReDo — sub-métricas */
-    .redo-metricas {
-      display: flex;
-      gap: var(--gap-xl);
-      margin-top: var(--gap-md);
-    }
-
-    .redo-metrica {
-      text-align: center;
-    }
-
-    .redo-metrica__valor {
-      font-family: var(--fuente-titular);
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-
-    .redo-metrica__label {
-      font-size: 0.68rem;
-      color: var(--on-surface-variant);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .redo-metrica--ok .redo-metrica__valor { color: var(--exito); }
-    .redo-metrica--alerta .redo-metrica__valor { color: var(--peligro); }
-
-    /* Tarjeta ReDo — desglose por tipo */
-    .redo-tipos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--gap-sm) var(--gap-md);
-      margin-top: var(--gap-md);
-      justify-content: center;
-    }
-
-    .redo-tipo {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-      font-size: 0.78rem;
-      color: var(--on-surface-variant);
-    }
-
-    .redo-tipo .material-symbols-outlined {
-      font-size: 1rem;
-    }
-
-    .redo-tipo__cantidad {
-      font-weight: 600;
-      color: var(--on-surface);
-    }
-
-    /* Tarjeta Backup */
-    .backup-estado {
-      margin-top: var(--gap-sm);
-    }
-
-    .backup-estado__dias {
-      font-family: var(--fuente-titular);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
-    .backup-estado__detalle {
-      font-size: 0.78rem;
-      color: var(--on-surface-variant);
-      margin-top: 2px;
-    }
-
-    .backup--ok .backup-estado__dias { color: var(--exito); }
-    .backup--aviso .backup-estado__dias { color: var(--aviso); }
-    .backup--peligro .backup-estado__dias { color: var(--peligro); }
-    .backup--nunca .backup-estado__dias { color: var(--peligro); }
-
-    /* Instrucciones de backup */
-    .backup-instrucciones {
-      margin-top: var(--gap-md);
-      padding-top: var(--gap-sm);
-      border-top: 1px solid var(--outline-variant);
-    }
-
-    .backup-instrucciones__titulo {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--outline-variant);
-      margin-bottom: var(--gap-xs);
-    }
-
-    .backup-instrucciones__cmd {
-      font-family: monospace;
-      font-size: 0.72rem;
-      color: var(--on-surface-variant);
-      background: var(--surface-container);
-      padding: 0.15rem 0.4rem;
-      border-radius: var(--radio-sm);
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    /* Tarjeta MediDo — semáforo y métricas del sistema */
-    .medido-semaforo {
-      display: flex;
-      align-items: center;
-      gap: var(--gap-sm);
-      margin-bottom: var(--gap-md);
-    }
-
-    .medido-semaforo__dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .medido-semaforo--ok .medido-semaforo__dot      { background: var(--exito); }
-    .medido-semaforo--warning .medido-semaforo__dot { background: var(--aviso); }
-    .medido-semaforo--danger .medido-semaforo__dot  { background: var(--peligro); }
-
-    .medido-semaforo__texto { font-size: 0.78rem; font-weight: 600; }
-    .medido-semaforo--ok .medido-semaforo__texto      { color: var(--exito); }
-    .medido-semaforo--warning .medido-semaforo__texto { color: var(--aviso); }
-    .medido-semaforo--danger .medido-semaforo__texto  { color: var(--peligro); }
-
-    .medido-metricas {
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap-xs);
-    }
-
-    .medido-metrica {
-      display: flex;
-      align-items: center;
-      gap: var(--gap-sm);
-      font-size: 0.75rem;
-    }
-
-    .medido-metrica__label {
-      width: 3rem;
-      color: var(--on-surface-variant);
-      flex-shrink: 0;
-    }
-
-    .medido-metrica__barra-fondo {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--surface-container);
-      overflow: hidden;
-    }
-
-    .medido-metrica__barra {
+    /* ── Reset Cockpit ── */
+    html, body {
       height: 100%;
-      border-radius: 2px;
-      background: var(--primary);
-      transition: width 0.3s;
+      overflow: hidden;
+      background: var(--ck-bg);
+      color: var(--ck-on-surface);
+      font-family: var(--ck-fuente);
+      margin: 0;
+    }
+    @media (max-width: 767px) {
+      html, body { height: auto; overflow: auto; }
     }
 
-    .medido-metrica__barra--warning { background: var(--aviso); }
-    .medido-metrica__barra--danger  { background: var(--peligro); }
-
-    .medido-metrica__valor {
-      width: 2.5rem;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      color: var(--on-surface);
-      flex-shrink: 0;
+    /* Scanlines decorativos */
+    #scanlines {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+      );
+    }
+    [data-tema-cockpit="light"] #scanlines {
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px
+      );
     }
 
-    .medido-resumen {
-      display: flex;
-      gap: var(--gap-lg);
-      margin-top: var(--gap-sm);
+    /* ── Wrapper principal ── */
+    #ck-wrap {
+      display: flex; flex-direction: column; height: 100%;
+      position: relative;
+    }
+    @media (max-width: 767px) {
+      #ck-wrap { height: auto; min-height: 100vh; }
     }
 
-    .medido-resumen-item { text-align: center; }
-
-    .medido-resumen-item__valor {
-      font-family: var(--fuente-titular);
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--on-surface);
+    /* ── Header 48px ── */
+    #ck-header {
+      height: 48px;
+      background: var(--ck-bg2);
+      border-bottom: 1px solid var(--ck-line);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      flex-shrink: 0; z-index: 10; position: relative;
+    }
+    @media (max-width: 767px) {
+      #ck-header { position: sticky; top: 0; }
     }
 
-    .medido-resumen-item__label {
-      font-size: 0.65rem;
-      color: var(--on-surface-variant);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .ck-hdr-izq { display: flex; align-items: center; gap: 0.5rem; }
+
+    .ck-marca-box {
+      width: 24px; height: 24px; border-radius: 3px;
+      border: 1px solid var(--ck-accent);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(0,229,196,0.3);
+    }
+    [data-tema-cockpit="light"] .ck-marca-box { box-shadow: none; }
+    .ck-marca-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ck-accent); box-shadow: 0 0 6px var(--ck-accent);
+    }
+    [data-tema-cockpit="light"] .ck-marca-dot { box-shadow: none; }
+
+    .ck-marca-txt {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--ck-accent); letter-spacing: 0.15em;
+    }
+    .ck-marca-txt span { color: var(--ck-on-variant); }
+    .ck-marca-sub {
+      font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.12em;
+    }
+    .ck-sep { width: 1px; height: 20px; background: var(--ck-line); margin: 0 0.5rem; }
+
+    .ck-nav { display: flex; align-items: center; gap: 0; }
+    .ck-nav a {
+      font-family: var(--ck-fuente);
+      font-size: 0.52rem; letter-spacing: 0.12em;
+      color: var(--ck-on-variant); cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-bottom: 1px solid transparent;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .ck-nav a:hover { color: var(--ck-on-surface); }
+    .ck-nav a.activo { color: var(--ck-accent); border-bottom-color: var(--ck-accent); }
+
+    .ck-hdr-der { display: flex; align-items: center; gap: 0.75rem; }
+
+    #ck-alerta-badge {
+      display: none; align-items: center; gap: 0.4rem;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid rgba(232,84,84,0.3);
+      background: rgba(232,84,84,0.08); border-radius: 2px;
+      font-size: 0.55rem; letter-spacing: 0.1em; color: var(--ck-danger);
+    }
+    [data-tema-cockpit="light"] #ck-alerta-badge {
+      border-color: rgba(198,40,40,0.3); background: rgba(198,40,40,0.08);
     }
 
-    /* Accesos rápidos */
-    .accesos-rapidos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--gap-sm);
+    .ck-reloj { text-align: right; line-height: 1; }
+    .ck-reloj__hora {
+      font-size: 1rem; font-weight: 700;
+      color: var(--ck-accent); letter-spacing: 0.08em;
     }
+    .ck-reloj__fecha {
+      font-size: 0.45rem; color: var(--ck-on-variant);
+      letter-spacing: 0.12em; margin-top: 2px;
+    }
+
+    .ck-tema-btn {
+      width: 28px; height: 28px; border: none; cursor: pointer;
+      background: none; display: flex; align-items: center; justify-content: center;
+      border-radius: 3px; color: var(--ck-on-variant); transition: background 0.2s;
+    }
+    .ck-tema-btn:hover { background: rgba(128,128,128,0.15); }
+
+    .ck-menu-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--ck-on-variant); font-size: 1.2rem;
+      display: none; align-items: center; padding: 0.25rem;
+    }
+
+    @media (max-width: 767px) {
+      .ck-nav, .ck-sep, .ck-marca-sub { display: none; }
+      .ck-menu-btn { display: flex; }
+      .ck-reloj__hora { font-size: 0.85rem; }
+      .ck-reloj__fecha { display: none; }
+    }
+
+    /* ── Grid principal 3×2 ── */
+    #ck-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 260px;
+      grid-template-rows: 1fr 1fr;
+      overflow: hidden;
+      position: relative; z-index: 1;
+    }
+    @media (max-width: 767px) {
+      #ck-grid { display: flex; flex-direction: column; overflow: visible; }
+    }
+
+    /* Zona base */
+    .ck-zona {
+      background: var(--ck-bg2);
+      border-right: 1px solid var(--ck-line);
+      border-bottom: 1px solid var(--ck-line);
+      padding: 0.85rem;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .ck-zona--glow { background: rgba(0,229,196,0.02); }
+    [data-tema-cockpit="light"] .ck-zona--glow { background: rgba(26,106,96,0.02); }
+    @media (max-width: 767px) {
+      .ck-zona { border-right: none; overflow: visible; }
+    }
+
+    #zona-a { grid-column: 1; grid-row: 1; }
+    #zona-b { grid-column: 1; grid-row: 2; }
+    #zona-c { grid-column: 2; grid-row: 1; }
+    #zona-e { grid-column: 3; grid-row: 1; border-right: none; }
+    #zona-f { grid-column: 3; grid-row: 2; border-right: none; }
+
+    /* Zona D — split 50/50 interno */
+    #zona-d {
+      grid-column: 2; grid-row: 2;
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-right: 1px solid var(--ck-line);
+      border-bottom: 1px solid var(--ck-line);
+      overflow: hidden;
+    }
+    @media (max-width: 767px) {
+      #zona-d { display: flex; flex-direction: column; }
+    }
+    .ck-zona-d-izq {
+      padding: 0.85rem 0.75rem 0.85rem 0.85rem;
+      border-right: 1px solid var(--ck-line);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .ck-zona-d-der {
+      padding: 0.85rem 0.85rem 0.85rem 0.75rem;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    @media (max-width: 767px) {
+      .ck-zona-d-izq { border-right: none; border-bottom: 1px solid var(--ck-line); padding: 0.85rem; }
+      .ck-zona-d-der { padding: 0.85rem; }
+    }
+
+    /* ── Footer 28px ── */
+    #ck-footer {
+      height: 28px;
+      background: var(--ck-bg2);
+      border-top: 1px solid var(--ck-line);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      flex-shrink: 0; z-index: 1;
+    }
+    @media (max-width: 767px) { #ck-footer { height: 36px; } }
+
+    .ck-footer-dots { display: flex; gap: 1.5rem; align-items: center; }
+    @media (max-width: 767px) { .ck-footer-dots { gap: 0.75rem; } }
+    .ck-footer-item { display: flex; align-items: center; gap: 0.3rem; }
+    .ck-footer-label { font-size: 0.5rem; color: var(--ck-on-variant); letter-spacing: 0.08em; }
+    .ck-footer-val   { font-size: 0.5rem; font-weight: 700; }
+    .ck-footer-ver   { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.1em; }
+    @media (max-width: 767px) { .ck-footer-ver { display: none; } }
+
+    /* ── Drawer móvil ── */
+    #ck-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 200; display: none;
+    }
+    #ck-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 220px;
+      background: var(--ck-bg2); border-left: 1px solid var(--ck-line);
+      z-index: 201;
+      transform: translateX(100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column;
+      padding: 1rem 0.75rem; gap: 0.1rem;
+    }
+    #ck-drawer.abierto { transform: translateX(0); }
+    .ck-drawer-item {
+      font-family: var(--ck-fuente);
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      color: var(--ck-on-variant);
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--ck-line);
+      cursor: pointer; text-decoration: none; display: block;
+    }
+    .ck-drawer-item.activo { color: var(--ck-accent); }
+    .ck-drawer-cerrar {
+      align-self: flex-end; background: none; border: none; cursor: pointer;
+      color: var(--ck-on-variant); font-size: 1.1rem; margin-bottom: 0.5rem;
+    }
+
+    /* ── Componentes de zona ── */
+
+    /* Temperatura exterior */
+    .ck-temp-ext {
+      font-size: 3.5rem; font-weight: 700;
+      color: var(--ck-accent); line-height: 1; letter-spacing: -0.04em;
+    }
+    [data-tema-cockpit="dark"] .ck-temp-ext { text-shadow: 0 0 40px rgba(0,229,196,0.3); }
+    @media (max-width: 767px) { .ck-temp-ext { font-size: 2.5rem; } }
+    .ck-temp-sub  { font-size: 0.55rem; color: var(--ck-on-variant); }
+    .ck-temp-rng  { font-size: 0.62rem; color: var(--ck-on-surface); }
+
+    /* TempScale interior */
+    .ck-ts-row    { display: flex; align-items: center; gap: 0.5rem; }
+    .ck-ts-nombre { font-size: 0.58rem; color: var(--ck-on-variant); width: 3.8rem; flex-shrink: 0; }
+    .ck-ts-track  {
+      flex: 1; height: 6px; border-radius: 3px; overflow: hidden;
+      position: relative;
+      background: rgba(0,229,196,0.06);
+    }
+    [data-tema-cockpit="light"] .ck-ts-track { background: rgba(26,106,96,0.06); }
+    .ck-ts-fill   { position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .ck-ts-val    { font-size: 0.65rem; font-weight: 700; width: 3rem; text-align: right; }
+    .ck-ts-hum    { font-size: 0.58rem; color: var(--ck-on-variant); width: 3rem; text-align: right; }
+    .ck-ts-leyenda { display: flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; }
+    .ck-ts-leyenda span { font-size: 0.45rem; color: var(--ck-on-variant); }
+    .ck-ts-gradiente {
+      flex: 1; height: 3px; border-radius: 2px;
+      background: linear-gradient(to right, #28a0c8, #00e5c4, #d06a3a);
+    }
+
+    /* Luces */
+    .ck-luces-res { font-size: 0.55rem; color: var(--ck-on-variant); margin-bottom: 0.5rem; }
+    .ck-luces-res span { color: var(--ck-accent); font-weight: 700; }
+    .ck-luces-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 0.3rem; flex: 1;
+    }
+    .ck-luz {
+      display: flex; align-items: center; gap: 0.3rem;
+      padding: 0.3rem 0.4rem;
+      border: 1px solid var(--ck-line);
+      font-size: 0.55rem; color: var(--ck-on-variant); overflow: hidden;
+    }
+    .ck-luz--on {
+      border-color: rgba(0,229,196,0.25); background: rgba(0,229,196,0.05);
+      color: var(--ck-on-surface);
+    }
+    [data-tema-cockpit="light"] .ck-luz--on {
+      border-color: rgba(26,106,96,0.25); background: rgba(26,106,96,0.05);
+    }
+    .ck-luz-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .ck-luz-dot--on  { background: var(--ck-accent); box-shadow: 0 0 6px var(--ck-accent); }
+    [data-tema-cockpit="light"] .ck-luz-dot--on { box-shadow: none; }
+    .ck-luz-dot--off { background: var(--ck-on-variant); }
+    .ck-luz-nom  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Red — métricas */
+    .ck-red-met  { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .ck-red-m    { font-size: 0.55rem; color: var(--ck-on-variant); }
+    .ck-red-m span { font-weight: 700; }
+    .ck-grafo-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 0.3rem; overflow: hidden; min-height: 0;
+    }
+    .ck-grafo-wrap svg { width: 100%; height: 100%; max-height: 155px; }
+
+    /* Gauges */
+    .ck-g-row  { display: flex; justify-content: space-around; flex: 1; align-items: center; }
+    .ck-g-sum  {
+      display: flex; justify-content: space-around;
+      padding-top: 0.4rem; border-top: 1px solid var(--ck-line);
+    }
+    .ck-g-kpi     { text-align: center; }
+    .ck-g-kpi-val { font-size: 0.72rem; font-weight: 700; }
+    .ck-g-kpi-lbl { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* Finanzas */
+    .ck-bal     { font-size: 2rem; font-weight: 700; color: var(--ck-on-surface); letter-spacing: -0.03em; line-height: 1; }
+    .ck-bal-mon { font-size: 0.7rem; color: var(--ck-on-variant); margin-left: 0.2rem; }
+    .ck-bal-mes { font-size: 0.5rem; color: var(--ck-on-variant); margin-bottom: 0.75rem; }
+    .ck-bars    { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.6rem; }
+    .ck-crypto  {
+      font-size: 0.55rem; color: var(--ck-on-variant);
+      border-top: 1px solid var(--ck-line); padding-top: 0.4rem;
+    }
+
+    /* Claude */
+    .ck-cl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .ck-cl-lbl  { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.1em; text-transform: uppercase; }
+    .ck-cl-val  { font-size: 0.8rem; font-weight: 700; }
+    .ck-cl-bars { display: flex; flex-direction: column; gap: 0.25rem; }
+
+    /* Backup */
+    .ck-bk-dias { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+    .ck-bk-det  { font-size: 0.52rem; color: var(--ck-on-variant); margin-top: 0.2rem; }
+
+    /* Log alertas */
+    .ck-log     { display: flex; flex-direction: column; gap: 0.35rem; overflow: hidden; flex: 1; }
+    .ck-log-row { display: flex; gap: 0.4rem; align-items: flex-start; }
+    .ck-log-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 0.3rem; flex-shrink: 0; }
+    .ck-log-txt { font-size: 0.5rem; }
+    .ck-log-mod { font-weight: 700; }
+    .ck-log-msg { color: var(--ck-on-surface); }
+    .ck-log-tpo { font-size: 0.45rem; color: var(--ck-on-variant); }
+
+    /* Accesos */
+    .ck-acc { display: flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.4rem; background: rgba(0,229,196,0.03); border: 1px solid var(--ck-line); cursor: pointer; text-decoration: none; }
+    [data-tema-cockpit="light"] .ck-acc { background: rgba(26,106,96,0.03); }
+    .ck-acc:hover { background: var(--ck-row-hover); }
+    .ck-acc-p { font-size: 0.62rem; color: var(--ck-accent-dim); }
+    .ck-acc-c { font-size: 0.58rem; color: var(--ck-on-surface); }
+    .ck-acc-cur { font-size: 0.62rem; color: var(--ck-accent-dim); margin-left: auto; }
+
+    /* Util */
+    .ck-offline  { font-size: 0.72rem; color: var(--ck-danger); font-style: italic; }
+    .ck-cargando { font-size: 0.72rem; color: var(--ck-on-variant); font-style: italic; }
   </style>
 </head>
 <body>
 
-  <!-- ======== EFECTO LUMINA ======== -->
-  <div class="hogar-lumina"></div>
+  <div id="scanlines" aria-hidden="true"></div>
 
-  <!-- ======== HEADER FLOTANTE ======== -->
-  <header class="hogar-header">
-    <div class="hogar-header__barra">
-      <a href="/" class="hogar-header__marca">
-        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
-        <div>
-          <div class="hogar-header__titulo">HogarOS</div>
-          <div class="hogar-header__subtitulo">El refugio del silencio</div>
-        </div>
-      </a>
-      <button class="hogar-header__menu-btn" id="btnMenu">
-        <span class="material-symbols-outlined">menu</span>
+  <!-- Drawer móvil -->
+  <div id="ck-overlay"></div>
+  <nav id="ck-drawer">
+    <button class="ck-drawer-cerrar" id="ck-drawer-cerrar">✕</button>
+    <a href="/"                                              class="ck-drawer-item activo">INICIO</a>
+    <a href="/red/"                                          class="ck-drawer-item">RED</a>
+    <a href="/finanzas/"                                     class="ck-drawer-item">FINANZAS</a>
+    <a href="/salud/"                                        class="ck-drawer-item">SALUD</a>
+    <a href="http://192.168.31.132:8123/lovelace/0"          class="ck-drawer-item" target="_blank">DOMÓTICA</a>
+    <a href="/lanzador.html"                                 class="ck-drawer-item">LANZADOR</a>
+    <a href="/alertas.html"                                  class="ck-drawer-item">ALERTAS</a>
+    <div style="margin-top:auto;padding-top:0.75rem;border-top:1px solid var(--ck-line)">
+      <button id="ck-drawer-tema" class="ck-drawer-item" style="border:none;background:none;width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:0.5rem;border-bottom:none">
+        <span id="ck-drawer-tema-ico"></span> Cambiar tema
       </button>
     </div>
-  </header>
-
-  <!-- ======== DRAWER DE NAVEGACIÓN ======== -->
-  <div class="hogar-drawer-overlay oculto" id="drawerOverlay"></div>
-  <nav class="hogar-drawer oculto" id="drawerNav">
-    <button class="hogar-drawer__cerrar" id="btnCerrarDrawer">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-    <span class="hogar-drawer__titulo">Navegacion</span>
-    <a href="/" class="hogar-drawer__enlace hogar-drawer__enlace--activo">
-      <span class="material-symbols-outlined">roofing</span>
-      <span>Inicio</span>
-    </a>
-    <a href="/red/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">lan</span>
-      <span>Red</span>
-    </a>
-    <a href="/finanzas/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">payments</span>
-      <span>Finanzas</span>
-    </a>
-    <a href="/salud/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">monitor_heart</span>
-      <span>Salud</span>
-    </a>
-    <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-drawer__enlace" target="_blank">
-      <span class="material-symbols-outlined">home_iot_device</span>
-      <span>Domotica</span>
-    </a>
-    <a href="/lanzador.html" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">apps</span>
-      <span>Lanzador</span>
-    </a>
-    <a href="/alertas.html" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">notifications</span>
-      <span>Alertas</span>
-    </a>
-    <div class="hogar-drawer__separador"></div>
-    <button class="hogar-drawer__enlace" id="btnTema">
-      <span class="material-symbols-outlined" id="iconoTema">dark_mode</span>
-      <span>Cambiar tema</span>
-    </button>
   </nav>
 
-  <!-- ======== CONTENIDO ======== -->
-  <main class="hogar-contenedor">
+  <div id="ck-wrap">
 
-    <!-- Tarjetas de módulos — layout bento -->
-    <section class="hogar-seccion">
-      <h2 class="hogar-seccion__titulo">Modulos</h2>
-
-      <div class="portal-bento">
-
-        <!-- TARJETA HOME ASSISTANT (Nivel 2 — datos reales) -->
-        <div class="hogar-tarjeta hogar-tarjeta--primary" id="tarjetaHA">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
-              <span class="material-symbols-outlined filled" style="font-size:1.1rem">thermostat</span>
-            </div>
-            <span class="hogar-tarjeta__label">Domotica</span>
-          </div>
-          <div id="haContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-tarjeta__enlace" target="_blank">
-            Abrir Home Assistant <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
-          </a>
+    <!-- ── HEADER ── -->
+    <header id="ck-header">
+      <div class="ck-hdr-izq">
+        <div class="ck-marca-box"><div class="ck-marca-dot"></div></div>
+        <div>
+          <div class="ck-marca-txt">HOGAR<span>OS</span></div>
+          <div class="ck-marca-sub">192.168.31.131 · VM-101</div>
         </div>
-
-        <!-- TARJETA FIDO -->
-        <div class="hogar-tarjeta hogar-tarjeta--tertiary" id="tarjetaFido">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--tertiary">
-              <span class="material-symbols-outlined" style="font-size:1.1rem">payments</span>
-            </div>
-            <span class="hogar-tarjeta__label">Finanzas Domesticas</span>
-          </div>
-          <div id="fidoContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <div id="fidoCryptoResumen"></div>
-          <a href="/finanzas/" class="hogar-tarjeta__enlace">
-            Abrir FiDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
-          </a>
-        </div>
-
-        <!-- TARJETA REDO -->
-        <div class="hogar-tarjeta hogar-tarjeta--secondary" id="tarjetaRedo">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--secondary">
-              <span class="material-symbols-outlined" style="font-size:1.1rem">lan</span>
-            </div>
-            <span class="hogar-tarjeta__label">Red Domestica</span>
-          </div>
-          <div id="redoContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <a href="/red/" class="hogar-tarjeta__enlace">
-            Abrir ReDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
-          </a>
-        </div>
-
-        <!-- TARJETA MEDIDO -->
-        <div class="hogar-tarjeta" id="tarjetaMedido">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
-              <span class="material-symbols-outlined" style="font-size:1.1rem">monitor_heart</span>
-            </div>
-            <span class="hogar-tarjeta__label">Salud del Sistema</span>
-          </div>
-          <div id="medidoContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <a href="/salud/" class="hogar-tarjeta__enlace">
-            Abrir MediDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
-          </a>
-        </div>
-
-        <!-- TARJETA ASISTENTE IA -->
-        <div class="hogar-tarjeta hogar-tarjeta--primary" id="tarjetaClaude">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
-              <span class="material-symbols-outlined" style="font-size:1.1rem">smart_toy</span>
-            </div>
-            <span class="hogar-tarjeta__label">Asistente IA</span>
-          </div>
-          <div id="claudeContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <a href="/salud/" class="hogar-tarjeta__enlace">
-            Abrir MediDo <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
-          </a>
-        </div>
-
-        <!-- TARJETA BACKUP -->
-        <div class="hogar-tarjeta" id="tarjetaBackup">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
-              <span class="material-symbols-outlined" style="font-size:1.1rem">backup</span>
-            </div>
-            <span class="hogar-tarjeta__label">Estado del Backup</span>
-          </div>
-          <div id="backupContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <div class="backup-instrucciones">
-            <div class="backup-instrucciones__titulo">Procedimiento</div>
-            <code class="backup-instrucciones__cmd">bash /root/montar_disco.sh</code>
-            <code class="backup-instrucciones__cmd">bash /root/backup.sh</code>
-            <code class="backup-instrucciones__cmd">umount /mnt/usb1</code>
-          </div>
-        </div>
-
-        <!-- TARJETA ALERTAS -->
-        <div class="hogar-tarjeta" id="tarjetaAlertas">
-          <div class="hogar-tarjeta__cabecera">
-            <div class="hogar-tarjeta__icono-circulo hogar-tarjeta__icono-circulo--primary">
-              <span class="material-symbols-outlined" style="font-size:1.1rem">notifications</span>
-            </div>
-            <span class="hogar-tarjeta__label">Alertas</span>
-          </div>
-          <div id="alertasContenido">
-            <span class="cargando">Cargando...</span>
-          </div>
-          <a href="/alertas.html" class="hogar-tarjeta__enlace">
-            Gestionar alertas <span class="material-symbols-outlined" style="font-size:0.9rem">arrow_forward</span>
-          </a>
-        </div>
-
+        <div class="ck-sep"></div>
+        <nav class="ck-nav">
+          <a href="/"                                         class="activo">INICIO</a>
+          <a href="/red/"                                     >RED</a>
+          <a href="/finanzas/"                                >FINANZAS</a>
+          <a href="/salud/"                                   >SALUD</a>
+          <a href="http://192.168.31.132:8123/lovelace/0"     target="_blank">DOMÓTICA</a>
+          <a href="/lanzador.html"                            >LANZADOR</a>
+          <a href="/alertas.html"                             >ALERTAS</a>
+        </nav>
       </div>
-    </section>
 
-    <!-- Accesos rápidos -->
-    <section class="hogar-seccion">
-      <h2 class="hogar-seccion__titulo">Accesos rapidos</h2>
-      <div class="accesos-rapidos">
-        <button class="hogar-boton hogar-boton--primario" id="btnEscanear">
-          <span class="material-symbols-outlined" style="font-size:1rem">radar</span>
-          Escanear red
-        </button>
-        <a href="/red/#dispositivos" class="hogar-boton hogar-boton--secundario">
-          <span class="material-symbols-outlined" style="font-size:1rem">devices</span>
-          Clasificar dispositivos
-        </a>
-        <a href="/finanzas/#importar" class="hogar-boton hogar-boton--secundario">
-          <span class="material-symbols-outlined" style="font-size:1rem">upload_file</span>
-          Importar extracto
-        </a>
-        <a href="/finanzas/#panel" class="hogar-boton hogar-boton--secundario">
-          <span class="material-symbols-outlined" style="font-size:1rem">bar_chart</span>
-          Informe mensual
-        </a>
+      <div id="ck-alerta-badge" class="danger-pulse">
+        <div style="width:5px;height:5px;border-radius:50%;background:var(--ck-danger)"></div>
+        <span id="ck-alerta-txt">! 0 ALERTAS</span>
       </div>
-    </section>
 
-    <!-- Línea decorativa inferior -->
-    <div class="hogar-linea-glow"></div>
+      <div class="ck-hdr-der">
+        <button id="ck-tema-btn" class="ck-tema-btn" title="Cambiar tema"></button>
+        <div class="ck-reloj">
+          <div class="ck-reloj__hora" id="ck-hora">--:--:--</div>
+          <div class="ck-reloj__fecha" id="ck-fecha"></div>
+        </div>
+        <button id="ck-menu-btn" class="ck-menu-btn">☰</button>
+      </div>
+    </header>
 
-  </main>
+    <!-- ── GRID PRINCIPAL ── -->
+    <main id="ck-grid">
+
+      <!-- [A] Clima -->
+      <div id="zona-a" class="ck-zona ck-zona--glow">
+        <div class="zone-label"><span class="zone-label__diamond">◆</span>Domótica · Clima</div>
+        <div id="za-ext" style="display:flex;align-items:flex-end;gap:0.5rem;margin-bottom:0.6rem">
+          <span class="ck-cargando">Cargando...</span>
+        </div>
+        <div style="font-size:0.48rem;color:var(--ck-on-variant);letter-spacing:0.1em;margin-bottom:0.4rem">TEMPERATURA INTERIOR · HUMEDAD</div>
+        <div id="za-int" style="display:flex;flex-direction:column;gap:0.35rem;flex:1"></div>
+        <div class="ck-ts-leyenda">
+          <span>18°</span>
+          <div class="ck-ts-gradiente"></div>
+          <span>24°</span>
+        </div>
+      </div>
+
+      <!-- [B] Luces -->
+      <div id="zona-b" class="ck-zona">
+        <div class="zone-label"><span class="zone-label__diamond">◆</span>Luces · Dispositivos</div>
+        <div id="zb-res" class="ck-luces-res">Cargando...</div>
+        <div id="zb-grid" class="ck-luces-grid"></div>
+      </div>
+
+      <!-- [C] Red -->
+      <div id="zona-c" class="ck-zona">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+          <div class="zone-label" style="margin:0"><span class="zone-label__diamond">◆</span>Red Doméstica · ReDo</div>
+          <div id="zc-met" class="ck-red-met"></div>
+        </div>
+        <div id="zc-grafo" class="ck-grafo-wrap"><span class="ck-cargando">Cargando...</span></div>
+      </div>
+
+      <!-- [D] Finanzas + Claude -->
+      <div id="zona-d">
+        <div class="ck-zona-d-izq">
+          <div class="zone-label"><span class="zone-label__diamond">◆</span>Finanzas · FiDo</div>
+          <div id="zd-bal"><span class="ck-cargando">Cargando...</span></div>
+          <div id="zd-bars" class="ck-bars"></div>
+          <div id="zd-crypto" class="ck-crypto"></div>
+        </div>
+        <div class="ck-zona-d-der">
+          <div class="zone-label"><span class="zone-label__diamond">◆</span>Asistente · Claude</div>
+          <div id="zd-cl-kpis" class="ck-cl-grid"></div>
+          <div id="zd-cl-bars" class="ck-cl-bars"></div>
+        </div>
+      </div>
+
+      <!-- [E] Gauges -->
+      <div id="zona-e" class="ck-zona">
+        <div class="zone-label"><span class="zone-label__diamond">◆</span>Salud del Sistema · MediDo</div>
+        <div id="ze-row" class="ck-g-row"><span class="ck-cargando">Cargando...</span></div>
+        <div id="ze-sum" class="ck-g-sum"></div>
+      </div>
+
+      <!-- [F] Backup + Log + Accesos -->
+      <div id="zona-f" class="ck-zona">
+        <div style="margin-bottom:0.6rem;padding-bottom:0.6rem;border-bottom:1px solid var(--ck-line)">
+          <div class="zone-label"><span class="zone-label__diamond">◆</span>Backup</div>
+          <div id="zf-bk"><span class="ck-cargando">Cargando...</span></div>
+        </div>
+        <div class="zone-label"><span class="zone-label__diamond">◆</span>Log · Alertas</div>
+        <div id="zf-log" class="ck-log"></div>
+        <div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid var(--ck-line)">
+          <div class="zone-label"><span class="zone-label__diamond">◆</span>Accesos</div>
+          <div style="display:flex;flex-direction:column;gap:0.2rem">
+            <a href="#" id="btn-escanear" class="ck-acc">
+              <span class="ck-acc-p">$</span>
+              <span id="btn-escanear-txt" class="ck-acc-c">escanear_red</span>
+              <span class="ck-acc-cur cursor-blink">▌</span>
+            </a>
+            <a href="/finanzas/#importar" class="ck-acc">
+              <span class="ck-acc-p">$</span><span class="ck-acc-c">importar_extracto</span>
+              <span class="ck-acc-cur cursor-blink">▌</span>
+            </a>
+            <a href="/finanzas/#panel" class="ck-acc">
+              <span class="ck-acc-p">$</span><span class="ck-acc-c">informe_mes</span>
+              <span class="ck-acc-cur cursor-blink">▌</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── FOOTER 28px ── -->
+    <footer id="ck-footer">
+      <div id="ck-footer-dots" class="ck-footer-dots"></div>
+      <div class="ck-footer-ver">HOGAROS v2.0 · COCKPIT EDITION · AUTO-REFRESH 60s</div>
+    </footer>
+
+  </div><!-- #ck-wrap -->
 
   <script>
     /* ============================================================
-       Configuración — URLs base de las apps
+       URLs de APIs
        ============================================================ */
-    var REDO_API    = "/red/api";
-    var FIDO_API    = "/finanzas/api";
-    var KRYPTO_API  = "/crypto/api";
-    var MEDIDO_API  = "/salud/api";
+    var REDO_API   = "/red/api";
+    var FIDO_API   = "/finanzas/api";
+    var KRYPTO_API = "/crypto/api";
+    var MEDIDO_API = "/salud/api";
+    var HA_API     = "/domotica/api";
 
     /* ============================================================
-       Drawer de navegacion
+       Estado footer (se actualiza desde cada fetch)
        ============================================================ */
-    var drawer = document.getElementById("drawerNav");
-    var overlay = document.getElementById("drawerOverlay");
-
-    function toggleDrawer() {
-      drawer.classList.toggle("oculto");
-      overlay.classList.toggle("oculto");
-    }
-
-    document.getElementById("btnMenu").addEventListener("click", toggleDrawer);
-    document.getElementById("drawerOverlay").addEventListener("click", toggleDrawer);
-    document.getElementById("btnCerrarDrawer").addEventListener("click", toggleDrawer);
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && !drawer.classList.contains("oculto")) toggleDrawer();
-    });
-
-    /* ============================================================
-       Toggle tema claro/oscuro con persistencia
-       ============================================================ */
-    (function initTema() {
-      var guardado = localStorage.getItem("hogar-tema");
-      if (guardado === "oscuro") {
-        document.documentElement.setAttribute("data-tema", "oscuro");
-      }
-      actualizarIconoTema();
-    })();
-
-    document.getElementById("btnTema").addEventListener("click", function() {
-      var actual = document.documentElement.getAttribute("data-tema");
-      if (actual === "oscuro") {
-        document.documentElement.removeAttribute("data-tema");
-        localStorage.setItem("hogar-tema", "claro");
-      } else {
-        document.documentElement.setAttribute("data-tema", "oscuro");
-        localStorage.setItem("hogar-tema", "oscuro");
-      }
-      actualizarIconoTema();
-    });
-
-    function actualizarIconoTema() {
-      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
-      document.getElementById("iconoTema").textContent = oscuro ? "light_mode" : "dark_mode";
-    }
-
-    /* ============================================================
-       Cargar datos de ReDo
-       ============================================================ */
-    var TIPOS_ICONO = {
-      telefono: 'smartphone',
-      portatil: 'laptop',
-      sobremesa: 'desktop_windows',
-      tablet: 'tablet',
-      tv: 'tv',
-      impresora: 'print',
-      router: 'router',
-      iot: 'sensors',
-      servidor: 'dns',
-      consola: 'videogame_asset',
-      otro: 'device_unknown'
+    var _estado = {
+      sistema: { ok: true,  warn: false, val: "OK"  },
+      red:     { ok: true,  warn: false, val: "OK"  },
+      backup:  { ok: true,  warn: false, val: "---" },
+      claude:  { ok: true,  warn: false, val: "--%" }
     };
 
-    function cargarRedo() {
-      fetch(REDO_API + "/resumen")
+    /* ============================================================
+       Tema — inicialización y toggle
+       ============================================================ */
+    (function() {
+      var t = localStorage.getItem("hogar-cockpit-tema") || "dark";
+      document.documentElement.setAttribute("data-tema-cockpit", t);
+      setIconoTema(t);
+    })();
+
+    function toggleTema() {
+      var actual = document.documentElement.getAttribute("data-tema-cockpit");
+      var nuevo  = actual === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-tema-cockpit", nuevo);
+      localStorage.setItem("hogar-cockpit-tema", nuevo);
+      setIconoTema(nuevo);
+    }
+
+    function svgSol() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+    }
+    function svgLuna() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    function setIconoTema(tema) {
+      var btn = document.getElementById("ck-tema-btn");
+      if (btn) btn.innerHTML = tema === "dark" ? svgSol() : svgLuna();
+      var ico = document.getElementById("ck-drawer-tema-ico");
+      if (ico) ico.innerHTML = tema === "dark" ? svgSol() : svgLuna();
+    }
+
+    document.getElementById("ck-tema-btn").addEventListener("click", toggleTema);
+    document.getElementById("ck-drawer-tema").addEventListener("click", toggleTema);
+
+    /* ============================================================
+       Reloj
+       ============================================================ */
+    function tickReloj() {
+      var now  = new Date();
+      var hora = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      var fecha = now.toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+      document.getElementById("ck-hora").textContent  = hora;
+      document.getElementById("ck-fecha").textContent = fecha;
+    }
+    tickReloj();
+    setInterval(tickReloj, 1000);
+
+    /* ============================================================
+       Drawer móvil
+       ============================================================ */
+    var _overlay = document.getElementById("ck-overlay");
+    var _drawer  = document.getElementById("ck-drawer");
+
+    function abrirDrawer()  { _drawer.classList.add("abierto");    _overlay.style.display = "block"; }
+    function cerrarDrawer() { _drawer.classList.remove("abierto"); _overlay.style.display = "none";  }
+
+    document.getElementById("ck-menu-btn").addEventListener("click", abrirDrawer);
+    document.getElementById("ck-drawer-cerrar").addEventListener("click", cerrarDrawer);
+    _overlay.addEventListener("click", cerrarDrawer);
+    document.addEventListener("keydown", function(e) { if (e.key === "Escape") cerrarDrawer(); });
+
+    /* ============================================================
+       Helpers generales
+       ============================================================ */
+    function fmtEu(n) {
+      return Number(n).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtFecha(iso) {
+      if (!iso) return "";
+      try { return new Date(iso).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }); }
+      catch(e) { return iso; }
+    }
+    function fmtK(n) {
+      return n >= 1000000 ? (n/1000000).toFixed(1)+"M" : n >= 1000 ? (n/1000).toFixed(0)+"k" : String(n);
+    }
+    function fmtN(n, dec) {
+      return Number(n).toLocaleString("es-ES", { minimumFractionDigits: dec||0, maximumFractionDigits: dec||0 });
+    }
+
+    function colorTemp(t) {
+      var pct = Math.max(0, Math.min(1, (t - 18) / 6));
+      if (pct < 0.5) {
+        var p = pct * 2;
+        return "rgb(40," + Math.round(160+p*69) + "," + Math.round(200-p*76) + ")";
+      }
+      var p2 = (pct - 0.5) * 2;
+      return "rgb(" + Math.round(40+p2*192) + "," + Math.round(229-p2*105) + "," + Math.round(124-p2*66) + ")";
+    }
+
+    function esDark() { return document.documentElement.getAttribute("data-tema-cockpit") === "dark"; }
+
+    /* ============================================================
+       Render: Gauge SVG
+       ============================================================ */
+    function renderGauge(valor, label, size) {
+      size = size || 72;
+      var r    = size * 0.38;
+      var cx   = size / 2, cy = size / 2;
+      var circ = 2 * Math.PI * r;
+      var arc  = 240, start = -210;
+      var pct  = Math.min(valor / 100, 1);
+      var len  = pct * (arc / 360) * circ;
+
+      function polar(a, rad) {
+        var rad2 = (a - 90) * Math.PI / 180;
+        return { x: cx + rad * Math.cos(rad2), y: cy + rad * Math.sin(rad2) };
+      }
+      function aPath(s, a, rad) {
+        var sp = polar(s, rad), ep = polar(s + a, rad);
+        return "M" + sp.x.toFixed(2) + " " + sp.y.toFixed(2) + " A" + rad + " " + rad + " 0 " + (a > 180 ? 1 : 0) + " 1 " + ep.x.toFixed(2) + " " + ep.y.toFixed(2);
+      }
+
+      var col      = valor >= 90 ? "var(--ck-danger)" : valor >= 75 ? "var(--ck-warn)" : "var(--ck-accent)";
+      var trackCol = esDark() ? "rgba(0,229,196,0.07)" : "rgba(26,106,96,0.07)";
+      var glow     = esDark() ? "drop-shadow(0 0 4px " + col + ")" : "none";
+
+      return '<div style="display:flex;flex-direction:column;align-items:center;gap:0.15rem">' +
+        '<svg width="' + size + '" height="' + size + '" overflow="visible">' +
+          '<path d="' + aPath(start, arc, r) + '" fill="none" stroke="' + trackCol + '" stroke-width="4" stroke-linecap="round"/>' +
+          '<path d="' + aPath(start, arc, r) + '" fill="none" stroke="' + col + '" stroke-width="4" stroke-linecap="round"' +
+            ' stroke-dasharray="' + len.toFixed(2) + ' ' + circ.toFixed(2) + '"' +
+            ' style="filter:' + glow + '"/>' +
+          '<text x="' + cx + '" y="' + (cy-3) + '" text-anchor="middle" fill="' + col + '" font-family="\'JetBrains Mono\',monospace" font-size="' + Math.round(size*0.18) + '" font-weight="700">' + valor + '</text>' +
+          '<text x="' + cx + '" y="' + (cy+size*0.15) + '" text-anchor="middle" fill="var(--ck-on-variant)" font-family="\'JetBrains Mono\',monospace" font-size="' + Math.round(size*0.1) + '">%</text>' +
+        '</svg>' +
+        '<div style="font-size:0.55rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--ck-on-variant)">' + label + '</div>' +
+      '</div>';
+    }
+
+    /* ============================================================
+       Render: Network Graph SVG
+       ============================================================ */
+    function renderNetworkGraph(dispositivos) {
+      var W = 320, H = 200;
+      var rX = W * 0.5, rY = H * 0.5;
+      var dark     = esDark();
+      var accent   = dark ? "#00e5c4" : "#1a6a60";
+      var adim     = dark ? "#009e88" : "#0e4d45";
+      var warn     = dark ? "#e8a03a" : "#b45309";
+      var onV      = dark ? "#3a6058" : "#5a8078";
+      var lineCol  = dark ? "rgba(0,229,196,0.15)" : "rgba(26,106,96,0.15)";
+
+      var lista = (dispositivos || []).filter(function(d) { return d.activo; }).slice(0, 12);
+      var nodos = lista.map(function(d, i) {
+        var angle = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
+        var rad = 0.32;
+        return {
+          nombre: (d.nombre || d.ip || "?").substring(0, 8),
+          x: 0.5 + rad * Math.cos(angle),
+          y: 0.5 + rad * Math.sin(angle),
+          unknown: d.estado === "desconocido"
+        };
+      });
+
+      var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '">';
+      svg += '<defs><radialGradient id="rg-portal" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="' + accent + '" stop-opacity="0.3"/><stop offset="100%" stop-color="' + accent + '" stop-opacity="0"/></radialGradient></defs>';
+
+      nodos.forEach(function(n) {
+        var nx = n.x * W, ny = n.y * H;
+        svg += '<line x1="' + rX + '" y1="' + rY + '" x2="' + nx + '" y2="' + ny + '"' +
+          ' stroke="' + (n.unknown ? warn : lineCol) + '" stroke-width="' + (n.unknown ? 1 : 0.8) + '"' +
+          (n.unknown ? ' stroke-dasharray="3 3"' : '') + '/>';
+      });
+
+      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="28" fill="url(#rg-portal)"/>';
+
+      nodos.forEach(function(n) {
+        var nx = n.x * W, ny = n.y * H;
+        var col = n.unknown ? warn : adim;
+        var gf  = dark ? ' style="filter:drop-shadow(0 0 4px ' + col + ')"' : '';
+        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="8" fill="' + col + '" opacity="0.08"/>';
+        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="4" fill="' + col + '"' + gf + '/>';
+        svg += '<text x="' + nx + '" y="' + (ny+13) + '" text-anchor="middle" fill="' + (n.unknown ? warn : onV) + '" font-family="\'JetBrains Mono\',monospace" font-size="7">' + n.nombre + '</text>';
+      });
+
+      var gfRouter = dark ? ' style="filter:drop-shadow(0 0 4px ' + accent + ')"' : '';
+      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="14" fill="' + accent + '" opacity="0.08"/>';
+      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="7" fill="' + accent + '"' + gfRouter + '/>';
+      svg += '<text x="' + rX + '" y="' + (rY+18) + '" text-anchor="middle" fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="7">Router</text>';
+      svg += '</svg>';
+      return svg;
+    }
+
+    /* ============================================================
+       Render: MiniBar
+       ============================================================ */
+    function renderMiniBar(valor, max, color, label, unit) {
+      var pct = Math.min((valor / (max || 1)), 1) * 100;
+      var rat = valor / (max || 1);
+      var col = rat >= 0.9 ? "var(--ck-danger)" : rat >= 0.75 ? "var(--ck-warn)" : color;
+      var bg  = esDark() ? "rgba(0,229,196,0.07)" : "rgba(26,106,96,0.07)";
+      var glow = esDark() ? col + "80" : "transparent";
+      return '<div class="minibar">' +
+        (label ? '<span class="minibar__label">' + label + '</span>' : '') +
+        '<div class="minibar__track" style="background:' + bg + '">' +
+          '<div class="minibar__fill" style="width:' + pct + '%;background:' + col + ';box-shadow:0 0 6px ' + glow + '"></div>' +
+        '</div>' +
+        '<span class="minibar__valor" style="color:' + col + '">' + fmtN(valor) + (unit ? '&thinsp;' + unit : '') + '</span>' +
+      '</div>';
+    }
+
+    /* ============================================================
+       Footer — actualizar dots
+       ============================================================ */
+    function actualizarFooter() {
+      var items = [
+        ["SISTEMA", _estado.sistema],
+        ["RED",     _estado.red    ],
+        ["BACKUP",  _estado.backup ],
+        ["CLAUDE",  _estado.claude ]
+      ];
+      var dark = esDark();
+      var html = "";
+      items.forEach(function(par) {
+        var lbl = par[0], est = par[1];
+        var col = est.warn ? "var(--ck-warn)" : est.ok ? "var(--ck-success)" : "var(--ck-danger)";
+        var glow = dark ? ";box-shadow:0 0 4px " + col : "";
+        html += '<div class="ck-footer-item">' +
+          '<div style="width:5px;height:5px;border-radius:50%;background:' + col + glow + ';flex-shrink:0"></div>' +
+          '<span class="ck-footer-label">' + lbl + '</span>' +
+          '<span class="ck-footer-val" style="color:' + col + '">' + est.val + '</span>' +
+        '</div>';
+      });
+      document.getElementById("ck-footer-dots").innerHTML = html;
+    }
+
+    /* ============================================================
+       Badge alertas en header
+       ============================================================ */
+    function setBadgeAlertas(n) {
+      var badge = document.getElementById("ck-alerta-badge");
+      if (n > 0) {
+        document.getElementById("ck-alerta-txt").textContent = "! " + n + " ALERTA" + (n > 1 ? "S" : "");
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+
+    /* ============================================================
+       Entidades HA
+       ============================================================ */
+    var HA_TEMP = {
+      "sensor.0xa4c138d70bcefd09_temperature": "Salón",
+      "sensor.temperature_158d0004255510":     "Cocina",
+      "sensor.temperature_158d00042554e2":     "Estudio",
+      "sensor.temperature_158d00018730b3":     "Hab. Antonio",
+      "sensor.temperature_158d000425161b":     "Dormitorio"
+    };
+    var HA_LUCES = {
+      "light.smart_bulb_msl120d_main_channel":           { nombre: "Bombilla"    },
+      "switch.0xa4c138c23ca59c24":                       { nombre: "Cocina"      },
+      "switch.0xa4c138d738bb72c1_left":                  { nombre: "Salón izq."  },
+      "switch.0xa4c138d738bb72c1_right":                 { nombre: "Salón der."  },
+      "switch.0xa4c1385fa998b01e":                       { nombre: "Entrada"     },
+      "switch.0xa4c1384e3242935e":                       { nombre: "Pasillo"     },
+      "switch.enchufe_001_lavadero_mss310_main_channel": { nombre: "Lavadero"    },
+      "switch.enchufe_002_antonio_mss310_main_channel":  { nombre: "Enc.Antonio" },
+      "switch.enchufe_003_cocina_mss310_main_channel":   { nombre: "Enc.Cocina"  }
+    };
+
+    /* ============================================================
+       Cargar Home Assistant
+       ============================================================ */
+    function cargarHA() {
+      fetch(HA_API + "/states")
         .then(function(r) { return r.json(); })
-        .then(function(d) {
-          var contenedor = document.getElementById("redoContenido");
-          var desconocidos = d.dispositivos_desconocidos || 0;
+        .then(function(estados) {
+          var m = {};
+          estados.forEach(function(e) { m[e.entity_id] = e; });
 
-          /* Desglose por tipo — orden visual predefinido */
-          var tiposHtml = '';
-          if (d.por_tipo && Object.keys(d.por_tipo).length > 0) {
-            // Orden preferido para la visualización
-            var orden = ['telefono', 'portatil', 'escritorio', 'television', 'impresora', 'iot', 'router', 'consola', 'servidor', 'otro'];
-
-            // Filtrar tipos existentes en el orden preferido
-            var tiposOrdenados = orden.filter(function(tipo) { return d.por_tipo[tipo] !== undefined; });
-
-            // Añadir tipos no previstos al final
-            Object.keys(d.por_tipo).forEach(function(tipo) {
-              if (tiposOrdenados.indexOf(tipo) === -1) {
-                tiposOrdenados.push(tipo);
-              }
-            });
-
-            var items = tiposOrdenados.map(function(tipo) {
-              var icono = TIPOS_ICONO[tipo] || 'device_unknown';
-              return '<span class="redo-tipo" title="' + tipo + '">' +
-                '<span class="material-symbols-outlined">' + icono + '</span>' +
-                '<span class="redo-tipo__cantidad">' + d.por_tipo[tipo] + '</span>' +
-              '</span>';
-            }).join('');
-            tiposHtml = '<div class="redo-tipos">' + items + '</div>';
+          // Exterior
+          var ext = m["sensor.huelva_f_montenegro_huelva_temperature"];
+          var max = m["sensor.huelva_f_montenegro_huelva_daily_max_temperature"];
+          var min = m["sensor.huelva_f_montenegro_huelva_daily_min_temperature"];
+          if (ext && ext.state !== "unavailable") {
+            document.getElementById("za-ext").innerHTML =
+              '<span class="ck-temp-ext">' + ext.state + '°</span>' +
+              '<div style="padding-bottom:0.4rem">' +
+                '<div class="ck-temp-sub">EXTERIOR</div>' +
+                '<div class="ck-temp-rng">' + (max ? '↑'+max.state+'° ' : '') + (min ? '↓'+min.state+'°' : '') + '</div>' +
+              '</div>';
           }
 
-          contenedor.innerHTML =
-            '<div class="hogar-tarjeta__valor">' + d.dispositivos_activos + '</div>' +
-            '<div class="hogar-tarjeta__detalle">dispositivos activos' +
-              (desconocidos > 0
-                ? ' · <span style="color:var(--peligro)">' + desconocidos + ' desconocidos</span>'
-                : '') +
-            '</div>' +
-            tiposHtml +
-            (d.ultimo_escaneo
-              ? '<div class="hogar-tarjeta__detalle">Ultimo escaneo: ' + formatearFecha(d.ultimo_escaneo) + '</div>'
-              : '');
+          // Interior
+          var html = "";
+          Object.keys(HA_TEMP).forEach(function(eid) {
+            var e   = m[eid];
+            var t   = (e && e.state !== "unavailable") ? parseFloat(e.state) : null;
+            var eH  = m[eid.replace("_temperature", "_humidity")];
+            var hum = (eH && eH.state !== "unavailable") ? Math.round(parseFloat(eH.state)) : null;
+            if (t !== null && !isNaN(t)) {
+              var col = colorTemp(t);
+              var pct = Math.max(0, Math.min(100, (t - 18) / 6 * 100));
+              var glow = esDark() ? "box-shadow:0 0 8px " + col + "60" : "";
+              html += '<div class="ck-ts-row">' +
+                '<span class="ck-ts-nombre">' + HA_TEMP[eid] + '</span>' +
+                '<div class="ck-ts-track"><div class="ck-ts-fill" style="width:' + pct + '%;background:' + col + ';' + glow + '"></div></div>' +
+                '<span class="ck-ts-val" style="color:' + col + '">' + t.toFixed(1) + '°</span>' +
+                '<span class="ck-ts-hum">' + (hum !== null ? hum + '%' : '--') + '</span>' +
+              '</div>';
+            } else {
+              html += '<div class="ck-ts-row">' +
+                '<span class="ck-ts-nombre">' + HA_TEMP[eid] + '</span>' +
+                '<div class="ck-ts-track"></div>' +
+                '<span class="ck-ts-val" style="color:var(--ck-on-variant)">--°</span>' +
+                '<span class="ck-ts-hum">--</span>' +
+              '</div>';
+            }
+          });
+          document.getElementById("za-int").innerHTML = html;
 
-          document.getElementById("tarjetaRedo").classList.remove("hogar-tarjeta--offline");
+          // Luces
+          var total = 0, enc = 0, hLuces = "";
+          Object.keys(HA_LUCES).forEach(function(eid) {
+            var e = m[eid], info = HA_LUCES[eid];
+            if (e && e.state !== "unavailable") {
+              total++;
+              var on = e.state === "on";
+              if (on) enc++;
+              hLuces += '<div class="ck-luz' + (on ? " ck-luz--on" : "") + '">' +
+                '<div class="ck-luz-dot ' + (on ? "ck-luz-dot--on" : "ck-luz-dot--off") + '"></div>' +
+                '<span class="ck-luz-nom">' + info.nombre + '</span>' +
+              '</div>';
+            }
+          });
+          document.getElementById("zb-res").innerHTML  = '<span>' + enc + '</span>/' + total + ' encendidos';
+          document.getElementById("zb-grid").innerHTML = hLuces;
         })
         .catch(function() {
-          document.getElementById("redoContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con ReDo</span>';
-          document.getElementById("tarjetaRedo").classList.add("hogar-tarjeta--offline");
+          document.getElementById("za-ext").innerHTML  = '<span class="ck-offline">Sin conexión con HA</span>';
+          document.getElementById("za-int").innerHTML  = "";
+          document.getElementById("zb-res").textContent = "Sin conexión";
+          document.getElementById("zb-grid").innerHTML = "";
         });
     }
 
     /* ============================================================
-       Cargar datos de FiDo
+       Cargar ReDo
+       ============================================================ */
+    function cargarRedo() {
+      fetch(REDO_API + "/resumen")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var activos = d.dispositivos_activos || 0;
+          var desc    = d.dispositivos_desconocidos || 0;
+          document.getElementById("zc-met").innerHTML =
+            '<span class="ck-red-m"><span style="color:var(--ck-accent);font-weight:700">' + activos + '</span> activos</span>' +
+            (desc > 0 ? '<span class="ck-red-m"><span style="color:var(--ck-warn);font-weight:700">' + desc + '</span> desconocido' + (desc>1?'s':'') + '</span>' : '') +
+            (d.ultimo_escaneo ? '<span class="ck-red-m" style="font-size:0.45rem">escaneo ' + fmtFecha(d.ultimo_escaneo) + '</span>' : '');
+          _estado.red = { ok: desc === 0, warn: desc > 0, val: desc > 0 ? "AVISO" : "OK" };
+          actualizarFooter();
+          return fetch(REDO_API + "/dispositivos");
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var lista = data.dispositivos || data || [];
+          document.getElementById("zc-grafo").innerHTML = renderNetworkGraph(lista);
+        })
+        .catch(function() {
+          document.getElementById("zc-met").innerHTML  = '<span class="ck-offline">Sin conexión</span>';
+          document.getElementById("zc-grafo").innerHTML = '<span class="ck-offline">Sin conexión con ReDo</span>';
+          _estado.red = { ok: false, warn: false, val: "ERROR" };
+          actualizarFooter();
+        });
+    }
+
+    /* ============================================================
+       Cargar FiDo
        ============================================================ */
     function cargarFido() {
       fetch(FIDO_API + "/resumen?cuenta_nombre=Cuenta%20Antonio&banco=caixa")
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          var contenedor = document.getElementById("fidoContenido");
-          var detalle = d.mes + " · Cuenta Antonio (Caixa)";
-
-          contenedor.innerHTML =
-            '<div class="hogar-tarjeta__valor">' + formatearEuros(d.balance) + '</div>' +
-            '<div class="hogar-tarjeta__detalle">' + detalle + '</div>' +
-            '<div class="fido-metricas">' +
-              '<div class="fido-metrica fido-metrica--ingreso">' +
-                '<div class="fido-metrica__valor">+' + formatearEuros(d.ingresos) + '</div>' +
-                '<div class="fido-metrica__label">ingresos</div>' +
-              '</div>' +
-              '<div class="fido-metrica fido-metrica--gasto">' +
-                '<div class="fido-metrica__valor">-' + formatearEuros(d.gastos) + '</div>' +
-                '<div class="fido-metrica__label">gastos</div>' +
-              '</div>' +
-            '</div>';
-
-          document.getElementById("tarjetaFido").classList.remove("hogar-tarjeta--offline");
+          document.getElementById("zd-bal").innerHTML =
+            '<div class="ck-bal">' + fmtEu(d.balance) + '<span class="ck-bal-mon">€</span></div>' +
+            '<div class="ck-bal-mes">' + (d.mes || "") + '</div>';
+          var ref = Math.max(d.ingresos, d.gastos, 1000);
+          document.getElementById("zd-bars").innerHTML =
+            renderMiniBar(d.ingresos, ref, "var(--ck-success)", "ingresos", "€") +
+            renderMiniBar(d.gastos,   ref, "var(--ck-danger)",  "gastos",   "€");
         })
         .catch(function() {
-          document.getElementById("fidoContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con FiDo</span>';
-          document.getElementById("tarjetaFido").classList.add("hogar-tarjeta--offline");
+          document.getElementById("zd-bal").innerHTML = '<span class="ck-offline">Sin conexión con FiDo</span>';
+          document.getElementById("zd-bars").innerHTML = "";
         });
     }
 
-    /* ============================================================
-       Cargar datos de Home Assistant
-       ============================================================ */
-    var HA_API = "/domotica/api";
-
-    // Entidades de temperatura interior (entity_id → nombre corto)
-    var HA_TEMP_INTERIOR = {
-      "sensor.0xa4c138d70bcefd09_temperature": "Salon",
-      "sensor.temperature_158d0004255510": "Cocina",
-      "sensor.temperature_158d00042554e2": "Estudio",
-      "sensor.temperature_158d00018730b3": "Hab. Antonio",
-      "sensor.temperature_158d000425161b": "Dormitorio"
-    };
-
-    // Entidades de luces/enchufes (entity_id → { nombre, icono })
-    var HA_LUCES = {
-      "light.smart_bulb_msl120d_main_channel": { nombre: "Bombilla", icono: "lightbulb" },
-      "switch.0xa4c138c23ca59c24": { nombre: "Cocina", icono: "light" },
-      "switch.0xa4c138d738bb72c1_left": { nombre: "Salon izq.", icono: "light" },
-      "switch.0xa4c138d738bb72c1_right": { nombre: "Salon der.", icono: "light" },
-      "switch.0xa4c1385fa998b01e": { nombre: "Entrada", icono: "light" },
-      "switch.0xa4c1384e3242935e": { nombre: "Pasillo", icono: "light" },
-      "switch.enchufe_001_lavadero_mss310_main_channel": { nombre: "Lavadero", icono: "power" },
-      "switch.enchufe_002_antonio_mss310_main_channel": { nombre: "Enc. Antonio", icono: "power" },
-      "switch.enchufe_003_cocina_mss310_main_channel": { nombre: "Enc. Cocina", icono: "power" }
-    };
-
-    function cargarHA() {
-      fetch(HA_API + "/states")
-        .then(function(r) { return r.json(); })
-        .then(function(estados) {
-          // Indexar por entity_id
-          var mapa = {};
-          estados.forEach(function(e) { mapa[e.entity_id] = e; });
-
-          // --- Temperatura exterior ---
-          var extTemp = mapa["sensor.huelva_f_montenegro_huelva_temperature"];
-          var extMax  = mapa["sensor.huelva_f_montenegro_huelva_daily_max_temperature"];
-          var extMin  = mapa["sensor.huelva_f_montenegro_huelva_daily_min_temperature"];
-
-          var htmlExterior = "";
-          if (extTemp && extTemp.state !== "unavailable") {
-            htmlExterior =
-              '<div class="ha-exterior">' +
-                '<span class="ha-exterior__temp">' + extTemp.state + '&deg;C</span>' +
-                '<span class="ha-exterior__rango">Exterior' +
-                  (extMax ? ' &uarr;' + extMax.state + '&deg;' : '') +
-                  (extMin ? ' &darr;' + extMin.state + '&deg;' : '') +
-                '</span>' +
-              '</div>';
-          }
-
-          // --- Temperaturas interiores ---
-          var htmlInterior = '<div class="ha-interior-grid">';
-          Object.keys(HA_TEMP_INTERIOR).forEach(function(eid) {
-            var e = mapa[eid];
-            var val = (e && e.state !== "unavailable") ? e.state + "&deg;" : "--";
-            htmlInterior +=
-              '<div class="ha-interior-item">' +
-                '<span class="ha-interior-item__nombre">' + HA_TEMP_INTERIOR[eid] + '</span>' +
-                '<span class="ha-interior-item__valor">' + val + '</span>' +
-              '</div>';
-          });
-          htmlInterior += '</div>';
-
-          // --- Luces y enchufes ---
-          var totalLuces = 0;
-          var encendidas = 0;
-          var htmlDispositivos = '<div class="ha-dispositivos-grid">';
-          Object.keys(HA_LUCES).forEach(function(eid) {
-            var e = mapa[eid];
-            var info = HA_LUCES[eid];
-            if (e && e.state !== "unavailable") {
-              totalLuces++;
-              var on = e.state === "on";
-              if (on) encendidas++;
-              htmlDispositivos +=
-                '<div class="ha-dispositivo' + (on ? ' ha-dispositivo--on' : '') + '">' +
-                  '<span class="material-symbols-outlined' + (on ? ' filled' : '') + ' ha-dispositivo__icono">' + info.icono + '</span>' +
-                  '<span class="ha-dispositivo__nombre">' + info.nombre + '</span>' +
-                '</div>';
-            }
-          });
-          htmlDispositivos += '</div>';
-
-          var htmlLuces =
-            '<div class="ha-luces">' +
-              '<div class="ha-luces__resumen">' +
-                '<span class="material-symbols-outlined filled" style="font-size:0.85rem;vertical-align:-2px;color:var(--primary)">lightbulb</span> ' +
-                encendidas + ' de ' + totalLuces + ' encendidos' +
-              '</div>' +
-              htmlDispositivos +
-            '</div>';
-
-          document.getElementById("haContenido").innerHTML = htmlExterior + htmlInterior + htmlLuces;
-          document.getElementById("tarjetaHA").classList.remove("hogar-tarjeta--offline");
-        })
-        .catch(function() {
-          document.getElementById("haContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con Home Assistant</span>';
-          document.getElementById("tarjetaHA").classList.add("hogar-tarjeta--offline");
-        });
-    }
-
-    /* ============================================================
-       Resumen crypto en tarjeta FiDo
-       ============================================================ */
     function cargarCryptoResumen() {
       fetch(KRYPTO_API + "/portafolio")
         .then(function(r) { return r.json(); })
         .then(function(datos) {
           if (!datos || !datos.length) return;
-          var totalInv = 0, totalVal = 0;
-          datos.forEach(function(c) {
-            totalInv += c.coste_total_inversion;
-            totalVal += c.valor_actual_inversion;
-          });
-          var pct = totalInv > 0 ? ((totalVal - totalInv) / totalInv * 100) : 0;
-          var clase = pct >= 0 ? "crypto-positivo" : "crypto-negativo";
-          var flecha = pct >= 0 ? "\u25B2" : "\u25BC";
-          var fmtNum = function(n) { return Math.round(n).toLocaleString("es-ES"); };
-          document.getElementById("fidoCryptoResumen").innerHTML =
-            '<div class="fido-crypto-resumen">' +
-              '\u20BF ' + fmtNum(totalInv) + ' \u2192 ' + fmtNum(totalVal) + ' \u20AC' +
-              ' <span class="' + clase + '">' + flecha + ' ' + Math.abs(pct).toFixed(1) + '%</span>' +
-            '</div>';
+          var inv = 0, val = 0;
+          datos.forEach(function(c) { inv += c.coste_total_inversion; val += c.valor_actual_inversion; });
+          var pct = inv > 0 ? ((val - inv) / inv * 100) : 0;
+          var pos = pct >= 0;
+          var col = pos ? "var(--ck-success)" : "var(--ck-danger)";
+          document.getElementById("zd-crypto").innerHTML =
+            '<span style="color:var(--ck-on-surface)">₿</span> ' +
+            Math.round(inv).toLocaleString("es-ES") + ' → ' + Math.round(val).toLocaleString("es-ES") + ' €' +
+            ' <span style="color:' + col + ';font-weight:700">' + (pos ? '▲' : '▼') + ' ' + Math.abs(pct).toFixed(1) + '%</span>';
         })
-        .catch(function() {}); // Silencioso — es info complementaria
+        .catch(function() {});
     }
 
     /* ============================================================
-       Cargar datos de MediDo
+       Cargar MediDo — Gauges
        ============================================================ */
     function cargarMedido() {
       fetch(MEDIDO_API + "/resumen")
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          var contenedor = document.getElementById("medidoContenido");
-          var estado = d.estado_global || "ok";
-          var textoEstado = estado === "ok" ? "Sistema OK" : estado === "warning" ? "Aviso" : "Alerta critica";
-
-          var htmlSemaforo =
-            '<div class="medido-semaforo medido-semaforo--' + estado + '">' +
-              '<div class="medido-semaforo__dot"></div>' +
-              '<span class="medido-semaforo__texto">' + textoEstado + '</span>' +
-            '</div>';
-
-          function barraMetrica(label, valor) {
-            if (valor === null || valor === undefined) return "";
-            var pct = Math.round(valor);
-            var claseBar = pct >= 90 ? "medido-metrica__barra--danger"
-                         : pct >= 80 ? "medido-metrica__barra--warning"
-                         : "";
-            return '<div class="medido-metrica">' +
-              '<span class="medido-metrica__label">' + label + '</span>' +
-              '<div class="medido-metrica__barra-fondo">' +
-                '<div class="medido-metrica__barra ' + claseBar + '" style="width:' + pct + '%"></div>' +
-              '</div>' +
-              '<span class="medido-metrica__valor">' + pct + '%</span>' +
-            '</div>';
-          }
-
-          var htmlMetricas =
-            '<div class="medido-metricas">' +
-              barraMetrica("CPU", d.pve_cpu_percent) +
-              barraMetrica("RAM", d.pve_memoria_percent) +
-              barraMetrica("Disco", d.vm_disco_percent) +
-            '</div>';
-
-          var htmlContenedores = d.contenedores_running !== null && d.contenedores_running !== undefined
-            ? '<div class="medido-resumen-item">' +
-                '<div class="medido-resumen-item__valor">' + d.contenedores_running + '/' + d.contenedores_total + '</div>' +
-                '<div class="medido-resumen-item__label">contenedores</div>' +
-              '</div>'
-            : "";
-
-          var htmlAlertas = d.alertas_activas > 0
-            ? '<div class="medido-resumen-item">' +
-                '<div class="medido-resumen-item__valor" style="color:var(--peligro)">' + d.alertas_activas + '</div>' +
-                '<div class="medido-resumen-item__label">alertas</div>' +
-              '</div>'
-            : "";
-
-          var htmlResumen =
-            '<div class="medido-resumen">' +
-              htmlContenedores +
-              '<div class="medido-resumen-item">' +
-                '<div class="medido-resumen-item__valor">' + d.servicios_ok + '/' + d.servicios_total + '</div>' +
-                '<div class="medido-resumen-item__label">servicios</div>' +
-              '</div>' +
-              htmlAlertas +
-            '</div>';
-
-          contenedor.innerHTML = htmlSemaforo + htmlMetricas + htmlResumen;
-          document.getElementById("tarjetaMedido").classList.remove("hogar-tarjeta--offline");
+          var cpu   = Math.round(d.pve_cpu_percent    || 0);
+          var ram   = Math.round(d.pve_memoria_percent || 0);
+          var disco = Math.round(d.vm_disco_percent    || 0);
+          document.getElementById("ze-row").innerHTML =
+            renderGauge(cpu, "CPU", 72) + renderGauge(ram, "RAM", 72) + renderGauge(disco, "Disco", 72);
+          var ctrsOk = d.contenedores_running === d.contenedores_total;
+          var svcsOk = d.servicios_ok         === d.servicios_total;
+          document.getElementById("ze-sum").innerHTML =
+            '<div class="ck-g-kpi"><div class="ck-g-kpi-val" style="color:' + (ctrsOk ? "var(--ck-success)" : "var(--ck-danger)") + '">' + d.contenedores_running + '/' + d.contenedores_total + '</div><div class="ck-g-kpi-lbl">CTRS</div></div>' +
+            '<div class="ck-g-kpi"><div class="ck-g-kpi-val" style="color:' + (svcsOk ? "var(--ck-success)" : "var(--ck-danger)") + '">' + d.servicios_ok + '/' + d.servicios_total + '</div><div class="ck-g-kpi-lbl">SVCS</div></div>' +
+            (d.uptime_host ? '<div class="ck-g-kpi"><div class="ck-g-kpi-val" style="color:var(--ck-success)">' + d.uptime_host + '</div><div class="ck-g-kpi-lbl">UPTIME</div></div>' : '');
+          _estado.sistema = { ok: d.estado_global === "ok", warn: d.estado_global === "warning", val: d.estado_global === "ok" ? "OK" : "AVISO" };
+          actualizarFooter();
         })
         .catch(function() {
-          document.getElementById("medidoContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con MediDo</span>';
-          document.getElementById("tarjetaMedido").classList.add("hogar-tarjeta--offline");
+          document.getElementById("ze-row").innerHTML = '<span class="ck-offline">Sin conexión con MediDo</span>';
+          document.getElementById("ze-sum").innerHTML = "";
+          _estado.sistema = { ok: false, warn: false, val: "ERROR" };
+          actualizarFooter();
         });
     }
 
     /* ============================================================
-       Cargar estado del Backup
+       Cargar Claude
+       ============================================================ */
+    function cargarClaude() {
+      fetch(MEDIDO_API + "/claude/resumen?periodo=mes")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var sesiones = d.sesiones_totales || 0;
+          var tokens   = (d.tokens && (d.tokens.input_total||0) + (d.tokens.output_total||0)) || 0;
+          var coste    = d.coste && d.coste.total_usd ? d.coste.total_usd.toFixed(2) : "0.00";
+          var proyecto = (d.ultima_sesion && d.ultima_sesion.proyecto) || "--";
+          document.getElementById("zd-cl-kpis").innerHTML =
+            '<div><div class="ck-cl-lbl">SESIONES</div><div class="ck-cl-val" style="color:var(--ck-accent)">' + sesiones + '</div></div>' +
+            '<div><div class="ck-cl-lbl">TOKENS</div><div class="ck-cl-val" style="color:var(--ck-accent-dim)">' + fmtK(tokens) + '</div></div>' +
+            '<div><div class="ck-cl-lbl">COSTE</div><div class="ck-cl-val" style="color:var(--ck-on-surface)">' + coste + ' USD</div></div>' +
+            '<div><div class="ck-cl-lbl">PROYECTO</div><div class="ck-cl-val" style="color:var(--ck-on-variant);font-size:0.62rem">' + proyecto + '</div></div>';
+          var lim = d.limites_tokens || {};
+          var p5h = (lim.ultimas_5h   && lim.ultimas_5h.porcentaje_usado)   || 0;
+          var p7d = (lim.ultima_semana && lim.ultima_semana.porcentaje_usado) || 0;
+          document.getElementById("zd-cl-bars").innerHTML =
+            renderMiniBar(p5h, 100, "var(--ck-accent)", "últ. 5h", "") +
+            renderMiniBar(p7d, 100, "var(--ck-accent)", "semana",  "");
+          _estado.claude = { ok: p7d < 80, warn: p7d >= 80, val: fmtN(p7d) + "%" };
+          actualizarFooter();
+        })
+        .catch(function() {
+          document.getElementById("zd-cl-kpis").innerHTML = '<span class="ck-offline">Sin conexión</span>';
+          document.getElementById("zd-cl-bars").innerHTML = "";
+        });
+    }
+
+    /* ============================================================
+       Cargar Backup
        ============================================================ */
     function cargarBackup() {
       fetch("/api/backup")
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          var contenedor = document.getElementById("backupContenido");
-          var tarjeta = document.getElementById("tarjetaBackup");
-          var estado = d.estado || "ok";
-          var conteos = d.conteos || {};
-          var resumen = d.resumen || {};
-
-          function formatearDuracion(segundos) {
-            if (!segundos && segundos !== 0) return "";
-            var minutos = Math.round(segundos / 60);
-            if (minutos < 60) return minutos + " min";
-            var horas = Math.floor(minutos / 60);
-            var resto = minutos % 60;
-            return horas + " h" + (resto ? " " + resto + " min" : "");
-          }
-
           if (!d.ultima_fecha) {
-            tarjeta.className = "hogar-tarjeta backup--nunca";
-            contenedor.innerHTML =
-              '<div class="backup-estado">' +
-                '<div class="backup-estado__dias">Sin backup</div>' +
-                '<div class="backup-estado__detalle">Nunca se ha registrado un backup</div>' +
-              '</div>';
+            document.getElementById("zf-bk").innerHTML =
+              '<div class="ck-bk-dias" style="color:var(--ck-danger)">Sin backup</div>' +
+              '<div class="ck-bk-det">Nunca registrado</div>';
+            _estado.backup = { ok: false, warn: false, val: "NUNCA" };
+            actualizarFooter();
             return;
           }
-
-          var ahora = new Date();
-          var fecha = new Date(d.ultima_fecha);
-          var dias = Math.floor((ahora - fecha) / (1000 * 60 * 60 * 24));
-
-          var clase, texto;
-          if (estado === "error") {
-            clase = "backup--peligro";
-            texto = "Backup con errores";
-          } else if (estado === "warning") {
-            clase = "backup--aviso";
-            texto = "Backup con avisos";
-          } else if (dias < 7) {
-            clase = "backup--ok";
-            texto = "Hace " + dias + " dia" + (dias !== 1 ? "s" : "");
-          } else if (dias < 14) {
-            clase = "backup--aviso";
-            texto = "Hace " + dias + " dias — toca hacer copia";
-          } else {
-            clase = "backup--peligro";
-            texto = "SIN BACKUP DESDE HACE " + dias + " DIAS";
-          }
-
-          var detalleTecnico = "";
-          if (conteos.dumps_total) {
-            detalleTecnico += '<div class="backup-estado__detalle">Dumps ' + conteos.dumps_ok + '/' + conteos.dumps_total + '</div>';
-          } else if (d.dumps_ok && d.dumps_ok.length) {
-            detalleTecnico += '<div class="backup-estado__detalle">Dumps ' + d.dumps_ok.length + ' registrados</div>';
-          }
-          if (conteos.vms_total) {
-            detalleTecnico += '<div class="backup-estado__detalle">VMs ' + conteos.vms_ok + '/' + conteos.vms_total + '</div>';
-          }
-          if (resumen.datos) {
-            detalleTecnico += '<div class="backup-estado__detalle">Datos: ' + resumen.datos + '</div>';
-          }
-          if (d.duracion_segundos || d.duracion_segundos === 0) {
-            detalleTecnico += '<div class="backup-estado__detalle">Duracion: ' + formatearDuracion(d.duracion_segundos) + '</div>';
-          }
-
-          tarjeta.className = "hogar-tarjeta " + clase;
-          contenedor.innerHTML =
-            '<div class="backup-estado">' +
-              '<div class="backup-estado__dias">' + texto + '</div>' +
-              '<div class="backup-estado__detalle">Ultimo: ' + formatearFecha(d.ultima_fecha) + '</div>' +
-              (d.tamano_total ? '<div class="backup-estado__detalle">' + d.tamano_total + '</div>' : '') +
-              detalleTecnico +
-            '</div>';
-
+          var dias   = Math.floor((new Date() - new Date(d.ultima_fecha)) / 86400000);
+          var estado = d.estado || "ok";
+          var col    = (estado === "error" || dias >= 14) ? "var(--ck-danger)"
+                     : (estado === "warning" || dias >= 7) ? "var(--ck-warn)"
+                     : "var(--ck-success)";
+          var extras = "";
+          var c = d.conteos || {};
+          if (c.dumps_total) extras += "dumps " + c.dumps_ok + "/" + c.dumps_total + " · ";
+          if (c.vms_total)   extras += "vms " + c.vms_ok + "/" + c.vms_total;
+          extras = extras.replace(/ · $/, "");
+          document.getElementById("zf-bk").innerHTML =
+            '<div style="display:flex;align-items:baseline;gap:0.5rem">' +
+              '<div class="ck-bk-dias" style="color:' + col + '">+' + dias + 'd</div>' +
+              '<div style="font-size:0.55rem;color:var(--ck-on-variant)">último ok</div>' +
+            '</div>' +
+            (extras ? '<div class="ck-bk-det">' + extras + '</div>' : '');
+          _estado.backup = { ok: dias < 7 && estado === "ok", warn: estado === "warning" || (dias >= 7 && dias < 14), val: "+" + dias + "D" };
+          actualizarFooter();
         })
         .catch(function() {
-          document.getElementById("backupContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con hogar-api</span>';
-          document.getElementById("tarjetaBackup").classList.add("hogar-tarjeta--offline");
+          document.getElementById("zf-bk").innerHTML = '<span class="ck-offline">Sin conexión</span>';
+          _estado.backup = { ok: false, warn: false, val: "ERROR" };
+          actualizarFooter();
         });
+    }
+
+    /* ============================================================
+       Cargar Alertas — log + badge
+       ============================================================ */
+    function cargarAlertasResumen() {
+      Promise.all([
+        fetch(REDO_API   + "/alertas").then(function(r) { return r.json(); }).then(function(d) { return (d.alertas||[]).map(function(a) { return Object.assign({_mod:"RED"},a); }); }).catch(function() { return []; }),
+        fetch(MEDIDO_API + "/alertas").then(function(r) { return r.json(); }).then(function(d) { return (d.alertas||[]).map(function(a) { return Object.assign({_mod:"MEDIDO"},a); }); }).catch(function() { return []; })
+      ]).then(function(res) {
+        var todas   = res[0].concat(res[1]);
+        var activas = todas.filter(function(a) { return !a.resuelta; }).length;
+        setBadgeAlertas(activas);
+        var dark = esDark();
+        var ord  = todas.slice().sort(function(a, b) {
+          if (a.resuelta !== b.resuelta) return a.resuelta ? 1 : -1;
+          return (b.fecha||"").localeCompare(a.fecha||"");
+        }).slice(0, 4);
+        var html = "";
+        ord.forEach(function(a) {
+          var col  = a.resuelta ? "var(--ck-success)" : (a.tipo === "warning" ? "var(--ck-warn)" : "var(--ck-danger)");
+          var glow = dark ? ";box-shadow:0 0 4px " + col : "";
+          var msg  = (a.mensaje||"").substring(0,45) + ((a.mensaje||"").length>45?"…":"");
+          html += '<div class="ck-log-row">' +
+            '<div class="ck-log-dot" style="background:' + col + glow + '"></div>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div class="ck-log-txt"><span class="ck-log-mod" style="color:' + col + '">[' + a._mod + ']</span> <span class="ck-log-msg">' + msg + '</span></div>' +
+              '<div class="ck-log-tpo">' + fmtFecha(a.fecha) + '</div>' +
+            '</div>' +
+          '</div>';
+        });
+        document.getElementById("zf-log").innerHTML = html || '<div style="font-size:0.65rem;color:var(--ck-on-variant)">Sin alertas registradas</div>';
+      });
     }
 
     /* ============================================================
        Escaneo manual
        ============================================================ */
-    document.getElementById("btnEscanear").addEventListener("click", function() {
-      var btn = this;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">hourglass_top</span> Escaneando...';
-
+    document.getElementById("btn-escanear").addEventListener("click", function(e) {
+      e.preventDefault();
+      var txt = document.getElementById("btn-escanear-txt");
+      txt.textContent = "escaneando...";
       fetch(REDO_API + "/escanear", { method: "POST" })
         .then(function() {
-          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">check_circle</span> Escaneo lanzado';
-          setTimeout(function() {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">radar</span> Escanear red';
-            cargarRedo();
-          }, 5000);
+          txt.textContent = "✓ lanzado";
+          setTimeout(function() { txt.textContent = "escanear_red"; cargarRedo(); }, 5000);
         })
-        .catch(function() {
-          btn.disabled = false;
-          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1rem">radar</span> Escanear red';
-          // Error silencioso — el centro de alertas mostrará el problema
-        });
+        .catch(function() { txt.textContent = "escanear_red"; });
     });
 
     /* ============================================================
-       Tarjeta Alertas — resumen compacto
+       Inicialización y refresco
        ============================================================ */
-    function cargarAlertasResumen() {
-      var fuentes = [
-        { api: REDO_API + "/alertas",   nombre: "ReDo" },
-        { api: MEDIDO_API + "/alertas", nombre: "MediDo" }
-      ];
-
-      var promesas = fuentes.map(function(f) {
-        return fetch(f.api)
-          .then(function(r) { return r.json(); })
-          .then(function(d) { return d.alertas || []; })
-          .catch(function() { return null; });
-      });
-
-      Promise.all(promesas).then(function(resultados) {
-        var contenedor = document.getElementById("alertasContenido");
-        var hayError = resultados.some(function(r) { return r === null; });
-
-        if (hayError && resultados.every(function(r) { return r === null; })) {
-          contenedor.innerHTML = '<span class="hogar-estado-offline">Sin conexion</span>';
-          document.getElementById("tarjetaAlertas").classList.add("hogar-tarjeta--offline");
-          return;
-        }
-
-        var todas = [];
-        resultados.forEach(function(lista) {
-          if (lista) todas = todas.concat(lista);
-        });
-
-        var activas   = todas.filter(function(a) { return !a.resuelta; }).length;
-        var resueltas = todas.filter(function(a) { return  a.resuelta; }).length;
-
-        // Última alerta (activa primero, luego por fecha)
-        var ordenadas = todas.slice().sort(function(a, b) {
-          if (a.resuelta !== b.resuelta) return a.resuelta - b.resuelta;
-          return (b.fecha || "").localeCompare(a.fecha || "");
-        });
-        var ultima = ordenadas[0];
-
-        var colorActivas = activas > 0 ? "var(--peligro)" : "var(--exito)";
-        var iconoActivas = activas > 0 ? "warning" : "check_circle";
-
-        contenedor.innerHTML =
-          '<div style="display:flex;align-items:center;gap:var(--gap-sm);margin-bottom:var(--gap-sm)">' +
-            '<span class="material-symbols-outlined" style="color:' + colorActivas + ';font-size:1.4rem">' + iconoActivas + '</span>' +
-            '<div>' +
-              '<div style="font-family:var(--fuente-titular);font-size:1.3rem;font-weight:700;color:' + colorActivas + '">' + activas + '</div>' +
-              '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--on-surface-variant)">activas</div>' +
-            '</div>' +
-            '<div style="margin-left:var(--gap-md)">' +
-              '<div style="font-family:var(--fuente-titular);font-size:1.3rem;font-weight:700;color:var(--on-surface-variant)">' + resueltas + '</div>' +
-              '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--on-surface-variant)">resueltas</div>' +
-            '</div>' +
-          '</div>' +
-          (ultima
-            ? '<div style="font-size:0.75rem;color:var(--on-surface-variant);border-top:1px solid var(--outline-variant);padding-top:var(--gap-sm)">' +
-                '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:2px">Ultima alerta</div>' +
-                '<div style="color:var(--on-surface);font-size:0.78rem">' + (ultima.mensaje || "").substring(0, 60) + (ultima.mensaje && ultima.mensaje.length > 60 ? "…" : "") + '</div>' +
-                '<div style="margin-top:2px">' + formatearFecha(ultima.fecha) + '</div>' +
-              '</div>'
-            : '<div style="font-size:0.78rem;color:var(--on-surface-variant)">Sin alertas registradas</div>') +
-          (hayError
-            ? '<div style="font-size:0.7rem;color:var(--aviso);margin-top:var(--gap-xs)">' +
-                '<span class="material-symbols-outlined" style="font-size:0.8rem;vertical-align:-2px">cloud_off</span> Algun modulo sin conexion' +
-              '</div>'
-            : '');
-
-        document.getElementById("tarjetaAlertas").classList.remove("hogar-tarjeta--offline");
-      });
-    }
-
-    /* ============================================================
-       Helpers
-       ============================================================ */
-    function formatearEuros(cantidad) {
-      return Number(cantidad).toLocaleString("es-ES", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }) + " \u20AC";
-    }
-
-    function formatearFecha(iso) {
-      if (!iso) return "";
-      try {
-        var d = new Date(iso);
-        return d.toLocaleString("es-ES", {
-          day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
-        });
-      } catch(e) {
-        return iso;
-      }
-    }
-
-    function formatearNumero(n) {
-      if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
-      if (n >= 1000) return (n / 1000).toFixed(1) + "k";
-      return n.toString();
-    }
-
-    function cargarClaude() {
-      fetch(MEDIDO_API + "/claude/resumen?periodo=mes")
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          var contenedor = document.getElementById("claudeContenido");
-
-          // Limites de tokens (5h y semanal)
-          var htmlLimitesTokens = "";
-          if (d.limites_tokens) {
-            // Últimas 5 horas
-            var lim5h = d.limites_tokens.ultimas_5h || {};
-            var pct5h = lim5h.porcentaje_usado || 0;
-            var clase5h = pct5h >= 90 ? "medido-metrica__barra--danger"
-                        : pct5h >= 75 ? "medido-metrica__barra--warning"
-                        : "";
-            htmlLimitesTokens +=
-              '<div class="medido-metrica">' +
-                '<span class="medido-metrica__label">Últimas 5h</span>' +
-                '<div class="medido-metrica__barra-fondo">' +
-                  '<div class="medido-metrica__barra ' + clase5h + '" style="width:' + pct5h + '%"></div>' +
-                '</div>' +
-                '<span class="medido-metrica__valor">' + formatearNumero(lim5h.tokens_usados || 0) + ' / ' + formatearNumero(lim5h.limite || 0) + '</span>' +
-              '</div>';
-
-            // Última semana
-            var lim7d = d.limites_tokens.ultima_semana || {};
-            var pct7d = lim7d.porcentaje_usado || 0;
-            var clase7d = pct7d >= 90 ? "medido-metrica__barra--danger"
-                        : pct7d >= 75 ? "medido-metrica__barra--warning"
-                        : "";
-            htmlLimitesTokens +=
-              '<div class="medido-metrica" style="margin-top:0.25rem">' +
-                '<span class="medido-metrica__label">Esta semana</span>' +
-                '<div class="medido-metrica__barra-fondo">' +
-                  '<div class="medido-metrica__barra ' + clase7d + '" style="width:' + pct7d + '%"></div>' +
-                '</div>' +
-                '<span class="medido-metrica__valor">' + formatearNumero(lim7d.tokens_usados || 0) + ' / ' + formatearNumero(lim7d.limite || 0) + '</span>' +
-              '</div>';
-          }
-
-          // Presupuesto en EUR (si está configurado) — informativo
-          var htmlPresupuesto = "";
-          if (d.presupuesto && d.presupuesto.presupuesto_eur) {
-            htmlPresupuesto =
-              '<div style="margin-top:var(--gap-md);padding-top:var(--gap-sm);border-top:1px solid var(--outline-variant)">' +
-                '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:var(--gap-xs)">Presupuesto mes</div>' +
-                '<div style="font-size:0.9rem;color:var(--on-surface);margin-bottom:0.25rem">' +
-                  '<span style="font-weight:600">' + (d.coste.total_usd || 0).toFixed(2) + ' USD</span> / ' +
-                  '<span style="color:var(--on-surface-variant)">' + (d.presupuesto.presupuesto_eur || 0).toFixed(2) + ' €</span>' +
-                '</div>' +
-              '</div>';
-          }
-
-          // Resumen: sesiones, tokens del mes
-          var htmlResumen =
-            '<div class="medido-resumen" style="margin-top:var(--gap-md)">' +
-              '<div class="medido-resumen-item">' +
-                '<div class="medido-resumen-item__valor">' + (d.sesiones_totales || 0) + '</div>' +
-                '<div class="medido-resumen-item__label">sesiones</div>' +
-              '</div>' +
-              '<div class="medido-resumen-item">' +
-                '<div class="medido-resumen-item__valor">' + formatearNumero((d.tokens.input_total || 0) + (d.tokens.output_total || 0)) + '</div>' +
-                '<div class="medido-resumen-item__label">tokens mes</div>' +
-              '</div>' +
-            '</div>';
-
-          // Última sesión
-          var htmlUltimaSesion = "";
-          if (d.ultima_sesion) {
-            var fechaUltima = formatearFecha(d.ultima_sesion.fecha_fin);
-            htmlUltimaSesion =
-              '<div style="margin-top:var(--gap-md);padding-top:var(--gap-sm);border-top:1px solid var(--outline-variant)">' +
-                '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--outline-variant);margin-bottom:var(--gap-xs)">Última sesión</div>' +
-                '<div style="font-size:0.78rem;color:var(--on-surface);margin-bottom:2px"><strong>' + (d.ultima_sesion.proyecto || "N/A") + '</strong></div>' +
-                '<div style="font-size:0.7rem;color:var(--on-surface-variant);margin-bottom:2px">' + fechaUltima + '</div>' +
-                '<div style="font-size:0.75rem;color:var(--aviso);font-weight:600">' + (d.ultima_sesion.coste_usd || 0).toFixed(3) + ' USD · ' + formatearNumero(d.ultima_sesion.tokens_total || 0) + ' tokens</div>' +
-              '</div>';
-          }
-
-          contenedor.innerHTML = htmlLimitesTokens + htmlResumen + htmlPresupuesto + htmlUltimaSesion;
-          document.getElementById("tarjetaClaude").classList.remove("hogar-tarjeta--offline");
-        })
-        .catch(function(err) {
-          console.error("Error cargando Claude:", err);
-          document.getElementById("claudeContenido").innerHTML =
-            '<span class="hogar-estado-offline">Sin conexion con MediDo</span>';
-          document.getElementById("tarjetaClaude").classList.add("hogar-tarjeta--offline");
-        });
-    }
-
-    /* ============================================================
-       Inicialización y refresco periódico
-       ============================================================ */
+    actualizarFooter();
+    cargarHA();
     cargarRedo();
     cargarFido();
-    cargarHA();
     cargarCryptoResumen();
-    cargarBackup();
     cargarMedido();
     cargarClaude();
+    cargarBackup();
     cargarAlertasResumen();
 
-    // Refrescar cada 60 segundos (datos operacionales)
     setInterval(function() {
-      cargarRedo();
-      cargarFido();
-      cargarHA();
-      cargarMedido();
-      cargarClaude();
-      cargarAlertasResumen();
+      cargarHA(); cargarRedo(); cargarFido();
+      cargarMedido(); cargarClaude(); cargarAlertasResumen();
     }, 60000);
 
-    // Refrescar cada 10 minutos (crypto — datos menos volátiles)
     setInterval(cargarCryptoResumen, 600000);
   </script>
 

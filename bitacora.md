@@ -21,6 +21,28 @@ JetBrains Mono, modo oscuro/claro con toggle).
 
 El estilo Living Sanctuary queda intacto — la migración es incremental por fases.
 
+### Fase 2 rediseño Cockpit — portal/index.html
+
+Reescritura completa del portal principal al estilo Cockpit. Toda la lógica de
+negocio (fetches, entidades HA, IDs) se preserva; solo cambia la capa visual.
+
+**Cambios en `portal/index.html`:**
+- Header flotante glassmorphic → header fijo 48px, fondo `var(--ck-bg2)`, nav inline.
+  Eliminado drawer antiguo — drawer nuevo solo para móvil (<768px).
+- `hogar-lumina`, `.hogar-tarjeta`, `.portal-bento` → eliminados.
+- Grid 3×2 (`320px 1fr 260px` / `1fr 1fr`) con 6 zonas HUD:
+  - [A] Clima: temp exterior grande + TempScale interior cromático
+  - [B] Luces: chips 3×3 con dot de estado
+  - [C] Red: NetworkGraph SVG generado en JS con layout circular
+  - [D] Finanzas + Claude: split 50/50 con MiniBar ingresos/gastos y tokens
+  - [E] Gauges: 3× Gauge SVG circular (CPU/RAM/Disco) + resumen ctrs/svcs
+  - [F] Backup + Log alertas + Accesos rápidos estilo terminal
+- Footer fijo 28px con status dots (SISTEMA/RED/BACKUP/CLAUDE) actualizados
+  en tiempo real desde cada fetch.
+- Toggle tema sol/luna → `localStorage("hogar-cockpit-tema")` + `data-tema-cockpit`.
+- Responsive: móvil <768px pasa a flex columna con drawer lateral.
+- `body { overflow: hidden }` en desktop; `overflow: auto` en móvil.
+
 ## 2026-04-27
 
 ### Briefing diario — implementación completa
