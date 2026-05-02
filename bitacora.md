@@ -43,6 +43,47 @@ negocio (fetches, entidades HA, IDs) se preserva; solo cambia la capa visual.
 - Responsive: móvil <768px pasa a flex columna con drawer lateral.
 - `body { overflow: hidden }` en desktop; `overflow: auto` en móvil.
 
+### Fase 3 rediseño Cockpit — FiDo
+
+Reescritura completa del frontend de FiDo al estilo Cockpit.
+
+**Cambios en `static/index.html`:**
+- Eliminados: `hogar-lumina`, header flotante Living Sanctuary, drawer antiguo, ApexCharts.
+- Header fijo 48px con nav inline (botones de sección) + reloj + toggle tema. Drawer lateral solo en móvil.
+- Panel: grid 3 columnas — KPIs (Balance/Ingresos/Gastos/Movimientos) | minibars categorías + donut SVG | barras mensuales SVG + resumen crypto.
+- Sección Movimientos: barra de filtros compacta + tabla `ck-tabla` + paginación Cockpit.
+- Sección Importar: 2 columnas (formulario | resultado estilo terminal).
+- Secciones Categorías, Reglas, Ajustes: `ck-card` con `ck-lista-item`, formularios inline con `ck-input`/`ck-select`.
+- Sección Crypto: tabla + sidebar distribución con minibars.
+- Modal edición movimiento: grid 2 cols con `ck-input`/`ck-select` Cockpit.
+- Footer 28px con status dots API/BD/NTFY/KRYPTO.
+- Tema: `data-tema-cockpit` en `<html>`, toggle por botón, persiste en `localStorage`.
+- Toda la lógica Alpine.js (x-data, x-model, @click, x-for) preservada intacta.
+
+**Cambios en `static/estilos.css`:**
+- Reescritura completa. Elimina todas las clases Living Sanctuary (hogar-tarjeta, hogar-tabla, etc.).
+- Nuevas clases `ck-*` usando variables `--ck-*` de hogar.css.
+- Layout: `#fido-app` flex-column 100vh, secciones con overflow controlado.
+
+**Cambios en `static/app.js`:**
+- Eliminada dependencia de ApexCharts (no se carga en index.html).
+- Constante global `COLORES_CAT` (paleta teal/indigo/amber/pink…).
+- `renderizarGraficaCategoria()` y `renderizarGraficaMes()` → `renderizarDonut()` y `renderizarBarras()`: SVG inline generado con string concatenation.
+- Nuevos métodos `catColor(i)` y `catPct(cat)` para minibars del panel.
+
+### Correcciones post-implementación — portal/index.html
+
+- **Grafo de red enano**: el SVG de `renderNetworkGraph` no llenaba el espacio disponible.
+  Corregido cambiando `.ck-grafo-wrap` a `position:relative` y el SVG a
+  `position:absolute; inset:0.25rem` para que ocupe toda la zona sin desbordarse.
+- **Etiquetas de nodo con "192.168."**: todos los dispositivos sin nombre mostraban
+  `192.168.` (truncado a 8 chars). Añadido helper `ipCorta()` que extrae los dos
+  últimos octetos. Ahora cada nodo muestra el nombre como primario y los octetos
+  `X.Y` como texto secundario más pequeño y tenue.
+- **Fetches encadenados**: `/resumen` y `/dispositivos` estaban encadenados —
+  cualquier fallo en `/dispositivos` borraba las métricas ya renderizadas.
+  Separados en dos `fetch` totalmente independientes.
+
 ## 2026-04-27
 
 ### Briefing diario — implementación completa
