@@ -1,10 +1,12 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 14 completada ✅ — briefing diario funcionando, llega al móvil a las 8:30.
-> Última actualización: 2026-04-28
-> Nota 2026-04-25: la tesela de Finanzas Domésticas consume el resumen filtrado de FiDo para `Cuenta Antonio (Caixa)`, evitando duplicados por transferencias internas.
-> Nota 2026-04-26: backup estructurado v1 implementado en código. Próximo paso: actualizar `/root/backup.sh` en Proxmox, ejecutar backup real y verificar la tarjeta enriquecida en portada.
-> Nota 2026-04-27: briefing desplegado. El endpoint POST /api/briefing/enviar devuelve OK y los datos se recopilan correctamente (CPU/RAM/backup/FiDo/HA), pero la notificación no llega al móvil. Próximo paso: ejecutar `docker logs hogar-api --tail=20` en la VM para ver si hay warning de NTFY_TOPIC_ALERTAS vacío.
+> Estado actual: Fase 15 en curso — rediseño Cockpit. Portal ✅, FiDo ✅ (pendiente deploy font-size). ReDo y MediDo pendientes.
+> Última actualización: 2026-05-02
+> **Próximo paso concreto:**
+> 1. 👤 Ejecutar `./actualizar.sh` en la VM para desplegar FiDo con `html { font-size: 150% }` (commit ff73ecf)
+> 2. 🤖 Fase 15 — Paso 4: rediseño Cockpit de ReDo (`ReDo/static/index.html`)
+> 3. 🤖 Fase 15 — Paso 5: rediseño Cockpit de MediDo (`MediDo/static/index.html`)
+> 4. Referencia visual: `E:\Documentos\Desarrollo\hogarOS-handoff\design_handoff_cockpit\`
 
 ### Leyenda
 
@@ -501,6 +503,49 @@ Implementado en hogar-api como orquestador natural. Análisis en `analisis-mejor
 - [ ] 👤 Averiguar entity_id de la entidad weather en HA para obtener min/max del día
 - [ ] 👤 Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM
 - [ ] 👤 Verificar que llega automáticamente a las 8:30
+
+---
+
+## Fase 15 — Rediseño visual "Cockpit" (2026-05-02)
+
+Sustitución del estilo "Living Sanctuary" por el nuevo estilo "Cockpit": HUD industrial,
+JetBrains Mono, líneas finas, toggle oscuro/claro con `data-tema-cockpit` y `--ck-*` en `hogar.css`.
+Sin cambios funcionales — solo capa visual.
+
+### Referencia de diseño
+`E:\Documentos\Desarrollo\hogarOS-handoff\design_handoff_cockpit\`
+- `hogar Cockpit.html` — portal
+- `FiDo Cockpit.html` — FiDo
+- `ReDo Cockpit.html` — ReDo
+- `MediDo Cockpit.html` — MediDo
+
+### Paso 1 — hogar.css (base compartida) ✅
+- [x] 🤖 Añadir variables `--ck-*` y componentes Cockpit al final de `portal/static/hogar.css`
+- [x] 🤖 `@import` JetBrains Mono, animaciones, scrollbar global
+
+### Paso 2 — Portal (`portal/index.html`) ✅
+- [x] 🤖 Reescritura completa: header fijo 48px, grid 3×2 HUD, SVG Gauge + NetworkGraph
+- [x] 🤖 Footer 28px con status dots. Toggle tema `localStorage('hogar-cockpit-tema')`
+- [x] 🤖 Fix grafo: tamaño completo + etiquetas nombre+IP corta (commit c474fcb)
+- [x] 👤 Ejecutar `actualizar.sh` y verificar en producción
+
+### Paso 3 — FiDo (`FiDo/static/`) ✅ (pendiente deploy)
+- [x] 🤖 Reescritura completa de `estilos.css` con clases Cockpit (`fido-`, `ck-`)
+- [x] 🤖 Reescritura completa de `index.html`: header inline, panel 3 columnas, sin ApexCharts
+- [x] 🤖 `app.js`: reemplazar ApexCharts por SVG vanilla (`renderizarDonut`, `renderizarBarras`)
+- [x] 🤖 Fix tamaño fuente: `html { font-size: 150% }` en estilos.css (commit ff73ecf)
+- [x] 🤖 Cache-busting CSS: `estilos.css?v=3`
+- [ ] 👤 Ejecutar `actualizar.sh` en la VM para desplegar font-size fix
+
+### Paso 4 — ReDo (`ReDo/static/index.html`) 🔄 PENDIENTE
+- [ ] 🤖 Reescritura completa del frontend al estilo Cockpit
+- [ ] 🤖 Referencia: `ReDo Cockpit.html`
+- [ ] 👤 Ejecutar `actualizar.sh` y verificar
+
+### Paso 5 — MediDo (`MediDo/static/index.html`) 🔄 PENDIENTE
+- [ ] 🤖 Reescritura completa del frontend al estilo Cockpit
+- [ ] 🤖 Referencia: `MediDo Cockpit.html`
+- [ ] 👤 Ejecutar `actualizar.sh` y verificar
 
 ---
 

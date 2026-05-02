@@ -1,5 +1,21 @@
 # Bitácora — hogarOS
 
+## 2026-05-02 (sesión 2)
+
+### Fix tamaño de fuentes en FiDo Cockpit
+
+Las fuentes del nuevo diseño eran demasiado pequeñas (rem calibrados para el prototipo,
+no para uso real). Solución: `html { font-size: 150% }` en `estilos.css` — escala
+proporcionalmente todos los tamaños rem sin tener que cambiarlos uno a uno. Misma
+técnica usada en el portal.
+
+- `FiDo/static/estilos.css`: añadido `html { font-size: 150% }`. Header ajustado
+  a `height: 3.5rem` y footer a `height: 2.2rem` (de `px` a `rem` para escalar).
+- `FiDo/static/index.html`: cache-busting a `estilos.css?v=3`.
+- Commit: `ff73ecf` — pendiente despliegue con `./actualizar.sh` en VM.
+
+---
+
 ## 2026-05-02
 
 ### Fase 1 rediseño Cockpit — hogar.css (base compartida)
