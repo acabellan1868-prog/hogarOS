@@ -16,6 +16,7 @@
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
 
 /* ============================================================
    2. Variables CSS — Modo claro (por defecto)
@@ -1066,4 +1067,187 @@ body {
   opacity: 0.3;
   filter: blur(4px);
   margin: var(--gap-3xl) auto 0;
+}
+
+/* ============================================================
+   26. COCKPIT THEME — Variables --ck-* (modo oscuro por defecto)
+   Coexisten con el sistema Living Sanctuary sin romperlo.
+   El tema se activa con data-tema-cockpit="dark|light" en <html>.
+   ============================================================ */
+:root {
+  --ck-bg:           #060a09;
+  --ck-bg2:          #0a100e;
+  --ck-bg3:          #0f1a17;
+  --ck-accent:       #00e5c4;
+  --ck-accent-dim:   #009e88;
+  --ck-line:         rgba(0,229,196,0.12);
+  --ck-line-bright:  rgba(0,229,196,0.22);
+  --ck-on-surface:   #b8d8d0;
+  --ck-on-variant:   #3a6058;
+  --ck-danger:       #e85454;
+  --ck-warn:         #e8a03a;
+  --ck-success:      #3ae8a0;
+  --ck-input-bg:     rgba(0,229,196,0.04);
+  --ck-input-border: rgba(0,229,196,0.15);
+  --ck-row-hover:    rgba(0,229,196,0.04);
+  --ck-fuente:       'JetBrains Mono', 'Fira Code', monospace;
+}
+
+[data-tema-cockpit="light"] {
+  --ck-bg:           #f5f2ed;
+  --ck-bg2:          #ede9e3;
+  --ck-bg3:          #e5e0d8;
+  --ck-accent:       #1a6a60;
+  --ck-accent-dim:   #0e4d45;
+  --ck-line:         rgba(26,106,96,0.12);
+  --ck-line-bright:  rgba(26,106,96,0.22);
+  --ck-on-surface:   #1c2e2b;
+  --ck-on-variant:   #5a8078;
+  --ck-danger:       #c62828;
+  --ck-warn:         #b45309;
+  --ck-success:      #2e7d32;
+  --ck-input-bg:     rgba(26,106,96,0.04);
+  --ck-input-border: rgba(26,106,96,0.18);
+  --ck-row-hover:    rgba(26,106,96,0.04);
+}
+
+/* ============================================================
+   27. Cockpit — Animaciones
+   ============================================================ */
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes blink {
+  0%, 49%  { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.danger-pulse  { animation: pulse-danger 1.2s ease-in-out infinite; }
+.cursor-blink  { animation: blink 1s step-end infinite; }
+
+/* ============================================================
+   28. Cockpit — ZoneLabel (etiqueta de zona HUD)
+   ============================================================ */
+.zone-label {
+  font-family: var(--ck-fuente);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ck-on-variant);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.zone-label__diamond { color: var(--ck-accent-dim); }
+
+/* ============================================================
+   29. Cockpit — MiniBar (barra de progreso horizontal)
+   ============================================================ */
+.minibar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  font-family: var(--ck-fuente);
+}
+
+.minibar__label {
+  width: 3.5rem;
+  color: var(--ck-on-variant);
+  flex-shrink: 0;
+}
+
+.minibar__track {
+  flex: 1;
+  height: 2px;
+  background: rgba(0,229,196,0.07);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+[data-tema-cockpit="light"] .minibar__track {
+  background: rgba(26,106,96,0.07);
+}
+
+.minibar__fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.8s ease;
+}
+
+.minibar__valor {
+  width: 2.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   30. Cockpit — StatusDot (punto de estado con glow)
+   ============================================================ */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot--ok {
+  background: #3ae8a0;
+  box-shadow: 0 0 6px #3ae8a0;
+}
+
+.status-dot--warn {
+  background: #e8a03a;
+  box-shadow: 0 0 6px #e8a03a;
+}
+
+.status-dot--danger {
+  background: #e85454;
+  box-shadow: 0 0 6px #e85454;
+  animation: pulse-danger 1.2s ease-in-out infinite;
+}
+
+/* Sin glow en modo claro */
+[data-tema-cockpit="light"] .status-dot--ok    { box-shadow: none; }
+[data-tema-cockpit="light"] .status-dot--warn  { box-shadow: none; }
+[data-tema-cockpit="light"] .status-dot--danger { box-shadow: none; }
+
+/* ============================================================
+   31. Cockpit — CockpitLine (divisor de 1px)
+   ============================================================ */
+.cockpit-line {
+  height: 1px;
+  background: var(--ck-line);
+  border: none;
+  margin: 0;
+}
+
+.cockpit-line--bright {
+  background: var(--ck-line-bright);
+}
+
+/* ============================================================
+   32. Cockpit — Scrollbar global
+   ============================================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,229,196,0.15) transparent;
+}
+
+*::-webkit-scrollbar       { width: 4px; height: 4px; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(0,229,196,0.15);
+  border-radius: 2px;
+}
+
+[data-tema-cockpit="light"] * {
+  scrollbar-color: rgba(26,106,96,0.15) transparent;
+}
+
+[data-tema-cockpit="light"] *::-webkit-scrollbar-thumb {
+  background: rgba(26,106,96,0.15);
 }

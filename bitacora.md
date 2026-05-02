@@ -1,5 +1,26 @@
 # Bitácora — hogarOS
 
+## 2026-05-02
+
+### Fase 1 rediseño Cockpit — hogar.css (base compartida)
+
+Inicio del rediseño visual del ecosistema hogarOS: de estilo "Living Sanctuary"
+(glassmorphic, Plus Jakarta Sans) a nuevo estilo "Cockpit" (HUD, líneas finas,
+JetBrains Mono, modo oscuro/claro con toggle).
+
+**Cambios en `portal/static/hogar.css`** (añadidos al final, sin tocar código existente):
+- `@import` JetBrains Mono (pesos 300/400/500/700) desde Google Fonts.
+- Variables `--ck-*` en `:root` (oscuro por defecto) y override en `[data-tema-cockpit="light"]`.
+  Paleta oscura: fondo `#060a09`, acento teal `#00e5c4`. Paleta clara: fondo `#f5f2ed`, acento `#1a6a60`.
+- Componente `.zone-label` / `.zone-label__diamond`: etiqueta de zona HUD (sustituirá a `.hogar-seccion__titulo`).
+- Componente `.minibar` (`.minibar__label`, `.minibar__track`, `.minibar__fill`, `.minibar__valor`): barra de progreso horizontal para métricas.
+- Componente `.status-dot` (variantes `--ok`, `--warn`, `--danger`): punto de estado con glow; sin glow en modo claro.
+- Clase `.cockpit-line` / `.cockpit-line--bright`: divisor de 1px usando `--ck-line`.
+- Animaciones `@keyframes pulse-danger` y `@keyframes blink`; clases utilidad `.danger-pulse`, `.cursor-blink`.
+- Scrollbar global: 4px, thumb `rgba(0,229,196,0.15)` oscuro / `rgba(26,106,96,0.15)` claro.
+
+El estilo Living Sanctuary queda intacto — la migración es incremental por fases.
+
 ## 2026-04-27
 
 ### Briefing diario — implementación completa
