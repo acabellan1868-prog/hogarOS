@@ -684,7 +684,8 @@
       var onV      = dark ? "#3a6058" : "#5a8078";
       var lineCol  = dark ? "rgba(0,229,196,0.15)" : "rgba(26,106,96,0.15)";
 
-      var lista = (dispositivos || []).filter(function(d) { return d.activo; }).slice(0, 12);
+      /* Aceptar todos los dispositivos — el endpoint ya filtra activos */
+      var lista = (dispositivos || []).slice(0, 12);
       var nodos = lista.map(function(d, i) {
         var angle = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
         var rad = 0.32;
@@ -883,6 +884,7 @@
        Cargar ReDo
        ============================================================ */
     function cargarRedo() {
+      /* ── Resumen: métricas + footer (fetch independiente) ── */
       fetch(REDO_API + "/resumen")
         .then(function(r) { return r.json(); })
         .then(function(d) {
@@ -894,18 +896,25 @@
             (d.ultimo_escaneo ? '<span class="ck-red-m" style="font-size:0.45rem">escaneo ' + fmtFecha(d.ultimo_escaneo) + '</span>' : '');
           _estado.red = { ok: desc === 0, warn: desc > 0, val: desc > 0 ? "AVISO" : "OK" };
           actualizarFooter();
-          return fetch(REDO_API + "/dispositivos");
         })
+        .catch(function() {
+          document.getElementById("zc-met").innerHTML = '<span class="ck-offline">Sin conexión con ReDo</span>';
+          _estado.red = { ok: false, warn: false, val: "ERROR" };
+          actualizarFooter();
+        });
+
+      /* ── Dispositivos: grafo (fetch independiente) ── */
+      fetch(REDO_API + "/dispositivos")
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          var lista = data.dispositivos || data || [];
+          /* La API puede devolver { dispositivos: [...] } o directamente [...] */
+          var lista = Array.isArray(data) ? data
+                    : (Array.isArray(data.dispositivos) ? data.dispositivos : []);
           document.getElementById("zc-grafo").innerHTML = renderNetworkGraph(lista);
         })
         .catch(function() {
-          document.getElementById("zc-met").innerHTML  = '<span class="ck-offline">Sin conexión</span>';
-          document.getElementById("zc-grafo").innerHTML = '<span class="ck-offline">Sin conexión con ReDo</span>';
-          _estado.red = { ok: false, warn: false, val: "ERROR" };
-          actualizarFooter();
+          /* Si falla, mostrar solo el router en el centro */
+          document.getElementById("zc-grafo").innerHTML = renderNetworkGraph([]);
         });
     }
 
