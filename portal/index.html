@@ -312,10 +312,13 @@
     .ck-red-m    { font-size: 0.55rem; color: var(--ck-on-variant); }
     .ck-red-m span { font-weight: 700; }
     .ck-grafo-wrap {
-      flex: 1; display: flex; align-items: stretch; justify-content: stretch;
-      padding: 0.3rem; overflow: hidden; min-height: 0;
+      flex: 1; position: relative; min-height: 0; overflow: hidden;
     }
-    .ck-grafo-wrap svg { width: 100%; height: 100%; display: block; }
+    .ck-grafo-wrap svg {
+      position: absolute; inset: 0.25rem;
+      width: calc(100% - 0.5rem); height: calc(100% - 0.5rem);
+      display: block;
+    }
 
     /* Gauges */
     .ck-g-row  { display: flex; justify-content: space-around; flex: 1; align-items: center; }
@@ -684,13 +687,22 @@
       var onV      = dark ? "#3a6058" : "#5a8078";
       var lineCol  = dark ? "rgba(0,229,196,0.15)" : "rgba(26,106,96,0.15)";
 
+      /* Últimos dos octetos de una IPv4: "192.168.31.45" → "31.45" */
+      function ipCorta(ip) {
+        if (!ip) return "";
+        var p = (ip || "").split(".");
+        return p.length === 4 ? p[2] + "." + p[3] : ip;
+      }
+
       /* Aceptar todos los dispositivos — el endpoint ya filtra activos */
       var lista = (dispositivos || []).slice(0, 12);
       var nodos = lista.map(function(d, i) {
         var angle = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
         var rad = 0.32;
+        var nombre = d.nombre && d.nombre.trim() ? d.nombre.trim() : null;
         return {
-          nombre: (d.nombre || d.ip || "?").substring(0, 8),
+          label:    (nombre || ipCorta(d.ip) || "?").substring(0, 10),
+          sublabel: nombre ? ipCorta(d.ip) : "",   /* IP corta solo si ya hay nombre */
           x: 0.5 + rad * Math.cos(angle),
           y: 0.5 + rad * Math.sin(angle),
           unknown: d.estado === "desconocido"
@@ -711,11 +723,21 @@
 
       nodos.forEach(function(n) {
         var nx = n.x * W, ny = n.y * H;
-        var col = n.unknown ? warn : adim;
+        var col    = n.unknown ? warn : adim;
+        var txtCol = n.unknown ? warn : onV;
         var gf  = dark ? ' style="filter:drop-shadow(0 0 4px ' + col + ')"' : '';
         svg += '<circle cx="' + nx + '" cy="' + ny + '" r="8" fill="' + col + '" opacity="0.08"/>';
         svg += '<circle cx="' + nx + '" cy="' + ny + '" r="4" fill="' + col + '"' + gf + '/>';
-        svg += '<text x="' + nx + '" y="' + (ny+13) + '" text-anchor="middle" fill="' + (n.unknown ? warn : onV) + '" font-family="\'JetBrains Mono\',monospace" font-size="7">' + n.nombre + '</text>';
+        /* Nombre principal */
+        svg += '<text x="' + nx + '" y="' + (ny+13) + '" text-anchor="middle"' +
+          ' fill="' + txtCol + '" font-family="\'JetBrains Mono\',monospace" font-size="7" font-weight="500">' +
+          n.label + '</text>';
+        /* IP corta secundaria (si existe nombre) */
+        if (n.sublabel) {
+          svg += '<text x="' + nx + '" y="' + (ny+21) + '" text-anchor="middle"' +
+            ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="5.5" opacity="0.6">' +
+            n.sublabel + '</text>';
+        }
       });
 
       var gfRouter = dark ? ' style="filter:drop-shadow(0 0 4px ' + accent + ')"' : '';
