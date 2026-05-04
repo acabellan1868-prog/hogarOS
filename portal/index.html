@@ -943,17 +943,33 @@
     /* ============================================================
        Cargar FiDo
        ============================================================ */
+    function mostrarFido(d) {
+      document.getElementById("zd-bal").innerHTML =
+        '<div class="ck-bal">' + fmtEu(d.balance) + '<span class="ck-bal-mon">€</span></div>' +
+        '<div class="ck-bal-mes">' + (d.mes || "") + '</div>';
+      var ref = Math.max(d.ingresos, d.gastos, 1000);
+      document.getElementById("zd-bars").innerHTML =
+        renderMiniBar(d.ingresos, ref, "var(--ck-success)", "ingresos", "€") +
+        renderMiniBar(d.gastos,   ref, "var(--ck-danger)",  "gastos",   "€");
+    }
+
     function cargarFido() {
-      fetch(FIDO_API + "/resumen?cuenta_nombre=Cuenta%20Antonio&banco=caixa")
+      var base = FIDO_API + "/resumen?cuenta_nombre=Cuenta%20Antonio&banco=caixa";
+      fetch(base)
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          document.getElementById("zd-bal").innerHTML =
-            '<div class="ck-bal">' + fmtEu(d.balance) + '<span class="ck-bal-mon">€</span></div>' +
-            '<div class="ck-bal-mes">' + (d.mes || "") + '</div>';
-          var ref = Math.max(d.ingresos, d.gastos, 1000);
-          document.getElementById("zd-bars").innerHTML =
-            renderMiniBar(d.ingresos, ref, "var(--ck-success)", "ingresos", "€") +
-            renderMiniBar(d.gastos,   ref, "var(--ck-danger)",  "gastos",   "€");
+          /* Si el mes actual no tiene datos, pedir el mes anterior */
+          if (!d.ingresos && !d.gastos && !d.balance) {
+            var hoy = new Date();
+            var mesAnterior = hoy.getMonth() === 0
+              ? (hoy.getFullYear() - 1) + "-12"
+              : hoy.getFullYear() + "-" + String(hoy.getMonth()).padStart(2, "0");
+            return fetch(base + "&mes=" + mesAnterior)
+              .then(function(r2) { return r2.json(); })
+              .then(mostrarFido)
+              .catch(function() { mostrarFido(d); }); /* fallback: mostrar 0 si el anterior también falla */
+          }
+          mostrarFido(d);
         })
         .catch(function() {
           document.getElementById("zd-bal").innerHTML = '<span class="ck-offline">Sin conexión con FiDo</span>';
@@ -1025,12 +1041,14 @@
             '<div><div class="ck-cl-lbl">COSTE</div><div class="ck-cl-val" style="color:var(--ck-on-surface)">' + coste + ' USD</div></div>' +
             '<div><div class="ck-cl-lbl">PROYECTO</div><div class="ck-cl-val" style="color:var(--ck-on-variant);font-size:0.62rem">' + proyecto + '</div></div>';
           var lim = d.limites_tokens || {};
-          var p5h = (lim.ultimas_5h   && lim.ultimas_5h.porcentaje_usado)   || 0;
-          var p7d = (lim.ultima_semana && lim.ultima_semana.porcentaje_usado) || 0;
+          /* Clamp a 0-100: el API puede devolver valores > 100 si los tokens acumulados
+             superan el límite configurado (p. ej. CLAUDE_LIMITE_SEMANA_TOKENS pequeño). */
+          var p5h = Math.min(100, Math.max(0, (lim.ultimas_5h   && lim.ultimas_5h.porcentaje_usado)   || 0));
+          var p7d = Math.min(100, Math.max(0, (lim.ultima_semana && lim.ultima_semana.porcentaje_usado) || 0));
           document.getElementById("zd-cl-bars").innerHTML =
             renderMiniBar(p5h, 100, "var(--ck-accent)", "últ. 5h", "") +
             renderMiniBar(p7d, 100, "var(--ck-accent)", "semana",  "");
-          _estado.claude = { ok: p7d < 80, warn: p7d >= 80, val: fmtN(p7d) + "%" };
+          _estado.claude = { ok: p7d < 80, warn: p7d >= 80, val: Math.round(p7d) + "%" };
           actualizarFooter();
         })
         .catch(function() {
