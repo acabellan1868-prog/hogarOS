@@ -685,10 +685,18 @@
          - Todos los dispositivos (sin límite)
        ============================================================ */
     function renderNetworkGraph(dispositivos) {
-      /* ViewBox 16:9 apaisado; preserveAspectRatio="none" rellena el contenedor al 100%
-         sin bandas vacías, con distorsión mínima aceptable para círculos pequeños */
+      /* viewBox 16:9, preserveAspectRatio="none" → rellena el 100% del contenedor.
+         Radio ELÍPTICO: rxMax/ryMax proporcionales al viewBox para que los nodos
+         ocupen todo el espacio disponible en ambas dimensiones. */
       var W = 480, H = 270;
       var cx = 240, cy = 135;
+
+      /* Márgenes internos: los nodos llegan hasta aquí */
+      var mH = 30, mV = 22; /* margen horizontal / vertical en px del viewBox */
+      var rxMax = cx - mH;  /* 210 px — radio máximo horizontal */
+      var ryMax = cy - mV;  /* 113 px — radio máximo vertical   */
+      var rxMin = 40,  ryMin = 24; /* radio mínimo (nodos más antiguos, cerca del router) */
+
       var dark    = esDark();
       var accent  = dark ? "#00e5c4" : "#1a6a60";
       var adim    = dark ? "#009e88" : "#0e4d45";
@@ -708,7 +716,6 @@
         catch(e) { return 99999; }
       }
 
-      /* Hash determinista para jitter por dispositivo */
       function hashStr(s) {
         var h = 0;
         for (var i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
@@ -725,31 +732,33 @@
       });
       if (tsMin === tsMax) { tsMin = tsMax - 1; }
 
-      /* Radio en px del viewBox: más antiguo → cerca (45), más nuevo → lejos (112) */
-      var rMin = 45, rMax = 112;
-
       var nodos = lista.map(function(d, i) {
         var angle  = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
         var minAct = minDesde(d.ultima_vez);
         var activo = minAct < 70;
 
-        var ts      = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
-        var ratio   = (tsMax - ts) / (tsMax - tsMin);
-        var radBase = rMin + (1 - ratio) * (rMax - rMin);
+        var ts    = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
+        var ratio = (tsMax - ts) / (tsMax - tsMin); /* 1=más antiguo → más cerca */
 
+        /* Radio elíptico independiente en X e Y: ocupa todo el viewBox apaisado */
+        var rxBase = rxMin + (1 - ratio) * (rxMax - rxMin);
+        var ryBase = ryMin + (1 - ratio) * (ryMax - ryMin);
+
+        /* Jitter determinista proporcional (±12 % del radio base) */
         var h      = hashStr((d.ip || d.mac || String(i)) + "r");
-        var jitter = (h % 31) - 15;
-        var rad    = Math.max(rMin - 5, Math.min(rMax + 5, radBase + jitter));
+        var jPct   = ((h % 25) - 12) / 100; /* -0.12 … +0.12 */
+        var rx     = Math.max(rxMin * 0.8, Math.min(rxMax * 1.05, rxBase * (1 + jPct)));
+        var ry     = Math.max(ryMin * 0.8, Math.min(ryMax * 1.05, ryBase * (1 + jPct)));
 
         var circR   = activo ? 7 : (minAct < 1440 ? 5 : 3);
         var opacity = activo ? 1.0 : (minAct < 1440 ? 0.55 : 0.3);
-
         var nombre  = (d.notas || d.hostname || "").trim() || null;
         var unknown = (d.confiable === false || d.confiable === 0) && minAct < 1440;
 
-        var nx = cx + rad * Math.cos(angle);
-        var ny = cy + rad * Math.sin(angle);
+        var nx = cx + rx * Math.cos(angle);
+        var ny = cy + ry * Math.sin(angle);
 
+        /* Etiqueta: siempre visible, sublabel solo si tiene nombre propio */
         var label    = (nombre || ipCorta(d.ip) || "?").substring(0, 12);
         var sublabel = nombre ? ipCorta(d.ip) : "";
 
@@ -769,47 +778,46 @@
       /* Aristas */
       nodos.forEach(function(n) {
         var lCol = n.unknown ? warn : lineCol;
-        var lW   = n.unknown ? 1 : (n.activo ? 0.8 : 0.5);
+        var lW   = n.unknown ? 1.2 : (n.activo ? 0.8 : 0.5);
         svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + n.nx + '" y2="' + n.ny + '"' +
           ' stroke="' + lCol + '" stroke-width="' + lW + '" opacity="' + n.opacity + '"' +
-          (n.unknown ? ' stroke-dasharray="3 3"' : '') + '/>';
+          (n.unknown ? ' stroke-dasharray="4 3"' : '') + '/>';
       });
 
       /* Halo central */
-      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="26" fill="url(#rg-portal)"/>';
+      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="28" fill="url(#rg-portal)"/>';
 
       /* Nodos */
       nodos.forEach(function(n) {
         var col    = n.unknown ? warn : (n.activo ? accent : adim);
         var txtCol = n.unknown ? warn : (n.activo ? accent : onV);
         var gfStr  = dark ? ('drop-shadow(0 0 ' + (n.activo ? '5' : '2') + 'px ' + col + ')') : 'none';
-        var fSize  = n.activo ? 7 : 5.5;
-        var fOp    = n.activo ? 1 : 0.55;
+        var fSize  = n.activo ? 9 : 7;
+        var fOp    = n.activo ? 1 : 0.6;
 
-        svg += '<circle cx="' + n.nx + '" cy="' + n.ny + '" r="' + (n.circR * 1.8) + '"' +
+        svg += '<circle cx="' + n.nx + '" cy="' + n.ny + '" r="' + (n.circR * 2) + '"' +
           ' fill="' + col + '" opacity="' + (n.opacity * 0.1) + '"/>';
         svg += '<circle cx="' + n.nx + '" cy="' + n.ny + '" r="' + n.circR + '"' +
           ' fill="' + col + '" opacity="' + n.opacity + '"' +
           ' style="filter:' + gfStr + '"/>';
 
-        /* Etiqueta siempre visible */
-        var ty = n.ny + n.circR + 8;
+        var ty = n.ny + n.circR + 10;
         svg += '<text x="' + n.nx + '" y="' + ty + '" text-anchor="middle"' +
           ' fill="' + txtCol + '" font-family="\'JetBrains Mono\',monospace"' +
           ' font-size="' + fSize + '" font-weight="500" opacity="' + fOp + '">' +
           n.label + '</text>';
         if (n.sublabel) {
-          svg += '<text x="' + n.nx + '" y="' + (ty + 7) + '" text-anchor="middle"' +
+          svg += '<text x="' + n.nx + '" y="' + (ty + 8) + '" text-anchor="middle"' +
             ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace"' +
-            ' font-size="5" opacity="' + (fOp * 0.7) + '">' + n.sublabel + '</text>';
+            ' font-size="6.5" opacity="' + (fOp * 0.65) + '">' + n.sublabel + '</text>';
         }
       });
 
       /* Router central */
-      var gfR = dark ? 'filter:drop-shadow(0 0 6px ' + accent + ')' : '';
-      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="9" fill="' + accent + '" style="' + gfR + '"/>';
-      svg += '<text x="' + cx + '" y="' + (cy + 19) + '" text-anchor="middle"' +
-        ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="7">Router</text>';
+      var gfR = dark ? 'filter:drop-shadow(0 0 8px ' + accent + ')' : '';
+      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="10" fill="' + accent + '" style="' + gfR + '"/>';
+      svg += '<text x="' + cx + '" y="' + (cy + 20) + '" text-anchor="middle"' +
+        ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="8">Router</text>';
       svg += '</svg>';
       return svg;
     }
