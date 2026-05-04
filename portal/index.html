@@ -699,13 +699,14 @@
       var nodos = lista.map(function(d, i) {
         var angle = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
         var rad = 0.32;
-        var nombre = d.nombre && d.nombre.trim() ? d.nombre.trim() : null;
+        /* ReDo: el nombre visible está en "notas"; hostname suele ser null */
+        var nombre = (d.notas || d.hostname || d.nombre || "").trim() || null;
         return {
-          label:    (nombre || ipCorta(d.ip) || "?").substring(0, 10),
+          label:    (nombre || ipCorta(d.ip) || "?").substring(0, 12),
           sublabel: nombre ? ipCorta(d.ip) : "",   /* IP corta solo si ya hay nombre */
           x: 0.5 + rad * Math.cos(angle),
           y: 0.5 + rad * Math.sin(angle),
-          unknown: d.estado === "desconocido"
+          unknown: d.confiable === false || d.confiable === 0 || d.estado === "desconocido"
         };
       });
 
