@@ -685,8 +685,8 @@
          - Todos los dispositivos (sin límite)
        ============================================================ */
     function renderNetworkGraph(dispositivos) {
-      var W = 320, H = 200;
-      var rX = W * 0.5, rY = H * 0.5;
+      var W = 300, H = 300;
+      var cx = 150, cy = 150;
       var dark    = esDark();
       var accent  = dark ? "#00e5c4" : "#1a6a60";
       var adim    = dark ? "#009e88" : "#0e4d45";
@@ -700,48 +700,65 @@
         return p.length === 4 ? p[2] + "." + p[3] : (ip || "");
       }
 
-      /* Minutos transcurridos desde una fecha "YYYY-MM-DD HH:MM:SS" */
       function minDesde(fecha) {
         if (!fecha) return 99999;
         try { return (ahora - new Date(fecha.replace(" ", "T")).getTime()) / 60000; }
         catch(e) { return 99999; }
       }
 
+      /* Hash determinista para jitter por dispositivo */
+      function hashStr(s) {
+        var h = 0;
+        for (var i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+        return Math.abs(h);
+      }
+
       var lista = dispositivos || [];
       if (!lista.length) return '<span class="ck-cargando">Sin datos de red</span>';
 
-      /* Rango de antigüedad para normalizar el radio */
+      /* Rango de timestamps para mapear antigüedad a radio */
       var tsMin = Infinity, tsMax = -Infinity;
       lista.forEach(function(d) {
         var t = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : 0;
         if (t > 0) { tsMin = Math.min(tsMin, t); tsMax = Math.max(tsMax, t); }
       });
-      if (tsMin === tsMax) { tsMin = tsMax - 1; } /* evitar división por cero */
+      if (tsMin === tsMax) { tsMin = tsMax - 1; }
+
+      /* Radio base: más antiguo → cerca (55 px), más nuevo → lejos (128 px) */
+      var rMin = 55, rMax = 128;
 
       var nodos = lista.map(function(d, i) {
-        var angle    = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
-        var minAct   = minDesde(d.ultima_vez);
-        var activo   = minAct < 70; /* activo si visto en la última hora y pico */
+        var angle  = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
+        var minAct = minDesde(d.ultima_vez);
+        var activo = minAct < 70;
 
-        /* Radio según antigüedad: más antiguo (tsMin) → cerca (0.20), más nuevo (tsMax) → lejos (0.42) */
-        var ts       = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
-        var ratio    = (tsMax - ts) / (tsMax - tsMin); /* 1=más antiguo, 0=más nuevo */
-        var rad      = 0.42 - ratio * 0.22;            /* [0.20 … 0.42] */
+        var ts     = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
+        var ratio  = (tsMax - ts) / (tsMax - tsMin); /* 1=más antiguo, 0=más nuevo */
+        var radBase = rMin + (1 - ratio) * (rMax - rMin);
 
-        /* Tamaño del nodo según actividad reciente */
-        var circR    = activo ? 5 : (minAct < 1440 ? 3 : 2);
-        var opacity  = activo ? 1.0 : (minAct < 1440 ? 0.5 : 0.3);
+        /* Jitter determinista ±14 px para distribución orgánica */
+        var h = hashStr((d.ip || d.mac || String(i)) + "r");
+        var jitter = (h % 29) - 14;
+        var rad = Math.max(rMin - 5, Math.min(rMax + 5, radBase + jitter));
 
-        var nombre   = (d.notas || d.hostname || "").trim() || null;
-        var unknown  = d.confiable === false || d.confiable === 0;
+        var circR   = activo ? 5 : (minAct < 1440 ? 3 : 2);
+        var opacity = activo ? 1.0 : (minAct < 1440 ? 0.5 : 0.3);
+
+        var nombre  = (d.notas || d.hostname || "").trim() || null;
+        /* Naranja solo si desconocido Y visto en las últimas 24 h (igual que el contador) */
+        var unknown = (d.confiable === false || d.confiable === 0) && minAct < 1440;
+
+        var nx = cx + rad * Math.cos(angle);
+        var ny = cy + rad * Math.sin(angle);
+
+        /* Etiqueta: nombre o IP corta para todos; sublabel = IP si tiene nombre propio */
+        var label    = (nombre || ipCorta(d.ip) || "?").substring(0, 12);
+        var sublabel = nombre ? ipCorta(d.ip) : "";
 
         return {
-          label:   activo ? (nombre || ipCorta(d.ip) || "?").substring(0, 12) : "",
-          sublabel: (activo && nombre) ? ipCorta(d.ip) : "",
-          x: 0.5 + rad * Math.cos(angle),
-          y: 0.5 + rad * Math.sin(angle),
-          circR: circR, opacity: opacity, activo: activo,
-          unknown: unknown
+          label: label, sublabel: sublabel,
+          nx: nx, ny: ny,
+          circR: circR, opacity: opacity, activo: activo, unknown: unknown
         };
       });
 
@@ -753,50 +770,47 @@
 
       /* Aristas */
       nodos.forEach(function(n) {
-        var nx = n.x * W, ny = n.y * H;
         var lCol = n.unknown ? warn : lineCol;
         var lW   = n.unknown ? 1 : (n.activo ? 0.8 : 0.5);
-        svg += '<line x1="' + rX + '" y1="' + rY + '" x2="' + nx + '" y2="' + ny + '"' +
+        svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + n.nx + '" y2="' + n.ny + '"' +
           ' stroke="' + lCol + '" stroke-width="' + lW + '" opacity="' + n.opacity + '"' +
           (n.unknown ? ' stroke-dasharray="3 3"' : '') + '/>';
       });
 
       /* Halo central */
-      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="22" fill="url(#rg-portal)"/>';
+      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="26" fill="url(#rg-portal)"/>';
 
       /* Nodos */
       nodos.forEach(function(n) {
-        var nx  = n.x * W, ny = n.y * H;
         var col    = n.unknown ? warn : (n.activo ? accent : adim);
         var txtCol = n.unknown ? warn : (n.activo ? accent : onV);
         var gfStr  = dark ? ('drop-shadow(0 0 ' + (n.activo ? '5' : '2') + 'px ' + col + ')') : 'none';
+        var fSize  = n.activo ? 7 : 5.5;
+        var fOp    = n.activo ? 1 : 0.55;
 
-        /* Halo exterior del nodo */
-        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="' + (n.circR * 1.8) + '"' +
+        svg += '<circle cx="' + n.nx + '" cy="' + n.ny + '" r="' + (n.circR * 1.8) + '"' +
           ' fill="' + col + '" opacity="' + (n.opacity * 0.1) + '"/>';
-        /* Nodo */
-        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="' + n.circR + '"' +
+        svg += '<circle cx="' + n.nx + '" cy="' + n.ny + '" r="' + n.circR + '"' +
           ' fill="' + col + '" opacity="' + n.opacity + '"' +
           ' style="filter:' + gfStr + '"/>';
 
-        /* Etiqueta (solo activos) */
-        if (n.label) {
-          var ty = ny + n.circR + 8;
-          svg += '<text x="' + nx + '" y="' + ty + '" text-anchor="middle"' +
-            ' fill="' + txtCol + '" font-family="\'JetBrains Mono\',monospace" font-size="6.5" font-weight="500">' +
-            n.label + '</text>';
-          if (n.sublabel) {
-            svg += '<text x="' + nx + '" y="' + (ty + 7) + '" text-anchor="middle"' +
-              ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="5" opacity="0.6">' +
-              n.sublabel + '</text>';
-          }
+        /* Etiqueta siempre visible */
+        var ty = n.ny + n.circR + 8;
+        svg += '<text x="' + n.nx + '" y="' + ty + '" text-anchor="middle"' +
+          ' fill="' + txtCol + '" font-family="\'JetBrains Mono\',monospace"' +
+          ' font-size="' + fSize + '" font-weight="500" opacity="' + fOp + '">' +
+          n.label + '</text>';
+        if (n.sublabel) {
+          svg += '<text x="' + n.nx + '" y="' + (ty + 7) + '" text-anchor="middle"' +
+            ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace"' +
+            ' font-size="5" opacity="' + (fOp * 0.7) + '">' + n.sublabel + '</text>';
         }
       });
 
       /* Router central */
       var gfR = dark ? 'filter:drop-shadow(0 0 6px ' + accent + ')' : '';
-      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="8" fill="' + accent + '" style="' + gfR + '"/>';
-      svg += '<text x="' + rX + '" y="' + (rY + 18) + '" text-anchor="middle"' +
+      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="9" fill="' + accent + '" style="' + gfR + '"/>';
+      svg += '<text x="' + cx + '" y="' + (cy + 19) + '" text-anchor="middle"' +
         ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="7">Router</text>';
       svg += '</svg>';
       return svg;

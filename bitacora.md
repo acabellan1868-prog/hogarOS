@@ -1,5 +1,14 @@
 # Bitácora — hogarOS
 
+## 2026-05-04
+
+### Fix grafo de red — tamaño, distribución, naranja y nombres
+
+- **viewBox cuadrado** (300×300 en vez de 320×200): el grafo ahora ocupa todo el espacio del contenedor sin bandas muertas
+- **Mayor variación de radio**: rango [55–128 px] con jitter determinista ±14 px por dispositivo (basado en IP), para distribución orgánica y aristas de largo variado
+- **Bug naranja corregido**: el color naranja (desconocido) ahora solo aparece si `confiable=0` Y visto en las últimas 24 h — igual que el contador del encabezado
+- **Nombres siempre visibles**: etiqueta mostrada para todos los dispositivos (no solo activos), con fuente más pequeña y opacidad reducida para los inactivos
+
 ## 2026-05-02 (sesión 2)
 
 ### Fix tamaño de fuentes en FiDo Cockpit
