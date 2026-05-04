@@ -1,9 +1,9 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 en curso — rediseño Cockpit. Portal ✅, FiDo ✅ (pendiente deploy font-size). ReDo y MediDo pendientes.
-> Última actualización: 2026-05-02
+> Estado actual: Fase 15 en curso — rediseño Cockpit. Portal ✅ (grafo refactorizado 2026-05-04), FiDo ✅ (pendiente deploy font-size). ReDo y MediDo pendientes.
+> Última actualización: 2026-05-04
 > **Próximo paso concreto:**
-> 1. 👤 Ejecutar `./actualizar.sh` en la VM para desplegar FiDo con `html { font-size: 150% }` (commit ff73ecf)
+> 1. 👤 Ejecutar `./actualizar.sh` en la VM para desplegar el grafo refactorizado (commit `3164ebb`) y FiDo font-size (commit `ff73ecf`)
 > 2. 🤖 Fase 15 — Paso 4: rediseño Cockpit de ReDo (`ReDo/static/index.html`)
 > 3. 🤖 Fase 15 — Paso 5: rediseño Cockpit de MediDo (`MediDo/static/index.html`)
 > 4. Referencia visual: `E:\Documentos\Desarrollo\hogarOS-handoff\design_handoff_cockpit\`
@@ -527,6 +527,7 @@ Sin cambios funcionales — solo capa visual.
 - [x] 🤖 Reescritura completa: header fijo 48px, grid 3×2 HUD, SVG Gauge + NetworkGraph
 - [x] 🤖 Footer 28px con status dots. Toggle tema `localStorage('hogar-cockpit-tema')`
 - [x] 🤖 Fix grafo: tamaño completo + etiquetas nombre+IP corta (commit c474fcb)
+- [x] 🤖 Refactorización completa del grafo (2026-05-04, commits 9123012–3164ebb): naranja coherente con el contador, nombres siempre visibles, distribución uniforme con hash del IP, círculos sin distorsión con `requestAnimationFrame` + viewBox = px reales del contenedor
 - [x] 👤 Ejecutar `actualizar.sh` y verificar en producción
 
 ### Paso 3 — FiDo (`FiDo/static/`) ✅ (pendiente deploy)

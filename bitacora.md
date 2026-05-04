@@ -2,12 +2,43 @@
 
 ## 2026-05-04
 
-### Fix grafo de red — tamaño, distribución, naranja y nombres
+### Refactorización completa del grafo de red (portal Cockpit)
 
-- **viewBox cuadrado** (300×300 en vez de 320×200): el grafo ahora ocupa todo el espacio del contenedor sin bandas muertas
-- **Mayor variación de radio**: rango [55–128 px] con jitter determinista ±14 px por dispositivo (basado en IP), para distribución orgánica y aristas de largo variado
-- **Bug naranja corregido**: el color naranja (desconocido) ahora solo aparece si `confiable=0` Y visto en las últimas 24 h — igual que el contador del encabezado
-- **Nombres siempre visibles**: etiqueta mostrada para todos los dispositivos (no solo activos), con fuente más pequeña y opacidad reducida para los inactivos
+Sesión de correcciones iterativas sobre `renderNetworkGraph` en `portal/index.html`.
+Commits: `9123012`, `819e051`, `f1f9da6`, `10f9316`, `3164ebb`.
+
+#### Problemas identificados y soluciones
+
+**Bug: 3 nodos naranjas pero el contador decía "1 desconocido"**
+- Causa: el contador del encabezado (`/api/resumen`) filtra `WHERE ultima_vez >= datetime('now', '-24 hours') AND confiable = 0` (solo activos recientes), pero el grafo coloreaba de naranja TODOS los dispositivos con `confiable = 0` en la BD, incluyendo históricos inactivos.
+- Fix: `unknown = (d.confiable === false || d.confiable === 0) && minAct < 1440` — coherente con el contador.
+
+**Bug: nodos sin nombre**
+- Causa: la etiqueta solo se mostraba si `activo` (visto en < 70 min).
+- Fix: etiqueta siempre visible para todos los dispositivos; fuente y opacidad reducidas para los inactivos.
+
+**Bug: grafo pequeño — viewBox cuadrado en contenedor apaisado**
+- Primera iteración: cambié viewBox de 320×200 a 300×300 con `meet`. Error: en un contenedor apaisado (~900×380 px) el `meet` limita por el alto → el contenido se encoge a 380×380 y deja 260 px vacíos a cada lado. Empeoró.
+- Segunda iteración: viewBox 480×270 (16:9) con `preserveAspectRatio="none"`. El grafo llenaba el espacio pero los círculos se convertían en elipses (el SVG se estira en X e Y de forma independiente). El usuario lo reportó como "mareante".
+
+**Bug: nodos agrupados en el centro (radio basado en timestamp)**
+- Causa: el radio se calculaba con la antigüedad del dispositivo (`primera_vez`). Como todos los dispositivos fueron descubiertos en el mismo primer scan de nmap, `primera_vez` es prácticamente idéntico para todos → `ratio ≈ 1` para todos → radio mínimo → montón en el centro. Solo los pocos añadidos después se distribuían.
+- Fix: el radio se calcula con `hash(IP + "r") % 997`, distribución pseudoaleatoria uniforme entre `rMin` y `rMax`, determinista (misma posición en cada render).
+
+**Problema raíz: distorsión con `preserveAspectRatio="none"`**
+- `none` estira el SVG para rellenar el contenedor, haciendo que círculos se conviertan en elipses y el texto se deforme horizontalmente.
+- Fix definitivo: la función ya no devuelve HTML sino que recibe el elemento contenedor directamente. Inserta un `<svg>` vacío y usa `requestAnimationFrame` para leer las dimensiones reales del contenedor (`clientWidth` / `clientHeight`). El `viewBox` se fija exactamente a esas dimensiones → escala 1:1 → círculos perfectos siempre, independientemente del tamaño o ratio del contenedor.
+
+#### Estado final del grafo (`renderNetworkGraph`)
+
+| Aspecto | Implementación |
+|---------|---------------|
+| Radio | Hash del IP/MAC → distribución uniforme + jitter ±10 % |
+| Forma distribución | Elipse proporcional al contenedor real (rxMax=90 % de cx, ryMax=82 % de cy) |
+| Nodos naranjas | Solo si `confiable=0` y visto en últimas 24 h (igual que el contador) |
+| Etiquetas | Siempre visibles; font-size 11 px (activos) / 9 px (inactivos) |
+| Círculos | Sin distorsión: viewBox = px reales del contenedor |
+| Firma función | `renderNetworkGraph(lista, contenedor)` — manipula el DOM directamente |
 
 ## 2026-05-02 (sesión 2)
 
