@@ -147,7 +147,7 @@
     #ck-grid {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1.3fr 1.1fr;
+      grid-template-columns: 1fr 2fr 1fr;
       grid-template-rows: 1fr 1fr;
       overflow: hidden;
       position: relative; z-index: 1;
@@ -676,75 +676,128 @@
 
     /* ============================================================
        Render: Network Graph SVG
+       Lógica visual:
+         - Radio de la arista  → antigüedad (primera_vez): más antiguo = más cerca del router
+         - Tamaño del nodo     → actividad reciente (ultima_vez): activo < 1h = círculo grande
+         - Opacidad / glow     → misma actividad reciente
+         - Color naranja + línea discontinua → dispositivo desconocido (confiable=0)
+         - Etiquetas           → solo en activos (< 1h) para evitar solapamiento
+         - Todos los dispositivos (sin límite)
        ============================================================ */
     function renderNetworkGraph(dispositivos) {
       var W = 320, H = 200;
       var rX = W * 0.5, rY = H * 0.5;
-      var dark     = esDark();
-      var accent   = dark ? "#00e5c4" : "#1a6a60";
-      var adim     = dark ? "#009e88" : "#0e4d45";
-      var warn     = dark ? "#e8a03a" : "#b45309";
-      var onV      = dark ? "#3a6058" : "#5a8078";
-      var lineCol  = dark ? "rgba(0,229,196,0.15)" : "rgba(26,106,96,0.15)";
+      var dark    = esDark();
+      var accent  = dark ? "#00e5c4" : "#1a6a60";
+      var adim    = dark ? "#009e88" : "#0e4d45";
+      var warn    = dark ? "#e8a03a" : "#b45309";
+      var onV     = dark ? "#3a6058" : "#5a8078";
+      var lineCol = dark ? "rgba(0,229,196,0.15)" : "rgba(26,106,96,0.15)";
+      var ahora   = Date.now();
 
-      /* Últimos dos octetos de una IPv4: "192.168.31.45" → "31.45" */
       function ipCorta(ip) {
-        if (!ip) return "";
         var p = (ip || "").split(".");
-        return p.length === 4 ? p[2] + "." + p[3] : ip;
+        return p.length === 4 ? p[2] + "." + p[3] : (ip || "");
       }
 
-      /* Aceptar todos los dispositivos — el endpoint ya filtra activos */
-      var lista = (dispositivos || []).slice(0, 12);
+      /* Minutos transcurridos desde una fecha "YYYY-MM-DD HH:MM:SS" */
+      function minDesde(fecha) {
+        if (!fecha) return 99999;
+        try { return (ahora - new Date(fecha.replace(" ", "T")).getTime()) / 60000; }
+        catch(e) { return 99999; }
+      }
+
+      var lista = dispositivos || [];
+      if (!lista.length) return '<span class="ck-cargando">Sin datos de red</span>';
+
+      /* Rango de antigüedad para normalizar el radio */
+      var tsMin = Infinity, tsMax = -Infinity;
+      lista.forEach(function(d) {
+        var t = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : 0;
+        if (t > 0) { tsMin = Math.min(tsMin, t); tsMax = Math.max(tsMax, t); }
+      });
+      if (tsMin === tsMax) { tsMin = tsMax - 1; } /* evitar división por cero */
+
       var nodos = lista.map(function(d, i) {
-        var angle = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
-        var rad = 0.32;
-        /* ReDo: el nombre visible está en "notas"; hostname suele ser null */
-        var nombre = (d.notas || d.hostname || d.nombre || "").trim() || null;
+        var angle    = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
+        var minAct   = minDesde(d.ultima_vez);
+        var activo   = minAct < 70; /* activo si visto en la última hora y pico */
+
+        /* Radio según antigüedad: más antiguo (tsMin) → cerca (0.20), más nuevo (tsMax) → lejos (0.42) */
+        var ts       = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
+        var ratio    = (tsMax - ts) / (tsMax - tsMin); /* 1=más antiguo, 0=más nuevo */
+        var rad      = 0.42 - ratio * 0.22;            /* [0.20 … 0.42] */
+
+        /* Tamaño del nodo según actividad reciente */
+        var circR    = activo ? 5 : (minAct < 1440 ? 3 : 2);
+        var opacity  = activo ? 1.0 : (minAct < 1440 ? 0.5 : 0.3);
+
+        var nombre   = (d.notas || d.hostname || "").trim() || null;
+        var unknown  = d.confiable === false || d.confiable === 0;
+
         return {
-          label:    (nombre || ipCorta(d.ip) || "?").substring(0, 12),
-          sublabel: nombre ? ipCorta(d.ip) : "",   /* IP corta solo si ya hay nombre */
+          label:   activo ? (nombre || ipCorta(d.ip) || "?").substring(0, 12) : "",
+          sublabel: (activo && nombre) ? ipCorta(d.ip) : "",
           x: 0.5 + rad * Math.cos(angle),
           y: 0.5 + rad * Math.sin(angle),
-          unknown: d.confiable === false || d.confiable === 0 || d.estado === "desconocido"
+          circR: circR, opacity: opacity, activo: activo,
+          unknown: unknown
         };
       });
 
       var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">';
-      svg += '<defs><radialGradient id="rg-portal" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="' + accent + '" stop-opacity="0.3"/><stop offset="100%" stop-color="' + accent + '" stop-opacity="0"/></radialGradient></defs>';
+      svg += '<defs><radialGradient id="rg-portal" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="0%" stop-color="' + accent + '" stop-opacity="0.25"/>' +
+        '<stop offset="100%" stop-color="' + accent + '" stop-opacity="0"/>' +
+        '</radialGradient></defs>';
 
+      /* Aristas */
       nodos.forEach(function(n) {
         var nx = n.x * W, ny = n.y * H;
+        var lCol = n.unknown ? warn : lineCol;
+        var lW   = n.unknown ? 1 : (n.activo ? 0.8 : 0.5);
         svg += '<line x1="' + rX + '" y1="' + rY + '" x2="' + nx + '" y2="' + ny + '"' +
-          ' stroke="' + (n.unknown ? warn : lineCol) + '" stroke-width="' + (n.unknown ? 1 : 0.8) + '"' +
+          ' stroke="' + lCol + '" stroke-width="' + lW + '" opacity="' + n.opacity + '"' +
           (n.unknown ? ' stroke-dasharray="3 3"' : '') + '/>';
       });
 
-      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="28" fill="url(#rg-portal)"/>';
+      /* Halo central */
+      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="22" fill="url(#rg-portal)"/>';
 
+      /* Nodos */
       nodos.forEach(function(n) {
-        var nx = n.x * W, ny = n.y * H;
-        var col    = n.unknown ? warn : adim;
-        var txtCol = n.unknown ? warn : onV;
-        var gf  = dark ? ' style="filter:drop-shadow(0 0 4px ' + col + ')"' : '';
-        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="8" fill="' + col + '" opacity="0.08"/>';
-        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="4" fill="' + col + '"' + gf + '/>';
-        /* Nombre principal */
-        svg += '<text x="' + nx + '" y="' + (ny+13) + '" text-anchor="middle"' +
-          ' fill="' + txtCol + '" font-family="\'JetBrains Mono\',monospace" font-size="7" font-weight="500">' +
-          n.label + '</text>';
-        /* IP corta secundaria (si existe nombre) */
-        if (n.sublabel) {
-          svg += '<text x="' + nx + '" y="' + (ny+21) + '" text-anchor="middle"' +
-            ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="5.5" opacity="0.6">' +
-            n.sublabel + '</text>';
+        var nx  = n.x * W, ny = n.y * H;
+        var col    = n.unknown ? warn : (n.activo ? accent : adim);
+        var txtCol = n.unknown ? warn : (n.activo ? accent : onV);
+        var gfStr  = dark ? ('drop-shadow(0 0 ' + (n.activo ? '5' : '2') + 'px ' + col + ')') : 'none';
+
+        /* Halo exterior del nodo */
+        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="' + (n.circR * 1.8) + '"' +
+          ' fill="' + col + '" opacity="' + (n.opacity * 0.1) + '"/>';
+        /* Nodo */
+        svg += '<circle cx="' + nx + '" cy="' + ny + '" r="' + n.circR + '"' +
+          ' fill="' + col + '" opacity="' + n.opacity + '"' +
+          ' style="filter:' + gfStr + '"/>';
+
+        /* Etiqueta (solo activos) */
+        if (n.label) {
+          var ty = ny + n.circR + 8;
+          svg += '<text x="' + nx + '" y="' + ty + '" text-anchor="middle"' +
+            ' fill="' + txtCol + '" font-family="\'JetBrains Mono\',monospace" font-size="6.5" font-weight="500">' +
+            n.label + '</text>';
+          if (n.sublabel) {
+            svg += '<text x="' + nx + '" y="' + (ty + 7) + '" text-anchor="middle"' +
+              ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="5" opacity="0.6">' +
+              n.sublabel + '</text>';
+          }
         }
       });
 
-      var gfRouter = dark ? ' style="filter:drop-shadow(0 0 4px ' + accent + ')"' : '';
-      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="14" fill="' + accent + '" opacity="0.08"/>';
-      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="7" fill="' + accent + '"' + gfRouter + '/>';
-      svg += '<text x="' + rX + '" y="' + (rY+18) + '" text-anchor="middle" fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="7">Router</text>';
+      /* Router central */
+      var gfR = dark ? 'filter:drop-shadow(0 0 6px ' + accent + ')' : '';
+      svg += '<circle cx="' + rX + '" cy="' + rY + '" r="8" fill="' + accent + '" style="' + gfR + '"/>';
+      svg += '<text x="' + rX + '" y="' + (rY + 18) + '" text-anchor="middle"' +
+        ' fill="' + onV + '" font-family="\'JetBrains Mono\',monospace" font-size="7">Router</text>';
       svg += '</svg>';
       return svg;
     }
