@@ -685,8 +685,10 @@
          - Todos los dispositivos (sin límite)
        ============================================================ */
     function renderNetworkGraph(dispositivos) {
-      var W = 300, H = 300;
-      var cx = 150, cy = 150;
+      /* ViewBox 16:9 apaisado; preserveAspectRatio="none" rellena el contenedor al 100%
+         sin bandas vacías, con distorsión mínima aceptable para círculos pequeños */
+      var W = 480, H = 270;
+      var cx = 240, cy = 135;
       var dark    = esDark();
       var accent  = dark ? "#00e5c4" : "#1a6a60";
       var adim    = dark ? "#009e88" : "#0e4d45";
@@ -716,7 +718,6 @@
       var lista = dispositivos || [];
       if (!lista.length) return '<span class="ck-cargando">Sin datos de red</span>';
 
-      /* Rango de timestamps para mapear antigüedad a radio */
       var tsMin = Infinity, tsMax = -Infinity;
       lista.forEach(function(d) {
         var t = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : 0;
@@ -724,34 +725,31 @@
       });
       if (tsMin === tsMax) { tsMin = tsMax - 1; }
 
-      /* Radio base: más antiguo → cerca (55 px), más nuevo → lejos (128 px) */
-      var rMin = 55, rMax = 128;
+      /* Radio en px del viewBox: más antiguo → cerca (45), más nuevo → lejos (112) */
+      var rMin = 45, rMax = 112;
 
       var nodos = lista.map(function(d, i) {
         var angle  = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
         var minAct = minDesde(d.ultima_vez);
         var activo = minAct < 70;
 
-        var ts     = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
-        var ratio  = (tsMax - ts) / (tsMax - tsMin); /* 1=más antiguo, 0=más nuevo */
+        var ts      = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
+        var ratio   = (tsMax - ts) / (tsMax - tsMin);
         var radBase = rMin + (1 - ratio) * (rMax - rMin);
 
-        /* Jitter determinista ±14 px para distribución orgánica */
-        var h = hashStr((d.ip || d.mac || String(i)) + "r");
-        var jitter = (h % 29) - 14;
-        var rad = Math.max(rMin - 5, Math.min(rMax + 5, radBase + jitter));
+        var h      = hashStr((d.ip || d.mac || String(i)) + "r");
+        var jitter = (h % 31) - 15;
+        var rad    = Math.max(rMin - 5, Math.min(rMax + 5, radBase + jitter));
 
-        var circR   = activo ? 5 : (minAct < 1440 ? 3 : 2);
-        var opacity = activo ? 1.0 : (minAct < 1440 ? 0.5 : 0.3);
+        var circR   = activo ? 7 : (minAct < 1440 ? 5 : 3);
+        var opacity = activo ? 1.0 : (minAct < 1440 ? 0.55 : 0.3);
 
         var nombre  = (d.notas || d.hostname || "").trim() || null;
-        /* Naranja solo si desconocido Y visto en las últimas 24 h (igual que el contador) */
         var unknown = (d.confiable === false || d.confiable === 0) && minAct < 1440;
 
         var nx = cx + rad * Math.cos(angle);
         var ny = cy + rad * Math.sin(angle);
 
-        /* Etiqueta: nombre o IP corta para todos; sublabel = IP si tiene nombre propio */
         var label    = (nombre || ipCorta(d.ip) || "?").substring(0, 12);
         var sublabel = nombre ? ipCorta(d.ip) : "";
 
@@ -762,7 +760,7 @@
         };
       });
 
-      var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">';
+      var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;height:100%;display:block">';
       svg += '<defs><radialGradient id="rg-portal" cx="50%" cy="50%" r="50%">' +
         '<stop offset="0%" stop-color="' + accent + '" stop-opacity="0.25"/>' +
         '<stop offset="100%" stop-color="' + accent + '" stop-opacity="0"/>' +
