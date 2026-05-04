@@ -725,30 +725,22 @@
       var lista = dispositivos || [];
       if (!lista.length) return '<span class="ck-cargando">Sin datos de red</span>';
 
-      var tsMin = Infinity, tsMax = -Infinity;
-      lista.forEach(function(d) {
-        var t = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : 0;
-        if (t > 0) { tsMin = Math.min(tsMin, t); tsMax = Math.max(tsMax, t); }
-      });
-      if (tsMin === tsMax) { tsMin = tsMax - 1; }
-
       var nodos = lista.map(function(d, i) {
         var angle  = (i / Math.max(lista.length, 1)) * 2 * Math.PI - Math.PI / 2;
         var minAct = minDesde(d.ultima_vez);
         var activo = minAct < 70;
 
-        var ts    = d.primera_vez ? new Date(d.primera_vez.replace(" ","T")).getTime() : tsMax;
-        var ratio = (tsMax - ts) / (tsMax - tsMin); /* 1=más antiguo → más cerca */
+        /* Radio: hash del IP/MAC → distribución uniforme en todo el rango.
+           Determinista (misma posición en cada render) e independiente del timestamp,
+           que agrupa todos los dispositivos en el anillo interior cuando
+           coinciden en primera_vez. */
+        var hR  = hashStr((d.ip || d.mac || String(i)) + "r");
+        var hJ  = hashStr((d.ip || d.mac || String(i)) + "j");
+        var t   = (hR % 997) / 996; /* 0..1 uniforme por dispositivo */
+        var jPct = ((hJ % 21) - 10) / 100; /* ±10 % de jitter adicional */
 
-        /* Radio elíptico independiente en X e Y: ocupa todo el viewBox apaisado */
-        var rxBase = rxMin + (1 - ratio) * (rxMax - rxMin);
-        var ryBase = ryMin + (1 - ratio) * (ryMax - ryMin);
-
-        /* Jitter determinista proporcional (±12 % del radio base) */
-        var h      = hashStr((d.ip || d.mac || String(i)) + "r");
-        var jPct   = ((h % 25) - 12) / 100; /* -0.12 … +0.12 */
-        var rx     = Math.max(rxMin * 0.8, Math.min(rxMax * 1.05, rxBase * (1 + jPct)));
-        var ry     = Math.max(ryMin * 0.8, Math.min(ryMax * 1.05, ryBase * (1 + jPct)));
+        var rx = Math.max(rxMin, Math.min(rxMax, (rxMin + t * (rxMax - rxMin)) * (1 + jPct)));
+        var ry = Math.max(ryMin, Math.min(ryMax, (ryMin + t * (ryMax - ryMin)) * (1 + jPct)));
 
         var circR   = activo ? 7 : (minAct < 1440 ? 5 : 3);
         var opacity = activo ? 1.0 : (minAct < 1440 ? 0.55 : 0.3);
