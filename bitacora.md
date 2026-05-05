@@ -1,5 +1,35 @@
 # Bitácora — hogarOS
 
+## 2026-05-05 (sesión 2)
+
+### Fase 15 Paso 4 y 5 — Rediseño Cockpit de ReDo y MediDo
+
+Completada la migración al estilo Cockpit de las dos apps restantes del ecosistema.
+Toda la capa visual reemplazada; toda la lógica JS y los endpoints de API preservados.
+
+**ReDo** (`ReDo/static/index.html`, commits `1fb510e` + `0eae3a2`):
+- Header fijo 48px con `ck-header` + nav inline de 4 pestañas (DISPOSITIVOS / PRESENCIA / HISTORIAL / CONFIG). Drawer lateral solo en móvil.
+- 4 KPIs en grid horizontal con fuente HUD monoespaciada.
+- Tabla de dispositivos con bordes `1px var(--ck-line)`, cabeceras en `0.48rem` uppercase, badges `--ok/--warn`.
+- Timeline de barras con `--ck-accent` y gráfica SVG historial 24h preservada.
+- Sección configuración con inputs Cockpit.
+- `cambiarTab()` sincroniza botones de escritorio, pestañas móviles y drawer simultáneamente.
+
+**MediDo** (`MediDo/static/index.html`, commits `631a3d6` + `dc9d862`):
+- Header con 7 pestañas inline (General / Proxmox / Contenedores / Servicios / Historial / Alertas / Claude).
+- Barra `.md-status` con `.status-dot` reemplaza el semáforo circular antiguo.
+- Tarjetas métricas (`.md-tarjeta`) con barras de progreso de 2px (`.md-barra`).
+- Canvas gráfica 24h preservada; líneas de cuadrícula en `rgba(128,128,128,0.1)` para compatibilidad oscuro/claro.
+- Tab Claude: select de período, tabla de sesiones con filas expandibles, totales en grid.
+- Todo el JS preservado: `cargarGeneral`, `cargarProxmox`, `cargarContenedores`, `cargarServicios`, `cargarHistorial`/`dibujarGrafica`, `cargarAlertas`, `cargarSesionesClaudeAPI`, `setInterval(60s)`.
+
+**Fix tipografía común:**
+- Causa raíz: ReDo y MediDo no tenían `html { font-size: 150% }`, por lo que `1rem = 16px`
+  en lugar de `24px`, haciendo todos los textos más pequeños que en hogarOS y FiDo.
+- Fix: añadida la regla en el bloque `<style>` de cada `index.html`.
+
+---
+
 ## 2026-05-05
 
 ### Header Cockpit extraído a hogar.css como componente compartido

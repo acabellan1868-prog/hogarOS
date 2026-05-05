@@ -1,12 +1,10 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 en curso — rediseño Cockpit. Portal ✅ (grafo refactorizado 2026-05-04), FiDo ✅ (pendiente deploy font-size). ReDo y MediDo pendientes.
-> Última actualización: 2026-05-04
+> Estado actual: Fase 15 completada. Todos los frontends migrados a Cockpit (Portal ✅, FiDo ✅, ReDo ✅, MediDo ✅).
+> Última actualización: 2026-05-05
 > **Próximo paso concreto:**
-> 1. 👤 Ejecutar `./actualizar.sh` en la VM para desplegar el grafo refactorizado (commit `3164ebb`) y FiDo font-size (commit `ff73ecf`)
-> 2. 🤖 Fase 15 — Paso 4: rediseño Cockpit de ReDo (`ReDo/static/index.html`)
-> 3. 🤖 Fase 15 — Paso 5: rediseño Cockpit de MediDo (`MediDo/static/index.html`)
-> 4. Referencia visual: `E:\Documentos\Desarrollo\hogarOS-handoff\design_handoff_cockpit\`
+> 1. 👤 Ejecutar `./actualizar.sh` en la VM para desplegar ReDo y MediDo Cockpit (commits `0eae3a2` y `dc9d862`)
+> 2. 👤 Revisar ajustes visuales pendientes tras ver en producción
 
 ### Leyenda
 
@@ -538,15 +536,15 @@ Sin cambios funcionales — solo capa visual.
 - [x] 🤖 Cache-busting CSS: `estilos.css?v=3`
 - [ ] 👤 Ejecutar `actualizar.sh` en la VM para desplegar font-size fix
 
-### Paso 4 — ReDo (`ReDo/static/index.html`) 🔄 PENDIENTE
-- [ ] 🤖 Reescritura completa del frontend al estilo Cockpit
-- [ ] 🤖 Referencia: `ReDo Cockpit.html`
-- [ ] 👤 Ejecutar `actualizar.sh` y verificar
+### Paso 4 — ReDo (`ReDo/static/index.html`) ✅
+- [x] 🤖 Reescritura completa del frontend al estilo Cockpit (commit `1fb510e`)
+- [x] 🤖 Fix tipografía: `html { font-size: 150% }` (commit `0eae3a2`)
+- [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
 
-### Paso 5 — MediDo (`MediDo/static/index.html`) 🔄 PENDIENTE
-- [ ] 🤖 Reescritura completa del frontend al estilo Cockpit
-- [ ] 🤖 Referencia: `MediDo Cockpit.html`
-- [ ] 👤 Ejecutar `actualizar.sh` y verificar
+### Paso 5 — MediDo (`MediDo/static/index.html`) ✅
+- [x] 🤖 Reescritura completa del frontend al estilo Cockpit (commit `631a3d6`)
+- [x] 🤖 Fix tipografía: `html { font-size: 150% }` (commit `dc9d862`)
+- [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
 
 ---
 
