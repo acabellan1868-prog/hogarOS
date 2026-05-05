@@ -1,5 +1,31 @@
 # Bitácora — hogarOS
 
+## 2026-05-05
+
+### Header Cockpit extraído a hogar.css como componente compartido
+
+Los estilos del header del portal (`portal/index.html`) estaban definidos como
+`<style>` inline y no eran reutilizables por las sub-apps (FiDo, ReDo, MediDo).
+Esto hacía que cada app tuviera su propia versión del header con dimensiones y
+estilos distintos, rompiendo la consistencia visual del ecosistema.
+
+**Solución:** Se extrajo el sistema completo de cabecera Cockpit a `portal/static/hogar.css`
+(sección 7b). Las clases son las mismas que ya usaba el portal, por lo que este
+no requirió cambios en su HTML.
+
+**Clases añadidas a hogar.css:**
+- `.ck-header` — contenedor principal (height 48px, fondo `--ck-bg2`, borde inferior)
+- `.ck-hdr-izq` / `.ck-hdr-der` — lados izquierdo y derecho
+- `.ck-marca-box` / `.ck-marca-dot` — logotipo cuadrado con punto interior
+- `.ck-marca-txt` / `.ck-marca-sub` — nombre y subtítulo de la marca
+- `.ck-sep` — separador vertical de 1px
+- `.ck-nav` / `.ck-nav a` / `.ck-nav button` — navegación horizontal con estado `activo`
+- `.ck-reloj` / `.ck-reloj__hora` / `.ck-reloj__fecha` — reloj con hora y fecha
+- `.ck-tema-btn` — botón de cambio de tema (28×28px)
+
+**Primera app en adoptarlo:** FiDo (ver su bitácora).
+**Pendiente de adoptar:** ReDo y MediDo, cuando se migre su interfaz.
+
 ## 2026-05-04
 
 ### Refactorización completa del grafo de red (portal Cockpit)

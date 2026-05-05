@@ -111,6 +111,59 @@ Sin CI/CD (Integración y Despliegue Continuo). Siempre manual.
 - **Drawer sub-apps:** app activa → separador → otras apps → Ir al Portal → Cambiar tema
 - **Enlaces drawer:** usar `window.location.origin` (evita conflictos con sub_filter)
 
+## Header Cockpit compartido (sección 7b de hogar.css)
+
+Todas las apps del ecosistema que usen el tema Cockpit deben usar estas clases,
+definidas en `hogar.css`. El portal (`portal/index.html`) es la referencia canónica.
+
+### Estructura HTML
+```html
+<header class="ck-header">
+  <div class="ck-hdr-izq">
+    <div class="ck-marca-box"><div class="ck-marca-dot"></div></div>
+    <div>
+      <div class="ck-marca-txt">HOGAR<span>OS</span></div>
+      <div class="ck-marca-sub">subtítulo opcional</div>
+    </div>
+    <div class="ck-sep"></div>
+    <!-- nombre de la app si es sub-app -->
+    <div class="ck-sep"></div>
+    <nav class="ck-nav">
+      <a href="…" class="activo">SECCIÓN</a>   <!-- portal usa <a> -->
+      <button @click="…" :class="…? 'activo':''">SECCIÓN</button> <!-- sub-apps usan <button> -->
+    </nav>
+  </div>
+  <div class="ck-hdr-der">
+    <button class="ck-tema-btn">…</button>
+    <div class="ck-reloj">
+      <div class="ck-reloj__hora" id="…">--:--:--</div>
+      <div class="ck-reloj__fecha" id="…"></div>
+    </div>
+  </div>
+</header>
+```
+
+### Reloj — JavaScript estándar
+```js
+function tickReloj() {
+  var now  = new Date();
+  var hora = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  var fecha = now.toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+  document.getElementById("ID-hora").textContent  = hora;
+  document.getElementById("ID-fecha").textContent = fecha;
+}
+tickReloj();
+setInterval(tickReloj, 1000);
+```
+
+### Apps que lo usan
+| App | Adoptado | Notas |
+|-----|----------|-------|
+| hogarOS portal | ✓ | Referencia canónica |
+| FiDo | ✓ | Nav con `<button>` Alpine.js |
+| ReDo | pendiente | Migración de interfaz pendiente |
+| MediDo | pendiente | Migración de interfaz pendiente |
+
 ## Monitor de Claude
 
 - Hook `Stop` en `~/.claude/settings.json` ejecuta `py ~/.claude/claude-tracker.py`
