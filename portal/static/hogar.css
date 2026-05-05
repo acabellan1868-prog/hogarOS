@@ -315,6 +315,196 @@ body {
 }
 
 /* ============================================================
+   7b. Header unificado para todas las aplicaciones
+   ============================================================ */
+.hogar-header-app {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 2rem;
+  background: var(--surface-container-lowest);
+  border-bottom: 1px solid var(--surface-container-high);
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.hogar-header-app__left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.hogar-header-app__right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+
+.hogar-header-app__marca {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: var(--fuente-titular);
+  white-space: nowrap;
+}
+
+.hogar-header-app__marca-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.hogar-header-app__marca-text {
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.hogar-header-app__sep {
+  width: 1px;
+  height: 24px;
+  background: var(--surface-container);
+  flex-shrink: 0;
+}
+
+.hogar-header-app__app {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  flex-shrink: 0;
+  font-family: var(--fuente-titular);
+}
+
+.hogar-header-app__sub {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hogar-header-app__nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.hogar-header-app__nav-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radio-lg);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background var(--transicion), color var(--transicion);
+  font-family: var(--fuente-cuerpo);
+}
+
+.hogar-header-app__nav-btn:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+.hogar-header-app__nav-btn--activo {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  font-weight: 700;
+}
+
+.hogar-header-app__clock {
+  font-size: 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.hogar-header-app__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radio-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--on-surface-variant);
+  transition: background var(--transicion), color var(--transicion);
+  flex-shrink: 0;
+}
+
+.hogar-header-app__btn:hover {
+  background: var(--surface-container);
+  color: var(--on-surface);
+}
+
+/* Modo Cockpit (para FiDo y similares con font-size: 150% en html) */
+html[style*="font-size: 150%"] .hogar-header-app,
+[data-tema-cockpit] .hogar-header-app {
+  background: var(--ck-bg2);
+  border-bottom-color: var(--ck-line);
+  /* Ajuste de altura para escala 150% */
+  height: auto;
+  min-height: 3.5rem;
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__sep,
+[data-tema-cockpit] .hogar-header-app__sep {
+  background: var(--ck-line);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__app,
+[data-tema-cockpit] .hogar-header-app__app {
+  color: var(--ck-accent);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__nav-btn,
+[data-tema-cockpit] .hogar-header-app__nav-btn {
+  color: var(--ck-on-variant);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__nav-btn:hover,
+[data-tema-cockpit] .hogar-header-app__nav-btn:hover {
+  background: var(--ck-bg3);
+  color: var(--ck-on-surface);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__nav-btn--activo,
+[data-tema-cockpit] .hogar-header-app__nav-btn--activo {
+  background: var(--ck-bg3);
+  color: var(--ck-on-surface);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__clock,
+[data-tema-cockpit] .hogar-header-app__clock {
+  color: var(--ck-accent);
+  font-family: var(--ck-fuente);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__btn,
+[data-tema-cockpit] .hogar-header-app__btn {
+  color: var(--ck-on-variant);
+}
+
+html[style*="font-size: 150%"] .hogar-header-app__btn:hover,
+[data-tema-cockpit] .hogar-header-app__btn:hover {
+  background: var(--ck-bg3);
+  color: var(--ck-on-surface);
+}
+
+/* ============================================================
    8. Botón toggle tema
    ============================================================ */
 .hogar-toggle-tema {

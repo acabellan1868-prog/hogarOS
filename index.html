@@ -22,31 +22,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--fondo); color: var(--texto); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
 
-  /* Cabecera */
-  header {
-    background: var(--superficie);
-    border-bottom: 1px solid var(--borde);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-  .logo { font-size: 20px; font-weight: 800; color: var(--azul); letter-spacing: -0.5px; }
-  .logo span { color: var(--texto); }
-  .nav { display: flex; gap: 4px; margin-left: 24px; }
-  .nav-item {
-    padding: 6px 14px;
-    border-radius: 7px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--textotenue);
-    transition: all .15s;
-  }
-  .nav-item:hover { background: var(--superficie2); color: var(--texto); }
-  .nav-item.activo { background: var(--superficie2); color: var(--texto); font-weight: 600; }
-  .espaciador { flex: 1; }
-  .hora { font-size: 13px; color: var(--textotenue); font-family: monospace; }
 
   /* Bienvenida */
   .bienvenida {
@@ -180,15 +155,22 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">Hogar<span>OS</span></div>
-  <nav class="nav">
-    <div class="nav-item activo">🏠 Inicio</div>
-    <div class="nav-item">🔍 Red</div>
-    <div class="nav-item">💰 Finanzas</div>
-  </nav>
-  <div class="espaciador"></div>
-  <div class="hora" id="reloj">—</div>
+<header class="hogar-header-app">
+  <div class="hogar-header-app__left">
+    <a href="#" class="hogar-header-app__marca">
+      <span class="hogar-header-app__marca-icon">🏠</span>
+      <span class="hogar-header-app__marca-text">HogarOS</span>
+    </a>
+    <div class="hogar-header-app__sep"></div>
+    <nav class="hogar-header-app__nav">
+      <button class="hogar-header-app__nav-btn hogar-header-app__nav-btn--activo">Inicio</button>
+      <button class="hogar-header-app__nav-btn">Red</button>
+      <button class="hogar-header-app__nav-btn">Finanzas</button>
+    </nav>
+  </div>
+  <div class="hogar-header-app__right">
+    <div class="hogar-header-app__clock" id="reloj">—</div>
+  </div>
 </header>
 
 <div class="bienvenida">
