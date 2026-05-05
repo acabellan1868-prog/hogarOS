@@ -315,6 +315,86 @@ body {
 }
 
 /* ============================================================
+   7b. Header Cockpit compartido — todas las apps del ecosistema
+   ============================================================ */
+.ck-header {
+  height: 48px;
+  background: var(--ck-bg2);
+  border-bottom: 1px solid var(--ck-line);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  flex-shrink: 0; z-index: 10; position: relative;
+}
+
+.ck-hdr-izq { display: flex; align-items: center; gap: 0.5rem; }
+.ck-hdr-der { display: flex; align-items: center; gap: 0.75rem; }
+
+.ck-marca-box {
+  width: 24px; height: 24px; border-radius: 3px;
+  border: 1px solid var(--ck-accent);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 10px rgba(0,229,196,0.3);
+  flex-shrink: 0;
+}
+[data-tema-cockpit="light"] .ck-marca-box { box-shadow: none; }
+
+.ck-marca-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ck-accent); box-shadow: 0 0 6px var(--ck-accent);
+}
+[data-tema-cockpit="light"] .ck-marca-dot { box-shadow: none; }
+
+.ck-marca-txt {
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--ck-accent); letter-spacing: 0.15em;
+}
+.ck-marca-txt span { color: var(--ck-on-variant); }
+
+.ck-marca-sub {
+  font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.12em;
+}
+
+.ck-sep { width: 1px; height: 20px; background: var(--ck-line); margin: 0 0.5rem; flex-shrink: 0; }
+
+.ck-nav { display: flex; align-items: center; gap: 0; }
+.ck-nav a, .ck-nav button {
+  font-family: var(--ck-fuente);
+  font-size: 0.52rem; letter-spacing: 0.12em;
+  color: var(--ck-on-variant); cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border: none; border-bottom: 1px solid transparent;
+  background: none;
+  text-decoration: none; transition: color 0.2s;
+}
+.ck-nav a:hover, .ck-nav button:hover { color: var(--ck-on-surface); }
+.ck-nav a.activo, .ck-nav button.activo { color: var(--ck-accent); border-bottom-color: var(--ck-accent); }
+
+.ck-reloj { text-align: right; line-height: 1; }
+.ck-reloj__hora {
+  font-size: 1rem; font-weight: 700;
+  color: var(--ck-accent); letter-spacing: 0.08em;
+}
+.ck-reloj__fecha {
+  font-size: 0.45rem; color: var(--ck-on-variant);
+  letter-spacing: 0.12em; margin-top: 2px;
+}
+
+.ck-tema-btn {
+  width: 28px; height: 28px; border: none; cursor: pointer;
+  background: none; display: flex; align-items: center; justify-content: center;
+  border-radius: 3px; color: var(--ck-on-variant); transition: background 0.2s;
+  flex-shrink: 0;
+}
+.ck-tema-btn:hover { background: rgba(128,128,128,0.15); }
+
+@media (max-width: 767px) {
+  .ck-nav, .ck-sep, .ck-marca-sub { display: none; }
+  .ck-reloj__hora { font-size: 0.85rem; }
+  .ck-reloj__fecha { display: none; }
+}
+
+/* ============================================================
    8. Botón toggle tema
    ============================================================ */
 .hogar-toggle-tema {
