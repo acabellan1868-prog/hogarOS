@@ -170,6 +170,11 @@
     }
     .ck-zona--glow { background: rgba(0,229,196,0.02); }
     [data-tema-cockpit="light"] .ck-zona--glow { background: rgba(26,106,96,0.02); }
+    @media (max-width: 1300px) and (min-width: 768px) {
+      /* Zonas con scroll interno en portátil — el grid sigue ocupando 100vh */
+      .ck-zona, #zona-d { overflow-y: auto; }
+      .ck-zona-d-izq, .ck-zona-d-der { overflow-y: auto; }
+    }
     @media (max-width: 767px) {
       .ck-zona { border-right: none; overflow: visible; }
     }
