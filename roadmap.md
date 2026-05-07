@@ -1,10 +1,9 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada. Todos los frontends migrados a Cockpit (Portal ✅, FiDo ✅, ReDo ✅, MediDo ✅).
-> Última actualización: 2026-05-05
+> Estado actual: Fase 15 completada + mejoras responsive del ecosistema completo desplegadas.
+> Última actualización: 2026-05-07
 > **Próximo paso concreto:**
-> 1. 👤 Ejecutar `./actualizar.sh` en la VM para desplegar ReDo y MediDo Cockpit (commits `0eae3a2` y `dc9d862`)
-> 2. 👤 Revisar ajustes visuales pendientes tras ver en producción
+> 1. 👤 Seguir usando el sistema y anotar nuevos ajustes visuales o funcionales que aparezcan en el uso diario
 
 ### Leyenda
 

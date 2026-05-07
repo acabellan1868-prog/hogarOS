@@ -1,5 +1,17 @@
 # Bitácora — hogarOS
 
+## 2026-05-07 — Mejoras responsive ecosistema completo
+
+### `portal/index.html` — Font-size adaptativo y scroll en portátil
+
+- `html { font-size }` cambiado de fijo `150%` a tres escalones: `150%` (≥1301px), `125%` (portátiles ≤1300px), `100%` (tablet/móvil ≤900px). Antes todo el contenido se veía muy grande en portátiles de 15".
+- `overflow-x: hidden; overflow-y: auto` en móvil (≤767px): elimina el scroll horizontal en móvil que aparecía cuando algún elemento desbordaba el viewport.
+- Nuevo bloque `@media (max-width: 1300px) and (min-width: 768px)`: añade `overflow-y: auto` a `.ck-zona`, `#zona-d`, `.ck-zona-d-izq` y `.ck-zona-d-der`, permitiendo scroll interno por panel en portátil sin romper el diseño cockpit de pantalla completa.
+
+### `portal/static/hogar.css` — Fix tipografía nav compartida
+
+- Añadido `font-weight: normal` a `.ck-nav a, .ck-nav button`. Los navegadores aplican `font-weight: bold` por defecto a `<button>`, haciendo que los ítems del nav en FiDo (que usa `<button>`) aparecieran en negrita frente a los `<a>` de hogarOS. Al ser hogar.css compartido, el fix afecta a todas las apps.
+
 ## 2026-05-05 (sesión 2)
 
 ### Fase 15 Paso 4 y 5 — Rediseño Cockpit de ReDo y MediDo
