@@ -360,7 +360,7 @@ body {
 .ck-nav { display: flex; align-items: center; gap: 0; }
 .ck-nav a, .ck-nav button {
   font-family: var(--ck-fuente);
-  font-size: 0.52rem; letter-spacing: 0.12em;
+  font-size: 0.52rem; font-weight: normal; letter-spacing: 0.12em;
   color: var(--ck-on-variant); cursor: pointer;
   padding: 0.2rem 0.5rem;
   border: none; border-bottom: 1px solid transparent;
