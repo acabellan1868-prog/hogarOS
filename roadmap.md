@@ -1,9 +1,11 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada + mejoras responsive del ecosistema completo desplegadas.
-> Última actualización: 2026-05-07
+> Estado actual: Fase 15 completada + migración Cockpit del portal auxiliar completada.
+> Última actualización: 2026-05-12
 > **Próximo paso concreto:**
-> 1. 👤 Seguir usando el sistema y anotar nuevos ajustes visuales o funcionales que aparezcan en el uso diario
+> 1. 👤 Actualizar icono de Claude en `lanzador.json` de la VM (admin panel o `sed`)
+> 2. 👤 Ejecutar `actualizar.sh` para desplegar todos los cambios de esta sesión
+> 3. 👤 Seguir usando el sistema y anotar nuevos ajustes que aparezcan en el uso diario
 
 ### Leyenda
 
@@ -543,6 +545,17 @@ Sin cambios funcionales — solo capa visual.
 ### Paso 5 — MediDo (`MediDo/static/index.html`) ✅
 - [x] 🤖 Reescritura completa del frontend al estilo Cockpit (commit `631a3d6`)
 - [x] 🤖 Fix tipografía: `html { font-size: 150% }` (commit `dc9d862`)
+- [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
+
+### Paso 6 — Portal auxiliar (2026-05-12) ✅
+Páginas auxiliares del portal migradas al estilo Cockpit. Última pieza que quedaba con Living Sanctuary.
+
+- [x] 🤖 `portal/lanzador.html`: header 48px, tiles rectangulares, scanlines, FAB terminal `[ + ]` (commit `b5ad36e`)
+- [x] 🤖 `portal/admin-lanzador.html`: mismo header, grupos/filas con borde fino, modales Cockpit, botones terminales (commit `bbce7f2`)
+- [x] 🤖 `portal/alertas.html`: filtros toggle, items con barra lateral de color, botones `✓`/`✕` (commit `b7e7bec`)
+- [x] 🤖 Fix `ck-marca-box` como `<a href="/">` en los tres ficheros + `text-decoration:none` en `hogar.css` (commit `f62c81f`)
+- [x] 🤖 Fix icono Claude en `hogar-api/app/principal.py`: `emoji:🧠` → SVG Homarr CDN (commit `131112e`)
+- [ ] 👤 Actualizar icono de Claude en `lanzador.json` de la VM (admin panel o `sed`)
 - [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
 
 ---

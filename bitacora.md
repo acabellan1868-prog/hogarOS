@@ -1,5 +1,52 @@
 # Bitácora — hogarOS
 
+## 2026-05-12 — Migración al estilo Cockpit de lanzador, admin y alertas
+
+### `portal/lanzador.html` — Rediseño completo Cockpit (commit `b5ad36e`)
+
+- Sustituido el diseño Living Sanctuary por Cockpit completo.
+- Header: 48px fijo sticky, `ck-bg2`, nav inline con LANZADOR como tab activo, reloj + toggle tema a la derecha.
+- Fondo: `ck-bg` con scanlines decorativos.
+- Grupos: encabezado `◆ NOMBRE` en JetBrains Mono uppercase, línea separadora `1px solid ck-line`.
+- Apps: tiles rectangulares con `border: 1px solid ck-line`. Hover: borde teal + glow en oscuro.
+- FAB de administración: `[ + ]` estilo terminal en vez del blob orgánico.
+- Tema: migrado de `data-tema`/`hogar-tema` a `data-tema-cockpit`/`hogar-cockpit-tema`.
+- Drawer móvil: mismo patrón que el portal.
+
+### `portal/admin-lanzador.html` — Rediseño completo Cockpit (commit `bbce7f2`)
+
+- Mismo header 48px que el resto del ecosistema. Subtítulo `ADMIN · LANZADOR`.
+- Grupos: borde `1px solid ck-line`, cabecera `ck-bg2` con `◆` en JetBrains Mono.
+- Filas de enlace: icono en caja cuadrada `ck-bg3`, nombre uppercase 0.52rem.
+- Botones de acción: `✎` / `✕` en cuadrados de 26px; borrar se tiñe en `ck-danger` al hover.
+- Botones principales: `[ + GRUPO ]` y `[ GUARDAR ]` estilo terminal.
+- Modales: fondo `rgba(0,0,0,0.65)`, caja `ck-bg2` con `1px solid ck-line` sin border-radius.
+- Inputs: `ck-input-bg` / `ck-input-border`; foco en `ck-accent`.
+- Aviso guardado: `✓ CAMBIOS GUARDADOS` con borde `ck-success`.
+
+### `portal/alertas.html` — Rediseño completo Cockpit (commit `b7e7bec`)
+
+- Header 48px con ALERTAS como tab activo.
+- Filtros de estado y módulo: botones de borde fino uppercase, toggle a teal al activarse.
+- Contador: en `ck-danger` con `!` cuando hay alertas activas, gris si no hay ninguna.
+- Items: grid 3 columnas — barra lateral de color (rojo activa, naranja warning, gris resuelta), cuerpo, acciones.
+- Badge de módulo: caja con borde fino sin border-radius; ReDo en teal, MediDo en verde.
+- Botones `✓` (resolver) y `✕` (eliminar): cuadrados con hover de color.
+- Mensajes de error de conexión: franja fina con borde naranja.
+
+### Fix: `ck-marca-box` como enlace al portal (commit `f62c81f`)
+
+- En `lanzador.html`, `admin-lanzador.html` y `alertas.html` el `div.ck-marca-box` pasa a `<a href="/">`.
+- Permite volver al portal haciendo clic en el cuadradito con el punto del header.
+- `hogar.css`: añadido `text-decoration: none` a `.ck-marca-box` para evitar subrayado.
+
+### Fix: icono de Claude en el lanzador (commit `131112e`)
+
+- `hogar-api/app/principal.py`: sustituido `emoji:🧠` por la URL del SVG oficial de Claude en el CDN de Homarr (`cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/claude.svg`).
+- Aplica solo a instalaciones nuevas o si se borra `lanzador.json`. Para la VM actual: actualizar desde `/admin-lanzador.html` o con `sed` en el JSON.
+
+---
+
 ## 2026-05-07 — Mejoras responsive ecosistema completo
 
 ### `portal/index.html` — Font-size adaptativo y scroll en portátil
