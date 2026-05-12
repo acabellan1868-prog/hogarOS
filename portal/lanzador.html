@@ -1,254 +1,494 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema-cockpit="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lanzador — HogarOS</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/favicon.svg">
-  <link rel="manifest" href="/static/site.webmanifest">
-  <meta name="theme-color" content="#1a6a60">
+  <meta name="theme-color" content="#00e5c4">
   <link rel="stylesheet" href="/static/hogar.css">
   <style>
-    .lanzador-estado {
+    /* ── Reset Cockpit ── */
+    html { font-size: 150%; }
+    @media (max-width: 1300px) { html { font-size: 125%; } }
+    @media (max-width: 900px)  { html { font-size: 100%; } }
+
+    html, body {
+      margin: 0;
+      background: var(--ck-bg);
+      color: var(--ck-on-surface);
+      font-family: var(--ck-fuente);
+    }
+
+    /* Scanlines decorativos */
+    #scanlines {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+      );
+    }
+    [data-tema-cockpit="light"] #scanlines {
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px
+      );
+    }
+
+    /* ── Wrapper ── */
+    #ck-wrap { display: flex; flex-direction: column; min-height: 100vh; position: relative; }
+
+    /* ── Header 48px ── */
+    #ck-header {
+      height: 48px;
+      background: var(--ck-bg2);
+      border-bottom: 1px solid var(--ck-line);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      flex-shrink: 0; z-index: 10; position: sticky; top: 0;
+    }
+
+    .ck-hdr-izq { display: flex; align-items: center; gap: 0.5rem; }
+    .ck-hdr-der { display: flex; align-items: center; gap: 0.75rem; }
+
+    .ck-marca-box {
+      width: 24px; height: 24px; border-radius: 3px;
+      border: 1px solid var(--ck-accent);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(0,229,196,0.3);
+    }
+    [data-tema-cockpit="light"] .ck-marca-box { box-shadow: none; }
+    .ck-marca-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ck-accent); box-shadow: 0 0 6px var(--ck-accent);
+    }
+    [data-tema-cockpit="light"] .ck-marca-dot { box-shadow: none; }
+
+    .ck-marca-txt { font-size: 0.75rem; font-weight: 700; color: var(--ck-accent); letter-spacing: 0.15em; }
+    .ck-marca-txt span { color: var(--ck-on-variant); }
+    .ck-marca-sub { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.12em; }
+    .ck-sep { width: 1px; height: 20px; background: var(--ck-line); margin: 0 0.5rem; }
+
+    .ck-nav { display: flex; align-items: center; gap: 0; }
+    .ck-nav a {
+      font-family: var(--ck-fuente);
+      font-size: 0.52rem; letter-spacing: 0.12em;
+      color: var(--ck-on-variant); cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-bottom: 1px solid transparent;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .ck-nav a:hover { color: var(--ck-on-surface); }
+    .ck-nav a.activo { color: var(--ck-accent); border-bottom-color: var(--ck-accent); }
+
+    .ck-reloj { text-align: right; line-height: 1; }
+    .ck-reloj__hora { font-size: 1rem; font-weight: 700; color: var(--ck-accent); letter-spacing: 0.08em; }
+    .ck-reloj__fecha { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.12em; margin-top: 2px; }
+
+    .ck-tema-btn {
+      width: 28px; height: 28px; border: none; cursor: pointer;
+      background: none; display: flex; align-items: center; justify-content: center;
+      border-radius: 3px; color: var(--ck-on-variant); transition: background 0.2s;
+    }
+    .ck-tema-btn:hover { background: rgba(128,128,128,0.15); }
+
+    .ck-menu-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--ck-on-variant); font-size: 1.2rem;
+      display: none; align-items: center; padding: 0.25rem;
+    }
+
+    @media (max-width: 767px) {
+      .ck-nav, .ck-sep, .ck-marca-sub { display: none; }
+      .ck-menu-btn { display: flex; }
+      .ck-reloj__hora { font-size: 0.85rem; }
+      .ck-reloj__fecha { display: none; }
+    }
+
+    /* ── Main scrollable ── */
+    #ck-main {
+      flex: 1;
+      padding: 1.5rem 1.5rem 5rem;
+      position: relative; z-index: 1;
+    }
+    @media (max-width: 600px) { #ck-main { padding: 1rem 1rem 5rem; } }
+
+    /* ── Sección (grupo de apps) ── */
+    .lz-seccion { margin-bottom: 1.75rem; }
+
+    .lz-seccion__titulo {
+      font-family: var(--ck-fuente);
+      font-size: 0.48rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--ck-on-variant);
+      display: flex; align-items: center; gap: 0.35rem;
+      margin-bottom: 0.6rem;
+    }
+    .lz-seccion__titulo::after {
+      content: ''; flex: 1; height: 1px; background: var(--ck-line);
+    }
+    .lz-seccion__diamante { color: var(--ck-accent-dim); }
+
+    /* ── Grid de tiles ── */
+    .lz-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.4rem;
+    }
+    @media (max-width: 1100px) { .lz-grid { grid-template-columns: repeat(5, 1fr); } }
+    @media (max-width: 767px)  { .lz-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 480px)  { .lz-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    /* ── Tile de app ── */
+    .lz-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.7rem 0.4rem 0.6rem;
+      border: 1px solid var(--ck-line);
+      background: var(--ck-bg2);
+      text-decoration: none;
+      color: var(--ck-on-surface);
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 4.5rem;
+    }
+    .lz-tile:hover {
+      border-color: rgba(0,229,196,0.35);
+      background: var(--ck-row-hover);
+    }
+    [data-tema-cockpit="light"] .lz-tile:hover {
+      border-color: rgba(26,106,96,0.35);
+    }
+
+    .lz-tile__img {
+      width: 1.75rem;
+      height: 1.75rem;
+      object-fit: contain;
+      opacity: 0.75;
+      transition: opacity 0.2s, filter 0.2s;
+      flex-shrink: 0;
+    }
+    .lz-tile:hover .lz-tile__img { opacity: 1; }
+    [data-tema-cockpit="dark"] .lz-tile:hover .lz-tile__img {
+      filter: drop-shadow(0 0 5px rgba(0,229,196,0.4));
+    }
+
+    .lz-tile__emoji {
+      font-size: 1.4rem;
+      line-height: 1;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .lz-tile:hover .lz-tile__emoji { opacity: 1; }
+
+    .lz-tile__icono-mat {
+      font-size: 1.4rem;
+      color: var(--ck-accent-dim);
+      opacity: 0.7;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .lz-tile:hover .lz-tile__icono-mat { opacity: 1; color: var(--ck-accent); }
+
+    .lz-tile__nombre {
+      font-family: var(--ck-fuente);
+      font-size: 0.5rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       text-align: center;
-      padding: var(--gap-3xl);
-      color: var(--on-surface-variant);
-      font-size: 0.9rem;
+      color: var(--ck-on-surface);
+      line-height: 1.3;
+    }
+    .lz-tile__desc {
+      font-family: var(--ck-fuente);
+      font-size: 0.4rem;
+      color: var(--ck-on-variant);
+      text-align: center;
+      letter-spacing: 0.06em;
     }
 
-    .lanzador-estado button {
-      margin-left: 0.5rem;
+    /* ── Estado de carga / error ── */
+    .lz-estado {
+      font-size: 0.65rem;
+      color: var(--ck-on-variant);
+      padding: 2rem 0;
+    }
+
+    /* ── FAB gestionar ── */
+    .lz-fab {
+      position: fixed;
+      bottom: 2rem;
+      right: 1.5rem;
+      z-index: 50;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--ck-accent);
+      background: transparent;
+      color: var(--ck-accent);
+      font-family: var(--ck-fuente);
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-decoration: none;
       cursor: pointer;
-      background: none;
-      border: 1px solid currentColor;
-      padding: 0.3rem 0.8rem;
-      border-radius: var(--radio-full);
-      color: inherit;
-      font-family: var(--fuente-cuerpo);
-      font-size: 0.8rem;
-      transition: background var(--transicion);
+      transition: background 0.2s;
     }
+    .lz-fab:hover { background: rgba(0,229,196,0.08); }
+    [data-tema-cockpit="light"] .lz-fab:hover { background: rgba(26,106,96,0.08); }
 
-    .lanzador-estado button:hover {
-      background: var(--surface-container);
+    /* ── Footer 28px ── */
+    #ck-footer {
+      height: 28px;
+      background: var(--ck-bg2);
+      border-top: 1px solid var(--ck-line);
+      display: flex; align-items: center;
+      justify-content: flex-end;
+      padding: 0 1rem;
+      flex-shrink: 0; z-index: 1;
+    }
+    .ck-footer-ver { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.1em; }
+
+    /* ── Drawer móvil ── */
+    #ck-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 200; display: none;
+    }
+    #ck-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 220px;
+      background: var(--ck-bg2); border-left: 1px solid var(--ck-line);
+      z-index: 201;
+      transform: translateX(100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column;
+      padding: 1rem 0.75rem; gap: 0.1rem;
+    }
+    #ck-drawer.abierto { transform: translateX(0); }
+    .ck-drawer-item {
+      font-family: var(--ck-fuente);
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      color: var(--ck-on-variant);
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--ck-line);
+      cursor: pointer; text-decoration: none; display: block;
+    }
+    .ck-drawer-item.activo { color: var(--ck-accent); }
+    .ck-drawer-cerrar {
+      align-self: flex-end; background: none; border: none; cursor: pointer;
+      color: var(--ck-on-variant); font-size: 1.1rem; margin-bottom: 0.5rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- ======== EFECTO LUMINA ======== -->
-  <div class="hogar-lumina"></div>
+  <div id="scanlines" aria-hidden="true"></div>
 
-  <!-- ======== HEADER FLOTANTE ======== -->
-  <header class="hogar-header">
-    <div class="hogar-header__barra">
-      <a href="/" class="hogar-header__marca">
-        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
-        <div>
-          <div class="hogar-header__titulo">HogarOS</div>
-          <div class="hogar-header__subtitulo">El refugio del silencio</div>
-        </div>
-      </a>
-      <button class="hogar-header__menu-btn" id="btnMenu">
-        <span class="material-symbols-outlined">menu</span>
+  <!-- Drawer móvil -->
+  <div id="ck-overlay"></div>
+  <nav id="ck-drawer">
+    <button class="ck-drawer-cerrar" id="ck-drawer-cerrar">✕</button>
+    <a href="/"               class="ck-drawer-item">INICIO</a>
+    <a href="/red/"           class="ck-drawer-item">RED</a>
+    <a href="/finanzas/"      class="ck-drawer-item">FINANZAS</a>
+    <a href="/salud/"         class="ck-drawer-item">SALUD</a>
+    <a href="http://192.168.31.132:8123/lovelace/0" class="ck-drawer-item" target="_blank">DOMÓTICA</a>
+    <a href="/lanzador.html"  class="ck-drawer-item activo">LANZADOR</a>
+    <a href="/alertas.html"   class="ck-drawer-item">ALERTAS</a>
+    <div style="margin-top:auto;padding-top:0.75rem;border-top:1px solid var(--ck-line)">
+      <button id="ck-drawer-tema" class="ck-drawer-item" style="border:none;background:none;width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:0.5rem;border-bottom:none">
+        <span id="ck-drawer-tema-ico"></span> Cambiar tema
       </button>
     </div>
-  </header>
-
-  <!-- ======== DRAWER DE NAVEGACIÓN ======== -->
-  <div class="hogar-drawer-overlay oculto" id="drawerOverlay"></div>
-  <nav class="hogar-drawer oculto" id="drawerNav">
-    <button class="hogar-drawer__cerrar" id="btnCerrarDrawer">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-    <span class="hogar-drawer__titulo">Navegacion</span>
-    <a href="/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">roofing</span>
-      <span>Inicio</span>
-    </a>
-    <a href="/red/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">lan</span>
-      <span>Red</span>
-    </a>
-    <a href="/finanzas/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">payments</span>
-      <span>Finanzas</span>
-    </a>
-    <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-drawer__enlace" target="_blank">
-      <span class="material-symbols-outlined">home_iot_device</span>
-      <span>Domotica</span>
-    </a>
-    <a href="/lanzador.html" class="hogar-drawer__enlace hogar-drawer__enlace--activo">
-      <span class="material-symbols-outlined">apps</span>
-      <span>Lanzador</span>
-    </a>
-    <div class="hogar-drawer__separador"></div>
-    <button class="hogar-drawer__enlace" id="btnTema">
-      <span class="material-symbols-outlined" id="iconoTema">dark_mode</span>
-      <span>Cambiar tema</span>
-    </button>
   </nav>
 
-  <!-- ======== FAB GESTIONAR ======== -->
-  <a href="/admin-lanzador.html" class="lanzador-fab" title="Gestionar enlaces">
-    <span class="material-symbols-outlined" style="font-size:1.5rem">add</span>
-  </a>
+  <div id="ck-wrap">
 
-  <!-- ======== CONTENIDO ======== -->
-  <main class="hogar-contenedor" id="contenido">
-    <div class="lanzador-estado">
-      <span class="cargando">Cargando...</span>
-    </div>
-  </main>
+    <!-- ── HEADER ── -->
+    <header id="ck-header">
+      <div class="ck-hdr-izq">
+        <div class="ck-marca-box"><div class="ck-marca-dot"></div></div>
+        <div>
+          <div class="ck-marca-txt">HOGAR<span>OS</span></div>
+          <div class="ck-marca-sub">LANZADOR</div>
+        </div>
+        <div class="ck-sep"></div>
+        <nav class="ck-nav">
+          <a href="/">INICIO</a>
+          <a href="/red/">RED</a>
+          <a href="/finanzas/">FINANZAS</a>
+          <a href="/salud/">SALUD</a>
+          <a href="http://192.168.31.132:8123/lovelace/0" target="_blank">DOMÓTICA</a>
+          <a href="/lanzador.html" class="activo">LANZADOR</a>
+          <a href="/alertas.html">ALERTAS</a>
+        </nav>
+      </div>
+      <div class="ck-hdr-der">
+        <button id="ck-tema-btn" class="ck-tema-btn" title="Cambiar tema"></button>
+        <div class="ck-reloj">
+          <div class="ck-reloj__hora" id="ck-hora">--:--:--</div>
+          <div class="ck-reloj__fecha" id="ck-fecha"></div>
+        </div>
+        <button id="ck-menu-btn" class="ck-menu-btn">☰</button>
+      </div>
+    </header>
+
+    <!-- ── CONTENIDO ── -->
+    <main id="ck-main">
+      <div id="contenido">
+        <div class="lz-estado">Cargando...</div>
+      </div>
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer id="ck-footer">
+      <div class="ck-footer-ver">LANZADOR · COCKPIT EDITION · hogar-api</div>
+    </footer>
+
+  </div><!-- #ck-wrap -->
+
+  <!-- FAB gestionar -->
+  <a href="/admin-lanzador.html" class="lz-fab" title="Gestionar enlaces">[ + ]</a>
 
   <script>
     /* ============================================================
-       Drawer de navegacion
-       ============================================================ */
-    var drawer = document.getElementById("drawerNav");
-    var overlay = document.getElementById("drawerOverlay");
-
-    function toggleDrawer() {
-      drawer.classList.toggle("oculto");
-      overlay.classList.toggle("oculto");
-    }
-
-    document.getElementById("btnMenu").addEventListener("click", toggleDrawer);
-    document.getElementById("drawerOverlay").addEventListener("click", toggleDrawer);
-    document.getElementById("btnCerrarDrawer").addEventListener("click", toggleDrawer);
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && !drawer.classList.contains("oculto")) toggleDrawer();
-    });
-
-    /* ============================================================
        Tema
        ============================================================ */
-    (function initTema() {
-      if (localStorage.getItem("hogar-tema") === "oscuro") {
-        document.documentElement.setAttribute("data-tema", "oscuro");
-      }
-      actualizarIconoTema();
+    (function() {
+      var t = localStorage.getItem("hogar-cockpit-tema") || "dark";
+      document.documentElement.setAttribute("data-tema-cockpit", t);
+      setIconoTema(t);
     })();
 
-    document.getElementById("btnTema").addEventListener("click", function() {
-      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
-      if (oscuro) {
-        document.documentElement.removeAttribute("data-tema");
-        localStorage.setItem("hogar-tema", "claro");
-      } else {
-        document.documentElement.setAttribute("data-tema", "oscuro");
-        localStorage.setItem("hogar-tema", "oscuro");
-      }
-      actualizarIconoTema();
-    });
-
-    function actualizarIconoTema() {
-      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
-      document.getElementById("iconoTema").textContent = oscuro ? "light_mode" : "dark_mode";
+    function toggleTema() {
+      var actual = document.documentElement.getAttribute("data-tema-cockpit");
+      var nuevo  = actual === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-tema-cockpit", nuevo);
+      localStorage.setItem("hogar-cockpit-tema", nuevo);
+      setIconoTema(nuevo);
     }
 
+    function svgSol() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+    }
+    function svgLuna() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    function setIconoTema(tema) {
+      var btn = document.getElementById("ck-tema-btn");
+      if (btn) btn.innerHTML = tema === "dark" ? svgSol() : svgLuna();
+      var ico = document.getElementById("ck-drawer-tema-ico");
+      if (ico) ico.innerHTML = tema === "dark" ? svgSol() : svgLuna();
+    }
+
+    document.getElementById("ck-tema-btn").addEventListener("click", toggleTema);
+    document.getElementById("ck-drawer-tema").addEventListener("click", toggleTema);
+
     /* ============================================================
-       Iconos Material — mapa de nombres a iconos
-       (se usan como fallback cuando el enlace no tiene icono propio)
+       Reloj
+       ============================================================ */
+    function tickReloj() {
+      var now  = new Date();
+      var hora = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      var fecha = now.toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+      document.getElementById("ck-hora").textContent  = hora;
+      document.getElementById("ck-fecha").textContent = fecha;
+    }
+    tickReloj();
+    setInterval(tickReloj, 1000);
+
+    /* ============================================================
+       Drawer móvil
+       ============================================================ */
+    var _overlay = document.getElementById("ck-overlay");
+    var _drawer  = document.getElementById("ck-drawer");
+
+    function abrirDrawer()  { _drawer.classList.add("abierto");    _overlay.style.display = "block"; }
+    function cerrarDrawer() { _drawer.classList.remove("abierto"); _overlay.style.display = "none"; }
+
+    document.getElementById("ck-menu-btn").addEventListener("click", abrirDrawer);
+    document.getElementById("ck-drawer-cerrar").addEventListener("click", cerrarDrawer);
+    _overlay.addEventListener("click", cerrarDrawer);
+    document.addEventListener("keydown", function(e) { if (e.key === "Escape") cerrarDrawer(); });
+
+    /* ============================================================
+       Mapa de iconos Material como fallback
        ============================================================ */
     var ICONOS_MATERIAL = {
-      "chatgpt": "forum",
-      "gemini": "auto_awesome",
-      "claude": "cognition",
-      "grok": "psychology",
-      "spotify": "music_note",
-      "tailscale": "vpn_lock",
-      "proxmox": "dns",
-      "portainer": "dock",
-      "heimdall": "dashboard",
+      "chatgpt":        "forum",
+      "gemini":         "auto_awesome",
+      "claude":         "cognition",
+      "grok":           "psychology",
+      "spotify":        "music_note",
+      "tailscale":      "vpn_lock",
+      "proxmox":        "dns",
+      "portainer":      "dock",
+      "heimdall":       "dashboard",
       "home assistant": "house_with_shield",
-      "nodered": "hub",
-      "node-red": "hub",
-      "nextcloud": "cloud",
-      "jupyter": "data_exploration",
-      "jupyterlab": "data_exploration",
-      "n8n": "schema",
-      "planka": "view_kanban",
-      "dockmon": "monitor_heart",
-      "fido": "payments",
-      "hogaros": "roofing",
-      "mldonkey": "download",
-      "assistant": "house_with_shield"
+      "nodered":        "hub",
+      "node-red":       "hub",
+      "nextcloud":      "cloud",
+      "jupyter":        "data_exploration",
+      "jupyterlab":     "data_exploration",
+      "n8n":            "schema",
+      "planka":         "view_kanban",
+      "dockmon":        "monitor_heart",
+      "fido":           "payments",
+      "hogaros":        "roofing",
+      "mldonkey":       "download"
     };
 
-    /* Colores por posición para los iconos Material */
-    var COLORES_ICONO = [
-      "var(--primary)", "var(--secondary)", "var(--tertiary)",
-      "var(--primary-dim)", "var(--secondary-dim)", "var(--tertiary-dim)"
-    ];
-
-    /* Formas orgánicas rotativas */
-    var FORMAS = ["forma-organica-1", "forma-organica-2", "forma-organica-3", "forma-organica-4"];
-
     /* ============================================================
-       Renderizado
+       Renderizado de icono
        ============================================================ */
-    function iconoHtml(enlace, idx) {
+    function iconoHtml(enlace) {
       var icono = enlace.icono;
-      var forma = FORMAS[idx % FORMAS.length];
-      var color = COLORES_ICONO[idx % COLORES_ICONO.length];
 
-      // Icono de imagen (URL)
       if (icono && !icono.startsWith("emoji:")) {
-        return '<div class="lanzador-blob ' + forma + '">' +
-          '<img class="lanzador-blob__img" src="' + icono + '" alt="" loading="lazy">' +
-          '</div>';
+        return '<img class="lz-tile__img" src="' + icono + '" alt="" loading="lazy">';
       }
-
-      // Emoji
       if (icono && icono.startsWith("emoji:")) {
-        return '<div class="lanzador-blob ' + forma + '">' +
-          '<span style="font-size:2.25rem">' + icono.slice(6) + '</span>' +
-          '</div>';
+        return '<span class="lz-tile__emoji">' + icono.slice(6) + '</span>';
       }
 
-      // Material Symbol (buscar por nombre del enlace)
-      var nombreLower = (enlace.nombre || "").toLowerCase();
+      /* Fallback: Material Symbol */
+      var nombreLower  = (enlace.nombre || "").toLowerCase();
       var materialIcon = ICONOS_MATERIAL[nombreLower] || "link";
-
-      return '<div class="lanzador-blob ' + forma + '">' +
-        '<span class="material-symbols-outlined lanzador-blob__icono" style="color:' + color + '">' +
-          materialIcon +
-        '</span>' +
-        '</div>';
+      return '<span class="material-symbols-outlined lz-tile__icono-mat">' + materialIcon + '</span>';
     }
 
+    /* ============================================================
+       Renderizado de grupos
+       ============================================================ */
     function renderizar(config) {
       var contenido = document.getElementById("contenido");
       if (!config.grupos || config.grupos.length === 0) {
-        contenido.innerHTML = '<div class="lanzador-estado">No hay grupos configurados. <a href="/admin-lanzador.html">Ir al admin &rarr;</a></div>';
+        contenido.innerHTML = '<div class="lz-estado">No hay grupos configurados. <a href="/admin-lanzador.html" style="color:var(--ck-accent)">Ir al admin →</a></div>';
         return;
       }
 
       var html = "";
-      var idxGlobal = 0;
       config.grupos.forEach(function(grupo) {
         if (!grupo.enlaces || grupo.enlaces.length === 0) return;
-        html += '<section class="hogar-seccion">';
-        html += '<h2 class="hogar-seccion__titulo">' + grupo.titulo + '</h2>';
-        html += '<div class="lanzador-grid">';
+
+        html += '<div class="lz-seccion">';
+        html += '<div class="lz-seccion__titulo"><span class="lz-seccion__diamante">◆</span>' + grupo.titulo + '</div>';
+        html += '<div class="lz-grid">';
+
         grupo.enlaces.forEach(function(enlace) {
           var target = enlace.nueva_pestana ? ' target="_blank"' : '';
-          html += '<a href="' + enlace.url + '" class="lanzador-app"' + target + '>';
-          html += iconoHtml(enlace, idxGlobal);
-          html += '<div>';
-          html += '<div class="lanzador-nombre">' + enlace.nombre + '</div>';
+          html += '<a href="' + enlace.url + '" class="lz-tile"' + target + '>';
+          html += iconoHtml(enlace);
+          html += '<div class="lz-tile__nombre">' + enlace.nombre + '</div>';
           if (enlace.descripcion) {
-            html += '<div class="lanzador-desc">' + enlace.descripcion + '</div>';
+            html += '<div class="lz-tile__desc">' + enlace.descripcion + '</div>';
           }
-          html += '</div></a>';
-          idxGlobal++;
+          html += '</a>';
         });
-        html += '</div></section>';
+
+        html += '</div></div>';
       });
 
-      html += '<div class="hogar-linea-glow"></div>';
       contenido.innerHTML = html;
     }
 
@@ -260,8 +500,8 @@
       .then(function(config) { renderizar(config); })
       .catch(function() {
         document.getElementById("contenido").innerHTML =
-          '<div class="lanzador-estado">No se pudo conectar con hogar-api.' +
-          '<button onclick="location.reload()">Reintentar</button></div>';
+          '<div class="lz-estado">No se pudo conectar con hogar-api. ' +
+          '<button onclick="location.reload()" style="margin-left:0.5rem;background:none;border:1px solid var(--ck-on-variant);color:var(--ck-on-variant);padding:0.2rem 0.5rem;cursor:pointer;font-family:var(--ck-fuente);font-size:0.55rem;letter-spacing:0.1em">[ reintentar ]</button></div>';
       });
   </script>
 
