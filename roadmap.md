@@ -1,9 +1,9 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada al 100%. Ecosistema Cockpit completo desplegado en producción.
+> Estado actual: Fase 15 completada. Trabajo activo en Fase 16 (silenciado de alertas).
 > Última actualización: 2026-05-12
 > **Próximo paso concreto:**
-> 1. 👤 Seguir usando el sistema y anotar nuevos ajustes que aparezcan en el uso diario
+> 1. 👤 Hacer push de ReDo, MediDo y hogarOS y ejecutar `actualizar.sh` en la VM
 
 ### Leyenda
 
@@ -533,17 +533,17 @@ Sin cambios funcionales — solo capa visual.
 - [x] 🤖 `app.js`: reemplazar ApexCharts por SVG vanilla (`renderizarDonut`, `renderizarBarras`)
 - [x] 🤖 Fix tamaño fuente: `html { font-size: 150% }` en estilos.css (commit ff73ecf)
 - [x] 🤖 Cache-busting CSS: `estilos.css?v=3`
-- [ ] 👤 Ejecutar `actualizar.sh` en la VM para desplegar font-size fix
+- [x] 👤 Ejecutar `actualizar.sh` en la VM para desplegar font-size fix
 
 ### Paso 4 — ReDo (`ReDo/static/index.html`) ✅
 - [x] 🤖 Reescritura completa del frontend al estilo Cockpit (commit `1fb510e`)
 - [x] 🤖 Fix tipografía: `html { font-size: 150% }` (commit `0eae3a2`)
-- [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
+- [x] 👤 Ejecutar `actualizar.sh` y verificar en producción
 
 ### Paso 5 — MediDo (`MediDo/static/index.html`) ✅
 - [x] 🤖 Reescritura completa del frontend al estilo Cockpit (commit `631a3d6`)
 - [x] 🤖 Fix tipografía: `html { font-size: 150% }` (commit `dc9d862`)
-- [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
+- [x] 👤 Ejecutar `actualizar.sh` y verificar en producción
 
 ### Paso 6 — Portal auxiliar (2026-05-12) ✅
 Páginas auxiliares del portal migradas al estilo Cockpit. Última pieza que quedaba con Living Sanctuary.
@@ -555,6 +555,21 @@ Páginas auxiliares del portal migradas al estilo Cockpit. Última pieza que que
 - [x] 🤖 Fix icono Claude en `hogar-api/app/principal.py`: `emoji:🧠` → SVG Homarr CDN (commit `131112e`)
 - [x] 👤 Actualizar icono de Claude en `lanzador.json` de la VM (admin panel o `sed`)
 - [x] 👤 Ejecutar `actualizar.sh` y verificar en producción ✅
+
+---
+
+## Fase 16 — Silenciado de alertas (2026-05-12)
+
+Mejora del Centro de Alertas: silenciado individual por aviso, con supresión de NTFY.
+
+- [x] 🤖 `ReDo/app/bd.py`: migración `silenciada_hasta TEXT` en tabla `alertas`
+- [x] 🤖 `MediDo/app/bd.py`: ídem
+- [x] 🤖 `ReDo/app/rutas/alertas.py`: endpoints `silenciar` y `activar`, listado incluye `silenciada_hasta`
+- [x] 🤖 `MediDo/app/rutas/alertas.py`: ídem + helper `_esta_silenciada()`
+- [x] 🤖 `MediDo/app/alertador.py`: `_crear_alerta()` respeta alertas silenciadas (no crea nuevas ni envía NTFY)
+- [x] 🤖 `portal/alertas.html`: filtro SILENCIADAS, botones ⏸ / ⊘ / ↺, etiqueta visual
+- [ ] 👤 Push ReDo, MediDo y hogarOS + ejecutar `actualizar.sh` en la VM
+- [ ] 👤 Verificar en producción: silenciar JupyterLab y confirmar que desaparece de alertas y no llegan NTFY
 
 ---
 

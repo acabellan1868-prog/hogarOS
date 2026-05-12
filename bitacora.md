@@ -1,5 +1,37 @@
 # Bitácora — hogarOS
 
+## 2026-05-12 — Silenciado de alertas (Centro de Alertas 2.0 parcial)
+
+### Objetivo
+Permitir silenciar alertas individualmente desde el portal, suprimiendo también las notificaciones NTFY durante el período de silencio.
+
+### Cambios en ReDo (`ReDo/app/`)
+- `bd.py`: migración automática que añade columna `silenciada_hasta TEXT` a la tabla `alertas`
+- `rutas/alertas.py`: tres endpoints nuevos:
+  - `POST /api/alertas/{id}/silenciar` — body `{ horas: 24 }` o `{ permanente: true }`
+  - `POST /api/alertas/{id}/activar` — quita el silencio (pone `silenciada_hasta = NULL`)
+  - El listado `GET /api/alertas` devuelve `silenciada_hasta` y excluye silenciadas del contador
+
+### Cambios en MediDo (`MediDo/app/`)
+- `bd.py`: misma migración para `silenciada_hasta`
+- `rutas/alertas.py`: mismos tres endpoints + helper `_esta_silenciada()`
+- `alertador.py`: `_crear_alerta()` ahora comprueba si existe una alerta silenciada del mismo tipo+servicio antes de crear una nueva — si la hay, no crea ni envía NTFY
+
+### Cambios en hogarOS (`portal/alertas.html`)
+- Nuevo filtro `SILENCIADAS` en la toolbar
+- Filtro `TODAS` excluye silenciadas (muestra activas + resueltas)
+- Botones por alerta activa: ⏸ Silenciar 24h, ⊘ Ignorar siempre, ↺ Activar (en silenciadas)
+- Etiqueta visual `SILENCIADA 24H` / `IGNORADA SIEMPRE` en color warn
+- Contador de alertas activas no cuenta las silenciadas
+
+### Comportamiento
+- `silenciada_hasta = NULL` → activa
+- `silenciada_hasta = "9999-12-31"` → ignorada permanentemente
+- `silenciada_hasta = timestamp` → silenciada hasta esa fecha
+- Al expirar el silencio temporal, MediDo crea nueva alerta y envía NTFY en el siguiente ciclo
+
+---
+
 ## 2026-05-12 — Migración al estilo Cockpit de lanzador, admin y alertas
 
 ### `portal/lanzador.html` — Rediseño completo Cockpit (commit `b5ad36e`)

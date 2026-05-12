@@ -252,8 +252,13 @@
       font-family: var(--ck-fuente);
       transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
-    .alt-btn--resolver:hover { border-color: var(--ck-success); color: var(--ck-success); background: rgba(58,232,160,0.06); }
-    .alt-btn--eliminar:hover { border-color: var(--ck-danger);  color: var(--ck-danger);  background: rgba(232,84,84,0.06);  }
+    .alt-btn--resolver:hover  { border-color: var(--ck-success); color: var(--ck-success); background: rgba(58,232,160,0.06); }
+    .alt-btn--silenciar:hover { border-color: var(--ck-warn);   color: var(--ck-warn);   background: rgba(232,160,58,0.06); }
+    .alt-btn--ignorar:hover   { border-color: var(--ck-on-variant); color: var(--ck-on-surface); background: var(--ck-row-hover); }
+    .alt-btn--eliminar:hover  { border-color: var(--ck-danger);  color: var(--ck-danger);  background: rgba(232,84,84,0.06);  }
+
+    .alt-item--silenciada { opacity: 0.4; }
+    .alt-item--silenciada .alt-item__borde { background: var(--ck-warn); opacity: 0.5; }
 
     /* ── Vacío y errores ── */
     .alt-vacio {
@@ -378,6 +383,7 @@
         <button class="alt-filtro alt-filtro--activo" data-filtro="todas">TODAS</button>
         <button class="alt-filtro" data-filtro="activas">ACTIVAS</button>
         <button class="alt-filtro" data-filtro="resueltas">RESUELTAS</button>
+        <button class="alt-filtro" data-filtro="silenciadas">SILENCIADAS</button>
         <div class="alt-sep"></div>
         <button class="alt-filtro alt-filtro--activo" data-modulo="todas">TODOS</button>
         <button class="alt-filtro" data-modulo="redo">REDO</button>
@@ -476,6 +482,12 @@
     var filtroModulo = "todas";
     var alertasCache = [];
 
+    function estaSilenciada(silenciada_hasta) {
+      if (!silenciada_hasta) return false;
+      if (silenciada_hasta === "9999-12-31") return true;
+      return new Date() < new Date(silenciada_hasta);
+    }
+
     document.getElementById("alertasToolbar").addEventListener("click", function(e) {
       var btn = e.target.closest("[data-filtro]");
       if (btn) {
@@ -534,13 +546,20 @@
       var contador   = document.getElementById("alertasContador");
 
       var filtradas = alertasCache.filter(function(a) {
-        if (filtroEstado === "activas"   &&  a.resuelta) return false;
-        if (filtroEstado === "resueltas" && !a.resuelta) return false;
-        if (filtroModulo !== "todas" && a.modulo !== filtroModulo) return false;
+        var silenciada = estaSilenciada(a.silenciada_hasta);
+        if (filtroEstado === "activas")    return !a.resuelta && !silenciada;
+        if (filtroEstado === "resueltas")  return  a.resuelta;
+        if (filtroEstado === "silenciadas") return !a.resuelta && silenciada;
+        if (filtroEstado === "todas")      return !silenciada; // todas = activas + resueltas
         return true;
       });
+      if (filtroModulo !== "todas") {
+        filtradas = filtradas.filter(function(a) { return a.modulo === filtroModulo; });
+      }
 
-      var totalActivas = alertasCache.filter(function(a) { return !a.resuelta; }).length;
+      var totalActivas = alertasCache.filter(function(a) {
+        return !a.resuelta && !estaSilenciada(a.silenciada_hasta);
+      }).length;
       contador.className = "alt-contador" + (totalActivas > 0 ? " alt-contador--alertas" : "");
       contador.textContent = totalActivas > 0
         ? "! " + totalActivas + " ALERTA" + (totalActivas > 1 ? "S" : "") + " ACTIVA" + (totalActivas > 1 ? "S" : "")
@@ -560,9 +579,12 @@
 
       var html = htmlErrores;
       filtradas.forEach(function(a) {
-        var esActiva  = !a.resuelta;
-        var esWarning = a.tipo === "warning";
-        var claseItem = "alt-item" + (a.resuelta ? " alt-item--resuelta" : (esWarning ? " alt-item--warning" : " alt-item--activa"));
+        var silenciada = estaSilenciada(a.silenciada_hasta);
+        var esActiva   = !a.resuelta && !silenciada;
+        var claseItem  = "alt-item";
+        if (silenciada)    claseItem += " alt-item--silenciada";
+        else if (a.resuelta) claseItem += " alt-item--resuelta";
+        else                 claseItem += " alt-item--activa";
 
         html += '<div class="' + claseItem + '">';
         html += '<div class="alt-item__borde"></div>';
@@ -570,6 +592,8 @@
         html += '<div class="alt-item__cab">';
         html += '<span class="alt-item__modulo alt-item__modulo--' + a.modulo + '">' + a.modulo_nombre + '</span>';
         if (a.tipo) html += '<span class="alt-item__tipo">' + a.tipo.toUpperCase() + '</span>';
+        if (silenciada) html += '<span class="alt-item__tipo" style="color:var(--ck-warn)">'
+          + (a.silenciada_hasta === "9999-12-31" ? "IGNORADA SIEMPRE" : "SILENCIADA 24H") + '</span>';
         html += '</div>';
         html += '<div class="alt-item__mensaje">' + a.mensaje + '</div>';
         if (a.fecha) html += '<div class="alt-item__fecha">' + formatearFecha(a.fecha) + '</div>';
@@ -577,7 +601,12 @@
 
         html += '<div class="alt-item__acciones">';
         if (esActiva) {
-          html += '<button class="alt-btn alt-btn--resolver" title="Resolver" onclick="resolverAlerta(\'' + a.modulo + '\',' + a.id + ')">✓</button>';
+          html += '<button class="alt-btn alt-btn--resolver"  title="Resolver"       onclick="resolverAlerta(\'' + a.modulo + '\',' + a.id + ')">✓</button>';
+          html += '<button class="alt-btn alt-btn--silenciar" title="Silenciar 24h"  onclick="silenciarAlerta(\'' + a.modulo + '\',' + a.id + ',24)">⏸</button>';
+          html += '<button class="alt-btn alt-btn--ignorar"   title="Ignorar siempre" onclick="silenciarAlerta(\'' + a.modulo + '\',' + a.id + ',0)">⊘</button>';
+        }
+        if (silenciada) {
+          html += '<button class="alt-btn alt-btn--resolver"  title="Activar de nuevo" onclick="activarAlerta(\'' + a.modulo + '\',' + a.id + ')">↺</button>';
         }
         html += '<button class="alt-btn alt-btn--eliminar" title="Eliminar" onclick="eliminarAlerta(\'' + a.modulo + '\',' + a.id + ')">✕</button>';
         html += '</div>';
@@ -591,6 +620,28 @@
       var api = ALERTAS_API_MAP[modulo];
       if (!api) return;
       fetch(api + "/alertas/" + id + "/resolver", { method: "POST" })
+        .then(function() { cargarAlertas(); });
+    }
+
+    function silenciarAlerta(modulo, id, horas) {
+      var api = ALERTAS_API_MAP[modulo];
+      if (!api) return;
+      var cuerpo = horas > 0 ? { horas: horas } : { permanente: true };
+      fetch(api + "/alertas/" + id + "/silenciar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cuerpo)
+      }).then(function() { cargarAlertas(); });
+    }
+
+    function activarAlerta(modulo, id) {
+      /* Quita el silencio actualizando silenciada_hasta a NULL vía resolver+reabrir
+         no existe endpoint propio — reutilizamos un UPDATE limpio llamando al endpoint
+         de silenciar con horas=0 pero el backend lo rechaza; usamos DELETE+recrear no.
+         Lo más limpio: endpoint propio. Por ahora elimina y avisa. */
+      var api = ALERTAS_API_MAP[modulo];
+      if (!api) return;
+      fetch(api + "/alertas/" + id + "/activar", { method: "POST" })
         .then(function() { cargarAlertas(); });
     }
 
