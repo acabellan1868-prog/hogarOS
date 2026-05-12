@@ -1,11 +1,9 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada + migración Cockpit del portal auxiliar completada.
+> Estado actual: Fase 15 completada al 100%. Ecosistema Cockpit completo desplegado en producción.
 > Última actualización: 2026-05-12
 > **Próximo paso concreto:**
-> 1. 👤 Actualizar icono de Claude en `lanzador.json` de la VM (admin panel o `sed`)
-> 2. 👤 Ejecutar `actualizar.sh` para desplegar todos los cambios de esta sesión
-> 3. 👤 Seguir usando el sistema y anotar nuevos ajustes que aparezcan en el uso diario
+> 1. 👤 Seguir usando el sistema y anotar nuevos ajustes que aparezcan en el uso diario
 
 ### Leyenda
 
@@ -555,8 +553,8 @@ Páginas auxiliares del portal migradas al estilo Cockpit. Última pieza que que
 - [x] 🤖 `portal/alertas.html`: filtros toggle, items con barra lateral de color, botones `✓`/`✕` (commit `b7e7bec`)
 - [x] 🤖 Fix `ck-marca-box` como `<a href="/">` en los tres ficheros + `text-decoration:none` en `hogar.css` (commit `f62c81f`)
 - [x] 🤖 Fix icono Claude en `hogar-api/app/principal.py`: `emoji:🧠` → SVG Homarr CDN (commit `131112e`)
-- [ ] 👤 Actualizar icono de Claude en `lanzador.json` de la VM (admin panel o `sed`)
-- [ ] 👤 Ejecutar `actualizar.sh` y verificar en producción
+- [x] 👤 Actualizar icono de Claude en `lanzador.json` de la VM (admin panel o `sed`)
+- [x] 👤 Ejecutar `actualizar.sh` y verificar en producción ✅
 
 ---
 

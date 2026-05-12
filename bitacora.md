@@ -40,6 +40,10 @@
 - Permite volver al portal haciendo clic en el cuadradito con el punto del header.
 - `hogar.css`: añadido `text-decoration: none` a `.ck-marca-box` para evitar subrayado.
 
+### Despliegue en producción
+
+- `./actualizar.sh` ejecutado en VM 101. Todos los cambios de la sesión en producción. ✅
+
 ### Fix: icono de Claude en el lanzador (commit `131112e`)
 
 - `hogar-api/app/principal.py`: sustituido `emoji:🧠` por la URL del SVG oficial de Claude en el CDN de Homarr (`cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/claude.svg`).
