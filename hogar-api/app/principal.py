@@ -37,7 +37,7 @@ CONFIG_DEFECTO = {
                 {"nombre": "ChatGPT",   "descripcion": "", "url": "https://chatgpt.com/",                              "icono": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/chatgpt.svg",        "nueva_pestana": True},
                 {"nombre": "Grok",      "descripcion": "", "url": "https://grok.com/",                                 "icono": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grok.svg",           "nueva_pestana": True},
                 {"nombre": "Gemini",    "descripcion": "", "url": "https://gemini.google.com/",                        "icono": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/google-gemini.svg",   "nueva_pestana": True},
-                {"nombre": "Claude",    "descripcion": "", "url": "https://claude.ai",                                 "icono": "emoji:\U0001f9e0",                                                               "nueva_pestana": True},
+                {"nombre": "Claude",    "descripcion": "", "url": "https://claude.ai",                                 "icono": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/claude.svg",        "nueva_pestana": True},
                 {"nombre": "TailScale", "descripcion": "", "url": "https://login.tailscale.com/admin/machines",        "icono": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/tailscale.svg",       "nueva_pestana": True},
             ]
         },
