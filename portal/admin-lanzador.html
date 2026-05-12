@@ -1,340 +1,513 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema-cockpit="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Lanzador — HogarOS</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="apple-touch-icon" href="/static/favicon.svg">
-  <link rel="manifest" href="/static/site.webmanifest">
-  <meta name="theme-color" content="#1a6a60">
+  <meta name="theme-color" content="#00e5c4">
   <link rel="stylesheet" href="/static/hogar.css">
   <style>
-    .admin-toolbar {
+    /* ── Reset Cockpit ── */
+    html { font-size: 150%; }
+    @media (max-width: 1300px) { html { font-size: 125%; } }
+    @media (max-width: 900px)  { html { font-size: 100%; } }
+
+    html, body {
+      margin: 0;
+      background: var(--ck-bg);
+      color: var(--ck-on-surface);
+      font-family: var(--ck-fuente);
+    }
+
+    /* Scanlines */
+    #scanlines {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+      );
+    }
+    [data-tema-cockpit="light"] #scanlines {
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px
+      );
+    }
+
+    /* ── Wrapper ── */
+    #ck-wrap { display: flex; flex-direction: column; min-height: 100vh; position: relative; }
+
+    /* ── Header 48px ── */
+    #ck-header {
+      height: 48px;
+      background: var(--ck-bg2);
+      border-bottom: 1px solid var(--ck-line);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      flex-shrink: 0; z-index: 10; position: sticky; top: 0;
+    }
+
+    .ck-hdr-izq { display: flex; align-items: center; gap: 0.5rem; }
+    .ck-hdr-der { display: flex; align-items: center; gap: 0.75rem; }
+
+    .ck-marca-box {
+      width: 24px; height: 24px; border-radius: 3px;
+      border: 1px solid var(--ck-accent);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(0,229,196,0.3);
+    }
+    [data-tema-cockpit="light"] .ck-marca-box { box-shadow: none; }
+    .ck-marca-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ck-accent); box-shadow: 0 0 6px var(--ck-accent);
+    }
+    [data-tema-cockpit="light"] .ck-marca-dot { box-shadow: none; }
+
+    .ck-marca-txt { font-size: 0.75rem; font-weight: 700; color: var(--ck-accent); letter-spacing: 0.15em; }
+    .ck-marca-txt span { color: var(--ck-on-variant); }
+    .ck-marca-sub { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.12em; }
+    .ck-sep { width: 1px; height: 20px; background: var(--ck-line); margin: 0 0.5rem; }
+
+    .ck-nav { display: flex; align-items: center; gap: 0; }
+    .ck-nav a {
+      font-family: var(--ck-fuente);
+      font-size: 0.52rem; letter-spacing: 0.12em;
+      color: var(--ck-on-variant); cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-bottom: 1px solid transparent;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .ck-nav a:hover { color: var(--ck-on-surface); }
+    .ck-nav a.activo { color: var(--ck-accent); border-bottom-color: var(--ck-accent); }
+
+    .ck-reloj { text-align: right; line-height: 1; }
+    .ck-reloj__hora { font-size: 1rem; font-weight: 700; color: var(--ck-accent); letter-spacing: 0.08em; }
+    .ck-reloj__fecha { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.12em; margin-top: 2px; }
+
+    .ck-tema-btn {
+      width: 28px; height: 28px; border: none; cursor: pointer;
+      background: none; display: flex; align-items: center; justify-content: center;
+      border-radius: 3px; color: var(--ck-on-variant); transition: background 0.2s;
+    }
+    .ck-tema-btn:hover { background: rgba(128,128,128,0.15); }
+
+    .ck-menu-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--ck-on-variant); font-size: 1.2rem;
+      display: none; align-items: center; padding: 0.25rem;
+    }
+
+    @media (max-width: 767px) {
+      .ck-nav, .ck-sep, .ck-marca-sub { display: none; }
+      .ck-menu-btn { display: flex; }
+      .ck-reloj__hora { font-size: 0.85rem; }
+      .ck-reloj__fecha { display: none; }
+    }
+
+    /* ── Main ── */
+    #ck-main {
+      flex: 1;
+      padding: 1.25rem 1.5rem 3rem;
+      position: relative; z-index: 1;
+      max-width: 860px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) { #ck-main { padding: 1rem 1rem 3rem; } }
+
+    /* ── Toolbar ── */
+    .adm-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: var(--gap-xl);
+      margin-bottom: 1.25rem;
       flex-wrap: wrap;
-      gap: var(--gap-sm);
+      gap: 0.5rem;
     }
 
-    .admin-grupo {
-      background: var(--surface-container-low);
-      border: 1px solid var(--outline-variant);
-      border-radius: var(--radio-md);
-      margin-bottom: var(--gap-lg);
-      overflow: hidden;
+    .adm-toolbar__titulo {
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: var(--ck-on-variant);
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .adm-toolbar__titulo span { color: var(--ck-accent-dim); }
+
+    .adm-toolbar__acciones { display: flex; gap: 0.4rem; }
+
+    /* ── Botones Cockpit ── */
+    .ck-btn {
+      font-family: var(--ck-fuente);
+      font-size: 0.52rem;
+      letter-spacing: 0.12em;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--ck-line);
+      background: transparent;
+      color: var(--ck-on-variant);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .ck-btn:hover { background: var(--ck-row-hover); color: var(--ck-on-surface); }
+
+    .ck-btn--accent {
+      border-color: var(--ck-accent);
+      color: var(--ck-accent);
+    }
+    .ck-btn--accent:hover { background: rgba(0,229,196,0.08); }
+    [data-tema-cockpit="light"] .ck-btn--accent:hover { background: rgba(26,106,96,0.08); }
+
+    .ck-btn--danger {
+      border-color: var(--ck-danger);
+      color: var(--ck-danger);
+    }
+    .ck-btn--danger:hover { background: rgba(232,84,84,0.08); }
+
+    /* ── Grupos ── */
+    .adm-grupo {
+      border: 1px solid var(--ck-line);
+      margin-bottom: 0.75rem;
     }
 
-    .admin-grupo__cabecera {
+    .adm-grupo__cab {
       display: flex;
       align-items: center;
-      gap: var(--gap-md);
-      padding: var(--gap-md) var(--gap-lg);
-      background: var(--surface-container);
-      border-bottom: 1px solid var(--outline-variant);
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--ck-bg2);
+      border-bottom: 1px solid var(--ck-line);
     }
 
-    .admin-grupo__titulo {
-      font-family: var(--fuente-titular);
-      font-weight: 700;
-      font-size: 1rem;
+    .adm-grupo__titulo {
       flex: 1;
+      font-size: 0.52rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ck-on-surface);
     }
+    .adm-grupo__titulo span { color: var(--ck-accent-dim); margin-right: 0.35rem; }
 
-    .admin-enlace {
+    /* ── Filas de enlace ── */
+    .adm-enlace {
       display: grid;
-      grid-template-columns: 40px 1fr auto;
+      grid-template-columns: 32px 1fr auto;
       align-items: center;
-      gap: var(--gap-md);
-      padding: var(--gap-sm) var(--gap-lg);
-      border-bottom: 1px solid var(--outline-variant);
+      gap: 0.6rem;
+      padding: 0.4rem 0.75rem;
+      border-bottom: 1px solid var(--ck-line);
     }
+    .adm-enlace:last-of-type { border-bottom: none; }
 
-    .admin-enlace:last-child {
-      border-bottom: none;
-    }
-
-    .admin-enlace__icono {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radio-sm);
-      background: var(--surface-container-lowest);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
+    .adm-enlace__icono {
+      width: 32px; height: 32px;
+      background: var(--ck-bg3);
+      border: 1px solid var(--ck-line);
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
+    .adm-enlace__icono img { width: 18px; height: 18px; object-fit: contain; opacity: 0.8; }
+    .adm-enlace__icono .mat { font-size: 1rem; color: var(--ck-on-variant); }
 
-    .admin-enlace__icono img {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
+    .adm-enlace__info { min-width: 0; }
+    .adm-enlace__nombre {
+      font-size: 0.55rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .adm-enlace__url {
+      font-size: 0.45rem;
+      color: var(--ck-on-variant);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .admin-enlace__info { min-width: 0; }
+    .adm-enlace__acciones { display: flex; gap: 0.25rem; flex-shrink: 0; }
 
-    .admin-enlace__nombre {
-      font-weight: 600;
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .admin-enlace__url {
+    .adm-btn-icono {
+      width: 26px; height: 26px;
+      border: 1px solid var(--ck-line);
+      background: transparent;
+      cursor: pointer;
       font-size: 0.75rem;
-      color: var(--on-surface-variant);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ck-on-variant);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
+    .adm-btn-icono:hover { background: var(--ck-row-hover); color: var(--ck-on-surface); }
+    .adm-btn-icono--danger:hover { border-color: var(--ck-danger); color: var(--ck-danger); background: rgba(232,84,84,0.06); }
 
-    .admin-enlace__acciones {
-      display: flex;
-      gap: var(--gap-xs);
-      flex-shrink: 0;
-    }
-
-    .admin-add-enlace {
+    /* Botón añadir enlace dentro del grupo */
+    .adm-add-enlace {
       width: 100%;
-      padding: var(--gap-sm) var(--gap-lg);
+      padding: 0.35rem 0.75rem;
       background: none;
       border: none;
-      color: var(--primary);
-      font-family: var(--fuente-cuerpo);
-      font-size: 0.85rem;
-      font-weight: 600;
+      border-top: 1px solid var(--ck-line);
+      color: var(--ck-accent-dim);
+      font-family: var(--ck-fuente);
+      font-size: 0.48rem;
+      letter-spacing: 0.12em;
       cursor: pointer;
       text-align: left;
-      transition: background var(--transicion);
+      transition: background 0.2s, color 0.2s;
     }
+    .adm-add-enlace:hover { background: var(--ck-row-hover); color: var(--ck-accent); }
 
-    .admin-add-enlace:hover {
-      background: var(--surface-container);
-    }
-
-    /* Botones de icono */
-    .btn-icono {
-      width: 30px;
-      height: 30px;
-      border: 1px solid var(--outline-variant);
-      border-radius: var(--radio-sm);
-      background: none;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background var(--transicion), color var(--transicion);
-      color: var(--on-surface);
-    }
-
-    .btn-icono:hover { background: var(--surface-container); }
-    .btn-icono--peligro:hover { background: var(--peligro-fondo); color: var(--peligro); border-color: var(--peligro); }
-
-    /* Modal */
+    /* ── Modal ── */
     .modal-fondo {
       display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
       z-index: 200;
       align-items: center;
       justify-content: center;
-      padding: var(--gap-lg);
+      padding: 1rem;
     }
-
     .modal-fondo.visible { display: flex; }
 
     .modal {
-      background: var(--surface-container-low);
-      border-radius: var(--radio-lg);
-      box-shadow: var(--sombra-lg);
+      background: var(--ck-bg2);
+      border: 1px solid var(--ck-line);
       width: 100%;
-      max-width: 480px;
-      padding: var(--gap-xl);
+      max-width: 440px;
+      padding: 1.25rem;
     }
 
     .modal__titulo {
-      font-family: var(--fuente-titular);
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: var(--gap-lg);
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ck-accent);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.35rem;
     }
+    .modal__titulo::before { content: '◆'; color: var(--ck-accent-dim); }
 
-    .campo {
-      margin-bottom: var(--gap-md);
-    }
+    /* Campos del modal */
+    .campo { margin-bottom: 0.75rem; }
 
     .campo label {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--on-surface-variant);
-      margin-bottom: var(--gap-xs);
+      font-size: 0.45rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ck-on-variant);
+      margin-bottom: 0.25rem;
     }
 
     .campo input[type="text"],
     .campo input[type="url"] {
       width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--outline-variant);
-      border-radius: var(--radio-sm);
-      background: var(--surface-container-lowest);
-      color: var(--on-surface);
-      font-family: var(--fuente-cuerpo);
-      font-size: 0.9rem;
-      transition: border-color var(--transicion);
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--ck-input-border);
+      background: var(--ck-input-bg);
+      color: var(--ck-on-surface);
+      font-family: var(--ck-fuente);
+      font-size: 0.55rem;
+      letter-spacing: 0.04em;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
     }
-
     .campo input:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--ck-accent);
     }
 
     .campo__ayuda {
-      font-size: 0.72rem;
-      color: var(--on-surface-variant);
-      margin-top: var(--gap-xs);
+      font-size: 0.42rem;
+      color: var(--ck-on-variant);
+      margin-top: 0.25rem;
+      line-height: 1.6;
+    }
+    .campo__ayuda code {
+      background: var(--ck-bg3);
+      padding: 0.1rem 0.3rem;
+      border: 1px solid var(--ck-line);
+      font-family: var(--ck-fuente);
     }
 
     .campo--check {
       display: flex;
       align-items: center;
-      gap: var(--gap-sm);
+      gap: 0.5rem;
     }
-
     .campo--check label {
       margin: 0;
-      font-size: 0.9rem;
-      color: var(--on-surface);
-      font-weight: normal;
+      font-size: 0.5rem;
+      text-transform: none;
+      letter-spacing: 0.05em;
+      color: var(--ck-on-surface);
+    }
+    .campo--check input[type="checkbox"] {
+      accent-color: var(--ck-accent);
+      width: 14px; height: 14px;
     }
 
+    /* Preview icono */
     .icono-preview {
       display: flex;
       align-items: center;
-      gap: var(--gap-sm);
-      margin-top: var(--gap-xs);
+      gap: 0.5rem;
+      margin-top: 0.35rem;
     }
-
     .icono-preview__caja {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radio-sm);
-      background: var(--surface-container-lowest);
-      border: 1px solid var(--outline-variant);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
+      width: 32px; height: 32px;
+      background: var(--ck-bg3);
+      border: 1px solid var(--ck-line);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
       flex-shrink: 0;
     }
-
-    .icono-preview__caja img {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
-    }
+    .icono-preview__caja img { width: 18px; height: 18px; object-fit: contain; }
+    .icono-preview__label { font-size: 0.42rem; color: var(--ck-on-variant); letter-spacing: 0.1em; }
 
     .modal__acciones {
       display: flex;
       justify-content: flex-end;
-      gap: var(--gap-sm);
-      margin-top: var(--gap-lg);
+      gap: 0.4rem;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--ck-line);
     }
 
+    /* ── Aviso guardado ── */
     .aviso-guardado {
       display: none;
       position: fixed;
-      bottom: var(--gap-lg);
-      right: var(--gap-lg);
-      background: var(--exito);
-      color: #fff;
-      padding: var(--gap-sm) var(--gap-md);
-      border-radius: var(--radio-full);
-      font-size: 0.9rem;
-      font-weight: 600;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--ck-bg2);
+      border: 1px solid var(--ck-success);
+      color: var(--ck-success);
+      padding: 0.35rem 0.75rem;
+      font-family: var(--ck-fuente);
+      font-size: 0.52rem;
+      letter-spacing: 0.12em;
       z-index: 300;
+    }
+
+    /* ── Footer 28px ── */
+    #ck-footer {
+      height: 28px;
+      background: var(--ck-bg2);
+      border-top: 1px solid var(--ck-line);
+      display: flex; align-items: center;
+      justify-content: flex-end;
+      padding: 0 1rem;
+      flex-shrink: 0; z-index: 1;
+    }
+    .ck-footer-ver { font-size: 0.45rem; color: var(--ck-on-variant); letter-spacing: 0.1em; }
+
+    /* ── Drawer móvil ── */
+    #ck-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 200; display: none;
+    }
+    #ck-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 220px;
+      background: var(--ck-bg2); border-left: 1px solid var(--ck-line);
+      z-index: 201;
+      transform: translateX(100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column;
+      padding: 1rem 0.75rem; gap: 0.1rem;
+    }
+    #ck-drawer.abierto { transform: translateX(0); }
+    .ck-drawer-item {
+      font-family: var(--ck-fuente);
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      color: var(--ck-on-variant);
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--ck-line);
+      cursor: pointer; text-decoration: none; display: block;
+    }
+    .ck-drawer-item.activo { color: var(--ck-accent); }
+    .ck-drawer-cerrar {
+      align-self: flex-end; background: none; border: none; cursor: pointer;
+      color: var(--ck-on-variant); font-size: 1.1rem; margin-bottom: 0.5rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- ======== EFECTO LUMINA ======== -->
-  <div class="hogar-lumina"></div>
+  <div id="scanlines" aria-hidden="true"></div>
 
-  <!-- ======== HEADER FLOTANTE ======== -->
-  <header class="hogar-header">
-    <div class="hogar-header__barra">
-      <a href="/" class="hogar-header__marca">
-        <span class="material-symbols-outlined filled hogar-header__icono-marca">bubble_chart</span>
-        <div>
-          <div class="hogar-header__titulo">HogarOS</div>
-          <div class="hogar-header__subtitulo">El refugio del silencio</div>
-        </div>
-      </a>
-      <button class="hogar-header__menu-btn" id="btnMenu">
-        <span class="material-symbols-outlined">menu</span>
+  <!-- Drawer móvil -->
+  <div id="ck-overlay"></div>
+  <nav id="ck-drawer">
+    <button class="ck-drawer-cerrar" id="ck-drawer-cerrar">✕</button>
+    <a href="/"               class="ck-drawer-item">INICIO</a>
+    <a href="/red/"           class="ck-drawer-item">RED</a>
+    <a href="/finanzas/"      class="ck-drawer-item">FINANZAS</a>
+    <a href="/salud/"         class="ck-drawer-item">SALUD</a>
+    <a href="http://192.168.31.132:8123/lovelace/0" class="ck-drawer-item" target="_blank">DOMÓTICA</a>
+    <a href="/lanzador.html"        class="ck-drawer-item">LANZADOR</a>
+    <a href="/admin-lanzador.html"  class="ck-drawer-item activo">ADMIN</a>
+    <a href="/alertas.html"         class="ck-drawer-item">ALERTAS</a>
+    <div style="margin-top:auto;padding-top:0.75rem;border-top:1px solid var(--ck-line)">
+      <button id="ck-drawer-tema" class="ck-drawer-item" style="border:none;background:none;width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:0.5rem;border-bottom:none">
+        <span id="ck-drawer-tema-ico"></span> Cambiar tema
       </button>
     </div>
-  </header>
-
-  <!-- ======== DRAWER DE NAVEGACION ======== -->
-  <div class="hogar-drawer-overlay oculto" id="drawerOverlay"></div>
-  <nav class="hogar-drawer oculto" id="drawerNav">
-    <button class="hogar-drawer__cerrar" id="btnCerrarDrawer">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-    <span class="hogar-drawer__titulo">Navegacion</span>
-    <a href="/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">roofing</span>
-      <span>Inicio</span>
-    </a>
-    <a href="/red/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">lan</span>
-      <span>Red</span>
-    </a>
-    <a href="/finanzas/" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">payments</span>
-      <span>Finanzas</span>
-    </a>
-    <a href="http://192.168.31.132:8123/lovelace/0" class="hogar-drawer__enlace" target="_blank">
-      <span class="material-symbols-outlined">home_iot_device</span>
-      <span>Domotica</span>
-    </a>
-    <a href="/lanzador.html" class="hogar-drawer__enlace">
-      <span class="material-symbols-outlined">apps</span>
-      <span>Lanzador</span>
-    </a>
-    <a href="/admin-lanzador.html" class="hogar-drawer__enlace hogar-drawer__enlace--activo">
-      <span class="material-symbols-outlined">settings</span>
-      <span>Admin Lanzador</span>
-    </a>
-    <div class="hogar-drawer__separador"></div>
-    <button class="hogar-drawer__enlace" id="btnTema">
-      <span class="material-symbols-outlined" id="iconoTema">dark_mode</span>
-      <span>Cambiar tema</span>
-    </button>
   </nav>
 
-  <!-- ======== CONTENIDO ======== -->
-  <main class="hogar-contenedor">
+  <div id="ck-wrap">
 
-    <div class="admin-toolbar">
-      <h1 style="font-family:var(--fuente-titular);font-size:1.3rem;font-weight:700;">Gestionar Lanzador</h1>
-      <div style="display:flex;gap:var(--gap-sm)">
-        <button class="hogar-boton hogar-boton--secundario" id="btnAddGrupo">+ Grupo</button>
-        <button class="hogar-boton hogar-boton--primario" id="btnGuardar">Guardar cambios</button>
+    <!-- ── HEADER ── -->
+    <header id="ck-header">
+      <div class="ck-hdr-izq">
+        <div class="ck-marca-box"><div class="ck-marca-dot"></div></div>
+        <div>
+          <div class="ck-marca-txt">HOGAR<span>OS</span></div>
+          <div class="ck-marca-sub">ADMIN · LANZADOR</div>
+        </div>
+        <div class="ck-sep"></div>
+        <nav class="ck-nav">
+          <a href="/">INICIO</a>
+          <a href="/red/">RED</a>
+          <a href="/finanzas/">FINANZAS</a>
+          <a href="/salud/">SALUD</a>
+          <a href="http://192.168.31.132:8123/lovelace/0" target="_blank">DOMÓTICA</a>
+          <a href="/lanzador.html">LANZADOR</a>
+          <a href="/admin-lanzador.html" class="activo">ADMIN</a>
+          <a href="/alertas.html">ALERTAS</a>
+        </nav>
       </div>
-    </div>
+      <div class="ck-hdr-der">
+        <button id="ck-tema-btn" class="ck-tema-btn" title="Cambiar tema"></button>
+        <div class="ck-reloj">
+          <div class="ck-reloj__hora" id="ck-hora">--:--:--</div>
+          <div class="ck-reloj__fecha" id="ck-fecha"></div>
+        </div>
+        <button id="ck-menu-btn" class="ck-menu-btn">☰</button>
+      </div>
+    </header>
 
-    <div id="listaGrupos"></div>
+    <!-- ── CONTENIDO ── -->
+    <main id="ck-main">
 
-  </main>
+      <div class="adm-toolbar">
+        <div class="adm-toolbar__titulo">
+          <span>◆</span> Gestionar lanzador
+        </div>
+        <div class="adm-toolbar__acciones">
+          <button class="ck-btn" id="btnAddGrupo">[ + GRUPO ]</button>
+          <button class="ck-btn ck-btn--accent" id="btnGuardar">[ GUARDAR ]</button>
+        </div>
+      </div>
+
+      <div id="listaGrupos"></div>
+
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer id="ck-footer">
+      <div class="ck-footer-ver">ADMIN · LANZADOR · COCKPIT EDITION</div>
+    </footer>
+
+  </div><!-- #ck-wrap -->
 
   <!-- Modal enlace -->
   <div class="modal-fondo" id="modalEnlace">
@@ -350,29 +523,29 @@
         <input type="url" id="campoUrl" placeholder="http://192.168.31.103:8006/">
       </div>
       <div class="campo">
-        <label>Descripcion</label>
+        <label>Descripción</label>
         <input type="text" id="campoDesc" placeholder="MV Debian 12">
       </div>
       <div class="campo">
         <label>Icono</label>
         <input type="text" id="campoIcono" placeholder="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/proxmox.svg">
         <div class="campo__ayuda">
-          URL de imagen · <code>emoji:&#127968;</code> para emoji<br>
-          Homarr: <code>https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/planka.svg</code>
+          URL de imagen · <code>emoji:🏠</code> para emoji<br>
+          Homarr: <code>…/dashboard-icons/svg/planka.svg</code>
         </div>
         <div class="icono-preview">
           <div class="icono-preview__caja" id="iconoPreview"></div>
-          <span style="font-size:0.75rem;color:var(--on-surface-variant)">Vista previa</span>
+          <span class="icono-preview__label">VISTA PREVIA</span>
         </div>
       </div>
       <div class="campo campo--check">
         <input type="checkbox" id="campoNuevaPestana" checked>
-        <label for="campoNuevaPestana">Abrir en nueva pestana</label>
+        <label for="campoNuevaPestana">Abrir en nueva pestaña</label>
       </div>
 
       <div class="modal__acciones">
-        <button class="hogar-boton hogar-boton--secundario" id="btnCancelarEnlace">Cancelar</button>
-        <button class="hogar-boton hogar-boton--primario" id="btnConfirmarEnlace">Guardar enlace</button>
+        <button class="ck-btn" id="btnCancelarEnlace">[ CANCELAR ]</button>
+        <button class="ck-btn ck-btn--accent" id="btnConfirmarEnlace">[ GUARDAR ]</button>
       </div>
     </div>
   </div>
@@ -382,17 +555,17 @@
     <div class="modal">
       <div class="modal__titulo" id="modalGrupoTitulo">Nuevo grupo</div>
       <div class="campo">
-        <label>Titulo del grupo *</label>
+        <label>Título del grupo *</label>
         <input type="text" id="campoGrupoTitulo" placeholder="Servicios Externos">
       </div>
       <div class="modal__acciones">
-        <button class="hogar-boton hogar-boton--secundario" id="btnCancelarGrupo">Cancelar</button>
-        <button class="hogar-boton hogar-boton--primario" id="btnConfirmarGrupo">Guardar grupo</button>
+        <button class="ck-btn" id="btnCancelarGrupo">[ CANCELAR ]</button>
+        <button class="ck-btn ck-btn--accent" id="btnConfirmarGrupo">[ GUARDAR ]</button>
       </div>
     </div>
   </div>
 
-  <div class="aviso-guardado" id="avisoGuardado">&#10003; Cambios guardados</div>
+  <div class="aviso-guardado" id="avisoGuardado">✓ CAMBIOS GUARDADOS</div>
 
   <script>
     /* ============================================================
@@ -403,47 +576,70 @@
     var modalGrupoCtx  = null;
 
     /* ============================================================
-       Drawer de navegacion
-       ============================================================ */
-    var drawer = document.getElementById("drawerNav");
-    var overlay = document.getElementById("drawerOverlay");
-
-    function toggleDrawer() {
-      drawer.classList.toggle("oculto");
-      overlay.classList.toggle("oculto");
-    }
-
-    document.getElementById("btnMenu").addEventListener("click", toggleDrawer);
-    document.getElementById("drawerOverlay").addEventListener("click", toggleDrawer);
-    document.getElementById("btnCerrarDrawer").addEventListener("click", toggleDrawer);
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && !drawer.classList.contains("oculto")) toggleDrawer();
-    });
-
-    /* ============================================================
        Tema
        ============================================================ */
-    (function initTema() {
-      if (localStorage.getItem("hogar-tema") === "oscuro") {
-        document.documentElement.setAttribute("data-tema", "oscuro");
-      }
-      actualizarIconoTema();
+    (function() {
+      var t = localStorage.getItem("hogar-cockpit-tema") || "dark";
+      document.documentElement.setAttribute("data-tema-cockpit", t);
+      setIconoTema(t);
     })();
 
-    document.getElementById("btnTema").addEventListener("click", function() {
-      var osc = document.documentElement.getAttribute("data-tema") === "oscuro";
-      if (osc) { document.documentElement.removeAttribute("data-tema"); localStorage.setItem("hogar-tema","claro"); }
-      else      { document.documentElement.setAttribute("data-tema","oscuro"); localStorage.setItem("hogar-tema","oscuro"); }
-      actualizarIconoTema();
-    });
-
-    function actualizarIconoTema() {
-      var osc = document.documentElement.getAttribute("data-tema") === "oscuro";
-      document.getElementById("iconoTema").textContent = osc ? "light_mode" : "dark_mode";
+    function toggleTema() {
+      var actual = document.documentElement.getAttribute("data-tema-cockpit");
+      var nuevo  = actual === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-tema-cockpit", nuevo);
+      localStorage.setItem("hogar-cockpit-tema", nuevo);
+      setIconoTema(nuevo);
     }
 
+    function svgSol() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+    }
+    function svgLuna() {
+      return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    function setIconoTema(tema) {
+      var btn = document.getElementById("ck-tema-btn");
+      if (btn) btn.innerHTML = tema === "dark" ? svgSol() : svgLuna();
+      var ico = document.getElementById("ck-drawer-tema-ico");
+      if (ico) ico.innerHTML = tema === "dark" ? svgSol() : svgLuna();
+    }
+
+    document.getElementById("ck-tema-btn").addEventListener("click", toggleTema);
+    document.getElementById("ck-drawer-tema").addEventListener("click", toggleTema);
+
     /* ============================================================
-       Renderizado
+       Reloj
+       ============================================================ */
+    function tickReloj() {
+      var now  = new Date();
+      var hora = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      var fecha = now.toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+      document.getElementById("ck-hora").textContent  = hora;
+      document.getElementById("ck-fecha").textContent = fecha;
+    }
+    tickReloj();
+    setInterval(tickReloj, 1000);
+
+    /* ============================================================
+       Drawer móvil
+       ============================================================ */
+    var _overlay = document.getElementById("ck-overlay");
+    var _drawer  = document.getElementById("ck-drawer");
+
+    function abrirDrawer()  { _drawer.classList.add("abierto");    _overlay.style.display = "block"; }
+    function cerrarDrawer() { _drawer.classList.remove("abierto"); _overlay.style.display = "none"; }
+
+    document.getElementById("ck-menu-btn").addEventListener("click", abrirDrawer);
+    document.getElementById("ck-drawer-cerrar").addEventListener("click", cerrarDrawer);
+    _overlay.addEventListener("click", cerrarDrawer);
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") { cerrarDrawer(); cerrarModalEnlace(); cerrarModalGrupo(); }
+    });
+
+    /* ============================================================
+       Helpers de icono
        ============================================================ */
     function iconoPreviewHtml(icono, caja) {
       if (!icono) { caja.textContent = "?"; return; }
@@ -451,47 +647,51 @@
       caja.innerHTML = '<img src="' + icono + '" alt="">';
     }
 
+    function iconoFilaHtml(icono) {
+      if (!icono) return '<span class="mat material-symbols-outlined">link</span>';
+      if (icono.startsWith("emoji:")) return icono.slice(6);
+      return '<img src="' + icono + '" alt="" loading="lazy">';
+    }
+
+    /* ============================================================
+       Renderizado de la lista
+       ============================================================ */
     function renderizarLista() {
       var lista = document.getElementById("listaGrupos");
       if (config.grupos.length === 0) {
-        lista.innerHTML = '<p style="color:var(--on-surface-variant);text-align:center;padding:var(--gap-xl)">No hay grupos. Pulsa "+ Grupo" para crear uno.</p>';
+        lista.innerHTML = '<div style="font-size:0.55rem;color:var(--ck-on-variant);padding:1.5rem 0;letter-spacing:0.1em">Sin grupos. Pulsa [ + GRUPO ] para crear uno.</div>';
         return;
       }
 
       var html = "";
       config.grupos.forEach(function(grupo, gi) {
-        html += '<div class="admin-grupo" data-gi="' + gi + '">';
-        html += '<div class="admin-grupo__cabecera">';
-        html += '<span class="admin-grupo__titulo">' + grupo.titulo + '</span>';
-        html += '<button class="btn-icono" title="Renombrar" onclick="abrirModalGrupo(' + gi + ')"><span class="material-symbols-outlined" style="font-size:1rem">edit</span></button>';
-        html += '<button class="btn-icono btn-icono--peligro" title="Eliminar grupo" onclick="eliminarGrupo(' + gi + ')"><span class="material-symbols-outlined" style="font-size:1rem">delete</span></button>';
+        html += '<div class="adm-grupo">';
+
+        /* Cabecera del grupo */
+        html += '<div class="adm-grupo__cab">';
+        html += '<div class="adm-grupo__titulo"><span>◆</span>' + grupo.titulo + '</div>';
+        html += '<button class="adm-btn-icono" title="Renombrar" onclick="abrirModalGrupo(' + gi + ')">✎</button>';
+        html += '<button class="adm-btn-icono adm-btn-icono--danger" title="Eliminar grupo" onclick="eliminarGrupo(' + gi + ')">✕</button>';
         html += '</div>';
 
+        /* Filas de enlace */
         if (grupo.enlaces && grupo.enlaces.length > 0) {
           grupo.enlaces.forEach(function(enlace, ei) {
-            html += '<div class="admin-enlace">';
-            html += '<div class="admin-enlace__icono">';
-            if (!enlace.icono) {
-              html += '<span class="material-symbols-outlined" style="font-size:1.2rem">link</span>';
-            } else if (enlace.icono.startsWith("emoji:")) {
-              html += enlace.icono.slice(6);
-            } else {
-              html += '<img src="' + enlace.icono + '" alt="" loading="lazy">';
-            }
+            html += '<div class="adm-enlace">';
+            html += '<div class="adm-enlace__icono">' + iconoFilaHtml(enlace.icono) + '</div>';
+            html += '<div class="adm-enlace__info">';
+            html += '<div class="adm-enlace__nombre">' + enlace.nombre + '</div>';
+            html += '<div class="adm-enlace__url">' + enlace.url + '</div>';
             html += '</div>';
-            html += '<div class="admin-enlace__info">';
-            html += '<div class="admin-enlace__nombre">' + enlace.nombre + '</div>';
-            html += '<div class="admin-enlace__url">' + enlace.url + '</div>';
-            html += '</div>';
-            html += '<div class="admin-enlace__acciones">';
-            html += '<button class="btn-icono" title="Editar" onclick="abrirModalEnlace(' + gi + ',' + ei + ')"><span class="material-symbols-outlined" style="font-size:1rem">edit</span></button>';
-            html += '<button class="btn-icono btn-icono--peligro" title="Eliminar" onclick="eliminarEnlace(' + gi + ',' + ei + ')"><span class="material-symbols-outlined" style="font-size:1rem">delete</span></button>';
+            html += '<div class="adm-enlace__acciones">';
+            html += '<button class="adm-btn-icono" title="Editar" onclick="abrirModalEnlace(' + gi + ',' + ei + ')">✎</button>';
+            html += '<button class="adm-btn-icono adm-btn-icono--danger" title="Eliminar" onclick="eliminarEnlace(' + gi + ',' + ei + ')">✕</button>';
             html += '</div>';
             html += '</div>';
           });
         }
 
-        html += '<button class="admin-add-enlace" onclick="abrirModalEnlace(' + gi + ', null)"><span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle">add</span> Anadir enlace</button>';
+        html += '<button class="adm-add-enlace" onclick="abrirModalEnlace(' + gi + ', null)">[ + AÑADIR ENLACE ]</button>';
         html += '</div>';
       });
 
@@ -509,10 +709,10 @@
       modalEnlaceCtx = { gi: gi, ei: ei };
       var enlace = (ei !== null) ? config.grupos[gi].enlaces[ei] : null;
       document.getElementById("modalEnlaceTitulo").textContent = enlace ? "Editar enlace" : "Nuevo enlace";
-      document.getElementById("campoNombre").value      = enlace ? enlace.nombre      : "";
-      document.getElementById("campoUrl").value         = enlace ? enlace.url         : "";
-      document.getElementById("campoDesc").value        = enlace ? (enlace.descripcion || "") : "";
-      document.getElementById("campoIcono").value       = enlace ? (enlace.icono || "")       : "";
+      document.getElementById("campoNombre").value         = enlace ? enlace.nombre               : "";
+      document.getElementById("campoUrl").value            = enlace ? enlace.url                  : "";
+      document.getElementById("campoDesc").value           = enlace ? (enlace.descripcion || "")  : "";
+      document.getElementById("campoIcono").value          = enlace ? (enlace.icono || "")        : "";
       document.getElementById("campoNuevaPestana").checked = enlace ? enlace.nueva_pestana !== false : true;
       iconoPreviewHtml(enlace ? (enlace.icono || "") : "", document.getElementById("iconoPreview"));
       document.getElementById("modalEnlace").classList.add("visible");
@@ -532,10 +732,10 @@
       if (!nombre || !url) { alert("Nombre y URL son obligatorios."); return; }
 
       var enlace = {
-        nombre: nombre,
-        url: url,
-        descripcion: document.getElementById("campoDesc").value.trim(),
-        icono: document.getElementById("campoIcono").value.trim(),
+        nombre:        nombre,
+        url:           url,
+        descripcion:   document.getElementById("campoDesc").value.trim(),
+        icono:         document.getElementById("campoIcono").value.trim(),
         nueva_pestana: document.getElementById("campoNuevaPestana").checked
       };
 
@@ -543,11 +743,8 @@
       var ei = modalEnlaceCtx.ei;
       if (!config.grupos[gi].enlaces) config.grupos[gi].enlaces = [];
 
-      if (ei !== null) {
-        config.grupos[gi].enlaces[ei] = enlace;
-      } else {
-        config.grupos[gi].enlaces.push(enlace);
-      }
+      if (ei !== null) { config.grupos[gi].enlaces[ei] = enlace; }
+      else             { config.grupos[gi].enlaces.push(enlace); }
 
       cerrarModalEnlace();
       renderizarLista();
@@ -574,7 +771,7 @@
 
     document.getElementById("btnConfirmarGrupo").addEventListener("click", function() {
       var titulo = document.getElementById("campoGrupoTitulo").value.trim();
-      if (!titulo) { alert("El titulo es obligatorio."); return; }
+      if (!titulo) { alert("El título es obligatorio."); return; }
 
       var gi = modalGrupoCtx.gi;
       if (gi === null) {
@@ -610,7 +807,7 @@
     document.getElementById("btnGuardar").addEventListener("click", function() {
       var btn = this;
       btn.disabled = true;
-      btn.textContent = "Guardando...";
+      btn.textContent = "[ GUARDANDO... ]";
 
       fetch("/api/lanzador", {
         method: "PUT",
@@ -623,8 +820,8 @@
           aviso.style.display = "block";
           setTimeout(function() { aviso.style.display = "none"; }, 2500);
         })
-        .catch(function() { alert("Error al guardar. Comprueba que hogar-api esta en marcha."); })
-        .finally(function() { btn.disabled = false; btn.textContent = "Guardar cambios"; });
+        .catch(function() { alert("Error al guardar. Comprueba que hogar-api está en marcha."); })
+        .finally(function() { btn.disabled = false; btn.textContent = "[ GUARDAR ]"; });
     });
 
     /* ============================================================
@@ -635,7 +832,7 @@
       .then(function(datos) { config = datos; renderizarLista(); })
       .catch(function() {
         document.getElementById("listaGrupos").innerHTML =
-          '<p style="color:var(--error);text-align:center;padding:var(--gap-xl)">No se pudo conectar con hogar-api.</p>';
+          '<div style="font-size:0.55rem;color:var(--ck-danger);padding:1.5rem 0;letter-spacing:0.1em">No se pudo conectar con hogar-api.</div>';
       });
   </script>
 
