@@ -336,6 +336,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 10px rgba(0,229,196,0.3);
   flex-shrink: 0;
+  text-decoration: none;
 }
 [data-tema-cockpit="light"] .ck-marca-box { box-shadow: none; }
 
