@@ -289,7 +289,7 @@ MANIFIESTO="${DIR_ACTUAL}/MANIFIESTO.txt"
 
     # --- Estado de cada BD ---
     echo "BASES DE DATOS:"
-    for F in fido/fido.db.bak redo/redo.db.bak medido/medido.db.bak planka/planka_dump.sql mariadb/nextcloud_dump.sql; do
+    for F in fido/fido.db.bak redo/redo.db.bak medido/medido.db.bak planka/planka_dump.sql backups/mariadb/nextcloud_dump.sql; do
         RUTA="${DIR_ACTUAL}/datos/${F}"
         NOMBRE=$(basename "$F")
         if [ -f "$RUTA" ]; then
@@ -414,7 +414,7 @@ for ITEM in \
     "redo|sqlite|redo/redo.db.bak" \
     "medido|sqlite|medido/medido.db.bak" \
     "planka|postgres|planka/planka_dump.sql" \
-    "nextcloud|mariadb|mariadb/nextcloud_dump.sql"
+    "nextcloud|mariadb|backups/mariadb/nextcloud_dump.sql"
 do
     IFS='|' read -r NOMBRE TIPO RUTA_REL <<< "$ITEM"
     RUTA_ABS="${DIR_ACTUAL}/datos/${RUTA_REL}"
