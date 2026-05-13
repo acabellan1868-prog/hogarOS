@@ -1,9 +1,9 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada. Trabajo activo en Fase 16 (silenciado de alertas).
-> Última actualización: 2026-05-12
+> Estado actual: Fase 15 completada. Fase 16 (silenciado de alertas) desplegada en VM. Fix de backup MariaDB aplicado y pendiente de verificación.
+> Última actualización: 2026-05-13
 > **Próximo paso concreto:**
-> 1. 👤 Hacer push de ReDo, MediDo y hogarOS y ejecutar `actualizar.sh` en la VM
+> 1. 👤 Ejecutar `backup.sh` completo y verificar que el dump de Nextcloud se genera sin errores
 
 ### Leyenda
 

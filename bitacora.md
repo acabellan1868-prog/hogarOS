@@ -1,5 +1,21 @@
 # Bitácora — hogarOS
 
+## 2026-05-13 — Fix permisos backup MariaDB
+
+Error al ejecutar `backup_dumps.sh`: "Permiso denegado" al escribir el dump de Nextcloud.
+
+**Causa raíz:** el dump se escribía en `/mnt/datos/mariadb/` (volumen de datos interno de MariaDB, propietario `999:systemd-journal`, sin escritura para `others`). El montaje NFS aplica `root_squash`, por lo que `root` no tiene privilegios reales sobre ese directorio.
+
+**Cambios:**
+- `Politica_backup/backup_dumps.sh` línea 29: destino del dump cambiado de `/mnt/datos/mariadb/nextcloud_dump.sql` a `/mnt/datos/backups/mariadb/nextcloud_dump.sql`
+- `Politica_backup/backup.sh` líneas 292 y 417: rutas de verificación del dump actualizadas a `backups/mariadb/nextcloud_dump.sql`
+
+**Acción manual en VM:** `mkdir -p /mnt/datos/backups/mariadb && chmod 777 /mnt/datos/backups/mariadb`
+
+**Pendiente verificar:** ejecutar backup completo en la próxima sesión para confirmar que el dump se genera correctamente.
+
+---
+
 ## 2026-05-12 — Silenciado de alertas (Centro de Alertas 2.0 parcial)
 
 ### Objetivo
