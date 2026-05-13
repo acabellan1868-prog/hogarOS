@@ -26,7 +26,7 @@ PLANKA_DUMP="/mnt/datos/planka/planka_dump.sql"
 
 # MariaDB (Nextcloud)
 MARIADB_CONTAINER="next-cloud-db-1"
-MARIADB_DUMP="/mnt/datos/mariadb/nextcloud_dump.sql"
+MARIADB_DUMP="/mnt/datos/backups/mariadb/nextcloud_dump.sql"
 
 # Snapshot Docker (informativo)
 DOCKER_ESTADO="/mnt/datos/docker_estado.txt"
