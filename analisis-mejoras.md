@@ -1205,4 +1205,4 @@ Se pueden retomar en cualquier momento.
 | 4 | MediDo (Proxmox API) | Nueva app + hogarOS | Medio-alto | Muy alto | **Completado** (2026-03-27) |
 | 5 | Estandarizar drawers | ReDo + FiDo + MediDo | Bajo | Medio | **Completado** (2026-03-27) |
 | 6 | Centro de Alertas | hogarOS + ReDo + MediDo | Medio | Alto | Pendiente |
-| 7 | Monitor de uso de Claude | Windows hook + MediDo + hogarOS | Bajo-medio | Medio | Pendiente |
+| 7 | Monitor de uso de Claude | Windows hook + MediDo + hogarOS | Bajo-medio | Medio | **Completado** |
