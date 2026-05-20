@@ -1193,6 +1193,97 @@ Se pueden retomar en cualquier momento.
 
 **Valor:** encaja con la filosofía hogarOS: convertir información doméstica dispersa en gestión tranquila y accesible.
 
+### 6.11 FiDo — Informe mensual automático por NTFY
+
+**Problema:** para saber cómo fue el mes hay que abrir FiDo manualmente y revisar los datos.
+
+**Propuesta:** el día 1 de cada mes, FiDo genera y envía por NTFY un resumen: total gastado, top 3 categorías, comparativa con el mes anterior.
+
+**Cómo podría hacerse:**
+- Tarea APScheduler que se dispara el día 1 a las 8:00.
+- Consulta las mismas vistas que el panel actual.
+- Mensaje NTFY con texto plano estructurado.
+
+**Valor:** cierre mensual automático sin intervención manual. Obliga a revisar lo que no se revisa.
+
+### 6.12 MediDo — Digest matutino por NTFY
+
+**Problema:** el estado del hogar no se consulta a menos que algo falle.
+
+**Propuesta:** push NTFY a las 8:00 cada mañana con: estado de servicios, % de disco usado, alertas activas y gasto acumulado del mes.
+
+**Cómo podría hacerse:**
+- Tarea APScheduler en MediDo.
+- Agrega datos de `/api/resumen` propio + llama a `/finanzas/api/panel` para el gasto.
+- Solo envía si hay algo relevante (o siempre, configurable).
+
+**Valor:** visibilidad pasiva del ecosistema sin abrir el portal.
+
+### 6.13 hogarOS — Widget del tiempo
+
+**Problema:** el portal no tiene contexto del entorno físico del hogar.
+
+**Propuesta:** tarjeta con temperatura actual e icono de previsión usando la API de Open-Meteo (gratuita, sin API key ni registro).
+
+**Cómo podría hacerse:**
+- Llamada directa desde el frontend a `api.open-meteo.com` con latitud/longitud fija de la ciudad.
+- Sin backend ni almacenamiento — solo fetch en el cliente.
+- Icono WMO estándar (soleado, nublado, lluvia…).
+
+**Valor:** contexto útil en la portada con esfuerzo mínimo.
+
+### 6.14 hogarOS — PWA instalable
+
+**Problema:** acceder al portal desde el móvil requiere abrir el navegador y navegar.
+
+**Propuesta:** añadir `manifest.json` y un service worker básico para poder instalar el portal como app en Android/iOS desde Chrome/Safari.
+
+**Cómo podría hacerse:**
+- `manifest.json` con nombre, iconos, `start_url` y `display: standalone`.
+- Service worker mínimo para que Chrome ofrezca el banner de instalación.
+- Sin modo offline complejo en v1.
+
+**Valor:** acceso en un toque desde el móvil, sin barra de navegador.
+
+### 6.15 ReDo — Topología visual por zonas
+
+**Problema:** la lista de dispositivos no transmite dónde está físicamente cada cosa.
+
+**Propuesta:** vista alternativa que muestre los dispositivos agrupados visualmente por zona, con sus iconos por tipo.
+
+**Cómo podría hacerse:**
+- Usa los campos `zona` y `tipo` que ya existen en la BD.
+- Grid de tarjetas por zona en lugar de tabla plana.
+- Toggle entre vista lista (actual) y vista zonas (nueva).
+
+**Valor:** lectura más intuitiva de la red doméstica, especialmente con muchos dispositivos.
+
+### 6.16 Kryptonite — Tarjeta en el portal de hogarOS
+
+**Problema:** el valor del portfolio crypto no es visible en la portada del ecosistema.
+
+**Propuesta:** tarjeta en `portal/index.html` que muestre el valor total del portfolio y la variación del día, igual que las demás apps satélite.
+
+**Cómo podría hacerse:**
+- Endpoint `/portafolio` ya existe y devuelve el valor total.
+- Nginx ya tiene la ruta `/crypto/api/` configurada.
+- Tarjeta con valor en EUR/USD + variación 24h + enlace a `/crypto/`.
+
+**Valor:** visibilidad del portfolio sin salir del portal principal.
+
+### 6.17 hogarOS — Vista quiosco para pantalla siempre encendida
+
+**Problema:** la pantalla Lenovo de cocina podría mostrar información útil del hogar de forma pasiva.
+
+**Propuesta:** página simplificada (`/quiosco.html`) pensada para estar siempre visible en una pantalla fija: hora grande, tiempo, alertas activas, estado de servicios y valor del portfolio.
+
+**Cómo podría hacerse:**
+- Página estática que consume las APIs existentes.
+- Sin interacción — solo visualización, auto-refresco cada 60s.
+- Fuente grande, alto contraste, diseño pensado para verse desde lejos.
+
+**Valor:** el portal siempre presente en la cocina sin tener que abrirlo.
+
 ---
 
 ## Orden global de implementación
