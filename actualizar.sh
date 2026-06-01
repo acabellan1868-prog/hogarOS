@@ -3,10 +3,9 @@
 # actualizar.sh — Actualiza hogarOS y todas sus apps desde GitHub
 #
 # Qué hace:
-#   1. Descarga los últimos cambios de GitHub (git pull) en los 3 repos
-#   2. Para todos los contenedores
-#   3. Reconstruye las imágenes (por si cambió código de ReDo o FiDo)
-#   4. Levanta todo de nuevo
+#   1. Descarga los últimos cambios de GitHub (git pull) en los repos
+#   2. Solo para los repos con cambios: para, reconstruye y levanta sus contenedores
+#   3. Los repos sin cambios no se tocan — sin interrupción de servicio
 #
 # Uso: ./actualizar.sh
 # Ejecutar desde cualquier sitio — las rutas son absolutas.
@@ -14,6 +13,16 @@
 set -e
 
 DIRECTORIO_BASE="/mnt/datos"
+COMPOSE_DIR="$DIRECTORIO_BASE/hogarOS"
+
+# Mapeo repo → servicios docker-compose (separados por espacio si hay varios)
+declare -A SERVICIOS
+SERVICIOS["hogarOS"]="nginx hogar-api"
+SERVICIOS["redo-build"]="redo"
+SERVICIOS["fido-build"]="fido"
+SERVICIOS["medido-build"]="medido"
+SERVICIOS["kryptonite-build"]="kryptonite"
+
 PROYECTOS=("hogarOS" "redo-build" "fido-build" "medido-build" "kryptonite-build")
 
 echo "================================================"
@@ -21,46 +30,77 @@ echo "  hogarOS — Actualizando ecosistema"
 echo "  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "================================================"
 
-# ── Paso 1: Descargar cambios de GitHub ──
+# ── Paso 1: Descargar cambios y detectar qué repos cambiaron ──
 echo ""
-echo "── Paso 1/4: Descargando cambios de GitHub ──"
+echo "── Paso 1/2: Descargando cambios de GitHub ──"
+
+declare -A TIENE_CAMBIOS
 
 for proyecto in "${PROYECTOS[@]}"; do
   ruta="$DIRECTORIO_BASE/$proyecto"
 
-  if [ -d "$ruta/.git" ]; then
-    echo ""
-    echo "  ► $proyecto"
-    cd "$ruta"
-    rama_actual=$(git branch --show-current)
-    git pull origin "$rama_actual" 2>&1 | sed 's/^/    /'
-  else
+  if [ ! -d "$ruta/.git" ]; then
     echo ""
     echo "  ⚠ $proyecto — no encontrado en $ruta"
+    TIENE_CAMBIOS[$proyecto]=0
+    continue
+  fi
+
+  echo ""
+  echo "  ► $proyecto"
+  cd "$ruta"
+  rama_actual=$(git branch --show-current)
+  salida=$(git pull origin "$rama_actual" 2>&1)
+  echo "$salida" | sed 's/^/    /'
+
+  if echo "$salida" | grep -q "Already up to date."; then
+    TIENE_CAMBIOS[$proyecto]=0
+  else
+    TIENE_CAMBIOS[$proyecto]=1
   fi
 done
 
-# ── Paso 2: Parar contenedores ──
+# ── Paso 2: Reconstruir y reiniciar solo los servicios con cambios ──
 echo ""
-echo "── Paso 2/4: Parando contenedores ──"
-cd "$DIRECTORIO_BASE/hogarOS"
-docker compose down 2>&1 | sed 's/^/    /'
+echo "── Paso 2/2: Actualizando servicios con cambios ──"
 
-# ── Paso 3: Reconstruir imágenes ──
-echo ""
-echo "── Paso 3/4: Reconstruyendo imágenes ──"
-docker compose build 2>&1 | sed 's/^/    /'
+alguno_actualizado=0
 
-# ── Paso 4: Levantar contenedores ──
-echo ""
-echo "── Paso 4/4: Levantando contenedores ──"
-docker compose up -d 2>&1 | sed 's/^/    /'
+for proyecto in "${PROYECTOS[@]}"; do
+  if [ "${TIENE_CAMBIOS[$proyecto]}" -eq 0 ]; then
+    echo ""
+    echo "  ✓ $proyecto — sin cambios, no se reinicia"
+    continue
+  fi
+
+  servicios="${SERVICIOS[$proyecto]}"
+  echo ""
+  echo "  ► $proyecto — reconstruyendo: $servicios"
+
+  cd "$COMPOSE_DIR"
+
+  for servicio in $servicios; do
+    echo "    Parando $servicio..."
+    docker compose stop "$servicio" 2>&1 | sed 's/^/    /'
+    echo "    Reconstruyendo $servicio..."
+    docker compose build "$servicio" 2>&1 | sed 's/^/    /'
+    echo "    Levantando $servicio..."
+    docker compose up -d "$servicio" 2>&1 | sed 's/^/    /'
+  done
+
+  alguno_actualizado=1
+done
 
 # ── Resultado ──
 echo ""
 echo "================================================"
-echo "  ✓ Actualización completada"
+if [ "$alguno_actualizado" -eq 0 ]; then
+  echo "  ✓ Todo estaba al día — ningún servicio reiniciado"
+else
+  echo "  ✓ Actualización completada"
+fi
 echo "  $(date '+%Y-%m-%d %H:%M:%S')"
 echo "================================================"
 echo ""
+cd "$COMPOSE_DIR"
 docker compose ps
