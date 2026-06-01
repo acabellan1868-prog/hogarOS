@@ -52,7 +52,7 @@ def _obtener_backup() -> dict:
 def _obtener_gasto_semana() -> dict:
     """Consulta FiDo: gasto total de la semana en curso (todas las cuentas)."""
     try:
-        resp = httpx.get("http://fido:8080/api/resumen?periodo=semana", timeout=5)
+        resp = httpx.get("http://fido:8080/api/resumen?periodo=semana&banco=revolut", timeout=5)
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
