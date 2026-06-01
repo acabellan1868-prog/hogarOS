@@ -53,7 +53,8 @@ for proyecto in "${PROYECTOS[@]}"; do
   salida=$(git pull origin "$rama_actual" 2>&1)
   echo "$salida" | sed 's/^/    /'
 
-  if echo "$salida" | grep -q "Already up to date."; then
+  # Detecta "sin cambios" en inglés y español según el locale del servidor
+  if echo "$salida" | grep -qiE "Already up to date|Ya está actualizado"; then
     TIENE_CAMBIOS[$proyecto]=0
   else
     TIENE_CAMBIOS[$proyecto]=1
