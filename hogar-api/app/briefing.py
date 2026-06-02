@@ -60,6 +60,25 @@ def _obtener_gasto_semana() -> dict:
         return {}
 
 
+def _obtener_polar_semana() -> dict:
+    """
+    Consulta MediDo: km y horas de ciclismo en los últimos 7 días.
+    Filtra solo actividades de tipo CYCLING.
+    """
+    try:
+        resp = httpx.get("http://medido:8084/api/polar/resumen?dias=7", timeout=5)
+        resp.raise_for_status()
+        datos = resp.json()
+        por_tipo = datos.get("por_tipo", {})
+        ciclismo = por_tipo.get("CYCLING", {})
+        km      = ciclismo.get("km", 0)
+        minutos = ciclismo.get("duracion_minutos", 0)
+        return {"km": km, "horas": minutos / 60}
+    except Exception as e:
+        logger.warning(f"No se pudo consultar Polar en MediDo: {e}")
+        return {}
+
+
 def _obtener_temperatura() -> dict:
     """
     Consulta Home Assistant: temperatura actual y previsión min/max de hoy.
@@ -108,7 +127,7 @@ def _antiguedad_backup(ultima_fecha_str: str | None) -> str:
         return "fecha inválida ⚠️"
 
 
-def _componer(sistema: dict, backup: dict, finanzas: dict, temperatura: dict) -> tuple[str, str, str]:
+def _componer(sistema: dict, backup: dict, finanzas: dict, temperatura: dict, polar: dict) -> tuple[str, str, str]:
     """
     Compone el título, cuerpo y prioridad del mensaje NTFY.
     Devuelve (titulo, cuerpo, prioridad).
@@ -168,6 +187,17 @@ def _componer(sistema: dict, backup: dict, finanzas: dict, temperatura: dict) ->
     else:
         lineas.append("🌡️ Exterior: sin datos")
 
+    # Ciclismo semanal (Polar)
+    if polar:
+        km      = polar.get("km", 0)
+        horas   = polar.get("horas", 0)
+        h       = int(horas)
+        m       = int((horas - h) * 60)
+        tiempo  = f"{h}h {m}m" if h > 0 else f"{m}m"
+        lineas.append(f"🚴 Semana: {km:.1f} km · {tiempo}")
+    else:
+        lineas.append("🚴 Semana: sin datos")
+
     prioridad = "high" if hay_problemas else "default"
     return titulo, "\n".join(lineas), prioridad
 
@@ -212,5 +242,6 @@ def enviar_briefing():
     backup      = _obtener_backup()
     finanzas    = _obtener_gasto_semana()
     temperatura = _obtener_temperatura()
-    titulo, cuerpo, prioridad = _componer(sistema, backup, finanzas, temperatura)
+    polar       = _obtener_polar_semana()
+    titulo, cuerpo, prioridad = _componer(sistema, backup, finanzas, temperatura, polar)
     _enviar_ntfy(titulo, cuerpo, prioridad)
