@@ -1,5 +1,51 @@
 # Bitácora — hogarOS
 
+## 2026-05-28 — Monitor de Claude ✅ 100% OPERATIVO
+
+### Auditoría completa
+Revisión exhaustiva de la implementación del Monitor de uso de Claude Code.
+
+**Resultado:** Sistema **100% completo y en producción**.
+
+### Verificación en vivo ✅
+- **Portal hogarOS:** Tarjeta "Asistente · Claude" visible y funcional
+  - Muestra: 16 sesiones, 1.3M tokens, $76.87 USD
+  - Proyecto actual: pomoTareas
+  - Límites de 5h y semana: operativos
+- **MediDo:** Datos de sesiones registrados automáticamente
+  - Sesiones desde 22/5/2026 (captura activa)
+  - Desglose por respuesta (token input/output/cache, coste individual)
+  - Tablas indexed, queries optimizadas
+
+### Stack implementado ✅
+1. **Hook en Windows:** Activo y capturando automáticamente
+   - Al cerrar sesión → POST a `/salud/api/claude/sesion`
+   - Cola offline-first en `~/.claude/cola_sync.jsonl`
+   
+2. **Backend (MediDo):** 4 endpoints en `app/rutas/claude.py`
+   - `POST /api/claude/sesion` — Recibe datos del hook
+   - `GET /api/claude/resumen` — Resumen por períodos (día/semana/mes)
+   - `GET /api/claude/sesiones` — Lista sesiones con filtros
+   - `DELETE /api/claude/sesiones/{session_id}` — Elimina sesión
+
+3. **Base de datos:** Tabla `tracking_claude` operativa
+   - Almacena: session_id, tokens (input/output/cache), costes, proyecto, directorio
+   - Índices: session_id, fecha_fin, proyecto
+   - Datos: 16+ sesiones registradas
+
+4. **Frontend:** Tarjeta integrada en `portal/index.html` (zona D)
+   - Fetch automático a `/salud/api/claude/resumen?periodo=mes`
+   - Visualización: sesiones, tokens, coste USD, proyecto, límites
+
+5. **Infraestructura:** Nginx + MediDo + hogarOS
+   - Proxy `/salud/api/claude/*` → medido:8084
+   - Variables de entorno: `CLAUDE_PRESUPUESTO_EUR`, `CLAUDE_DIA_RESETEO`, límites de tokens
+
+### Conclusión
+Fase 5 del ecosistema hogarOS **COMPLETADA**. El sistema funciona sin intervención manual — cada sesión de Claude Code automáticamente se registra en MediDo y aparece en el portal.
+
+---
+
 ## 2026-05-13 — Fix permisos backup MariaDB
 
 Error al ejecutar `backup_dumps.sh`: "Permiso denegado" al escribir el dump de Nextcloud.

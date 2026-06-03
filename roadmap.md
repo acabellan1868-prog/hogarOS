@@ -1,7 +1,7 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada. Fase 16 (silenciado de alertas) desplegada en VM. Fix de backup MariaDB aplicado y pendiente de verificación.
-> Última actualización: 2026-05-13
+> Estado actual: Fase 15 completada. Fase 16 (silenciado de alertas) desplegada en VM. **Monitor de Claude ✅ 100% operativo** — captura automática activa, tarjeta en portal funcional. Fix de backup MariaDB aplicado y pendiente de verificación.
+> Última actualización: 2026-05-28
 > **Próximo paso concreto:**
 > 1. 👤 Ejecutar `backup.sh` completo y verificar que el dump de Nextcloud se genera sin errores
 
