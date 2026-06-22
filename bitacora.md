@@ -1,5 +1,47 @@
 # Bitácora — hogarOS
 
+## 2026-06-22 — DeDo: arranque del proyecto e integración en el ecosistema
+
+### Contexto
+Primera sesión en equipo nuevo. Se clonaron todos los repositorios del ecosistema en `C:\Users\acabe\Documents\Antonio\Desarrollo\Claude\` (uno por carpeta).
+
+### Trabajo realizado
+
+**Análisis:**
+- Revisión de `analisis.md`, `roadmap.md`, `bitacora.md` y `CLAUDE.md` de hogarOS
+- Lectura del repo DeDo (creado el 13/06/2026): análisis completo, esquema SQL, estructura base
+
+**Roadmap de DeDo creado** (`DeDo/roadmap.md`): 8 fases definidas con tareas 🤖/👤
+
+**Fase 0 ✅** — esqueleto ya existía en el repo
+
+**Fase 1 ✅ — Backend core:**
+- `app/config.py` — variables de entorno
+- `app/bd.py` — helpers SQLite (inicializar_bd, consultar_todos, consultar_uno, ejecutar)
+- `app/modelos.py` — modelos Pydantic (Crear/Actualizar/Respuesta para catálogo, stock, lista, caducidades)
+- `app/rutas/catalogo.py` — CRUD de productos
+- `app/rutas/stock.py` — CRUD de inventario
+- `app/rutas/lista.py` — CRUD de lista de la compra
+- `app/rutas/caducidades.py` — proximas, vencidas, actualizar fecha
+- `app/rutas/resumen.py` — resumen para tarjeta del portal
+- `app/principal.py` — arranque, inicialización BD, registro de routers
+
+**Integración hogarOS:**
+- `docker-compose.yml`: nuevo servicio `dedo` (puerto 8085, `/mnt/datos/dedo-build`)
+- `actualizar.sh`: añadido `dedo-build` al ciclo de actualización
+- `nginx.conf`: upstream `dedo` + location `/despensa/` con sub_filter (mismo patrón que FiDo/ReDo/MediDo)
+- `.env.example`: documentadas variables de DeDo
+
+### Estado final
+- Contenedor `dedo` corriendo en producción (hogarOS stack, puerto 8085)
+- `http://192.168.31.131/despensa/` responde con página "En construcción"
+- Todo el código de Fase 1 pusheado a GitHub
+
+### Próximo paso
+**Fase 3 — Frontend Cockpit** (la Fase 2 de tickets puede ir después del frontend)
+
+---
+
 ## 2026-05-28 — Monitor de Claude ✅ 100% OPERATIVO
 
 ### Auditoría completa
