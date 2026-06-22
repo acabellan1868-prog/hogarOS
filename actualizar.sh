@@ -22,8 +22,9 @@ SERVICIOS["redo-build"]="redo"
 SERVICIOS["fido-build"]="fido"
 SERVICIOS["medido-build"]="medido"
 SERVICIOS["kryptonite-build"]="kryptonite"
+SERVICIOS["dedo-build"]="dedo"
 
-PROYECTOS=("hogarOS" "redo-build" "fido-build" "medido-build" "kryptonite-build")
+PROYECTOS=("hogarOS" "redo-build" "fido-build" "medido-build" "kryptonite-build" "dedo-build")
 
 echo "================================================"
 echo "  hogarOS — Actualizando ecosistema"

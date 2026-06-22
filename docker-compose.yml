@@ -19,6 +19,7 @@ services:
       - hogar-api
       - medido
       - kryptonite
+      - dedo
     restart: unless-stopped
 
   # ── hogar-api — Orquestador: lanzador, backup y briefing diario ──
@@ -90,6 +91,23 @@ services:
       - /mnt/datos/kryptonite/parametros.env
     environment:
       - TZ=Europe/Madrid
+    restart: unless-stopped
+
+  # ── DeDo — Despensa Doméstica ──
+  # Se construye desde /mnt/datos/dedo-build/
+  dedo:
+    build: /mnt/datos/dedo-build
+    container_name: dedo
+    ports:
+      - "8085:8080"
+    volumes:
+      - /mnt/datos/dedo:/app/data
+    environment:
+      - TZ=Europe/Madrid
+      - DEDO_DB_PATH=/app/data/dedo.db
+      - NTFY_URL=https://ntfy.sh
+      - NTFY_TOPIC=${NTFY_TOPIC_ALERTAS}
+      - FIDO_API_URL=http://fido:8080
     restart: unless-stopped
 
   # ── MediDo — Metricas y salud del hogar ──
