@@ -1,5 +1,44 @@
 # Bitácora — hogarOS
 
+## 2026-06-23 — DeDo: Fase 3 — Frontend Cockpit
+
+### Trabajo realizado
+
+**Frontend completo implementado:**
+- `static/index.html` — header Cockpit con 5 pestañas (Despensa, Lista, Catálogo, Caducidades, Tickets), reloj, toggle de tema, enlace al portal
+- `static/estilos.css` — design system propio con prefijo `dedo-`, variables `--ck-*` de hogar.css
+- `static/app.js` — lógica vanilla JS: fetch a todos los endpoints de Fase 1, navegación por pestañas, reloj, tema (persiste en localStorage)
+
+**Pestañas implementadas:**
+- **Despensa** — grid de tarjetas con indicador de color (verde/naranja/rojo según stock mínimo), filtro todos/bajo/ok
+- **Lista** — ítems con borrado individual, formulario para añadir, botón vaciar
+- **Catálogo** — grid con badge activo/inactivo, filtro por estado
+- **Caducidades** — dos columnas (próximas / vencidas), control de días de vista configurable
+- **Tickets** — placeholder "Fase 2"
+
+**Bugs detectados y resueltos:**
+
+1. **Sin estilo en producción**: `href="/static/estilos.css"` (ruta absoluta) — nginx lo reescribía a `/despensa/static/estilos.css` y lo servía desde `portal/static/` donde no existe. Fix: usar ruta relativa `href="estilos.css"` (igual que FiDo). StaticFiles montado en `"/"` en `principal.py` para que el contenedor sirva `GET /estilos.css` → `static/estilos.css`.
+
+2. **`--ck-error` no existe**: el nombre real en hogar.css es `--ck-danger`. Corregido en estilos.css.
+
+3. **Enlace al portal no funcionaba**: `href="/"` es reescrito por sub_filter a `href="/despensa/"`. Fix: `onclick="window.location.href=window.location.origin+'/';"` (mismo patrón que el resto del ecosistema).
+
+**Integración en hogarOS:**
+- `portal/index.html`: enlace DESPENSA añadido tanto en el nav superior como en el drawer lateral
+
+### Estado final
+- DeDo corriendo en producción con frontend completo: `http://192.168.31.131/despensa/`
+- Portal hogarOS muestra enlace a DESPENSA
+- Todo pusheado a GitHub (repos DeDo y hogarOS)
+
+### Próximo paso
+**Fase 3 completada.** Siguientes opciones:
+- **Fase 2 — Tickets y precios**: procesar imágenes de tickets, actualizar stock, historial de precios, notificar a FiDo
+- **Tarjeta resumen en el portal**: consumir `/despensa/api/resumen` desde `portal/index.html`
+
+---
+
 ## 2026-06-22 — DeDo: arranque del proyecto e integración en el ecosistema
 
 ### Contexto
