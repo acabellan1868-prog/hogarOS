@@ -1,5 +1,50 @@
 # Bitácora — hogarOS
 
+## 2026-08-14 — Fix briefing: temperatura min/max con sensores AEMET
+
+### Contexto
+Revisión general del estado del ecosistema. Se detectaron dos puntos desactualizados
+en `roadmap.md` (Fase 16 aparecía como pendiente de push/despliegue cuando ya estaba
+en producción desde hace tiempo — confirmado por `git log` en ReDo, MediDo y hogarOS,
+todos con la rama limpia y sincronizada) y se investigó el pendiente real: la mínima/máxima
+del briefing diario nunca llegaba.
+
+### Diagnóstico
+El usuario no tiene ningún dispositivo con previsión meteorológica — solo una estación
+real (Meteoclimatic) que da datos medidos, no predicción. Además, `_obtener_temperatura()`
+en `hogar-api/app/briefing.py` leía el atributo `forecast` del estado de una entidad
+`weather.*`, pero las versiones recientes de Home Assistant ya no exponen la previsión
+como atributo de estado (ahora requiere llamada a servicio `weather.get_forecasts`).
+
+### Solución
+Se instaló la integración AEMET (gratuita) en Home Assistant, que expone la previsión
+como sensores independientes con el valor directo en el estado — más simples de leer
+por API REST que un `weather.*`.
+
+**Cambios en `hogar-api/app/briefing.py`:**
+- Nueva función `_obtener_estado_ha(entity_id)` — lee el estado numérico de cualquier entidad HA
+- `_obtener_temperatura()` reescrita: ya no depende de una única entidad `weather.*`,
+  consulta 3 entidades por separado:
+  - `BRIEFING_HA_TEMP_ENTITY` → temperatura actual (estación real Meteoclimatic, mismo sensor que ya usa la tarjeta de domótica del portal)
+  - `BRIEFING_HA_FORECAST_MAX_ENTITY` → `sensor.aemet_daily_forecast_temperature`
+  - `BRIEFING_HA_FORECAST_MIN_ENTITY` → `sensor.aemet_daily_forecast_temperature_low`
+
+**Cambios en `docker-compose.yml` y `.env.example`:** documentadas las 3 variables nuevas,
+con defaults que coinciden con las entidades reales del usuario (funciona sin tocar el `.env` de la VM).
+
+**Commit:** `9e6b616` en `acabellan1868-prog/hogarOS` — pusheado y desplegado.
+
+### Verificación
+Probado con `curl -X POST http://192.168.31.131/api/briefing/enviar` — notificación
+recibida en el móvil con la temperatura mín/máx correcta. ✅
+
+### Estado final
+- Fase 16 (silenciado de alertas): confirmado en producción, corregido el roadmap
+- Fase 14 (briefing diario): min/max de temperatura resuelto y verificado
+- Pendiente: ajustes en DeDo (Fase 17) antes de añadir la tarjeta resumen al portal
+
+---
+
 ## 2026-06-23 — DeDo: Fase 3 — Frontend Cockpit
 
 ### Trabajo realizado
