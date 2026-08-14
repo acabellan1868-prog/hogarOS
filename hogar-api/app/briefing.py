@@ -18,7 +18,9 @@ NTFY_URL            = os.getenv("NTFY_URL", "https://ntfy.sh")
 NTFY_TOPIC          = os.getenv("NTFY_TOPIC_ALERTAS", "")
 HA_HOST             = os.getenv("HA_HOST", "192.168.31.132")
 HA_TOKEN            = os.getenv("HA_TOKEN", "")
-HA_WEATHER_ENTITY   = os.getenv("BRIEFING_HA_WEATHER_ENTITY", "weather.forecast_home")
+HA_TEMP_ACTUAL_ENTITY = os.getenv("BRIEFING_HA_TEMP_ENTITY", "sensor.huelva_f_montenegro_huelva_temperature")
+HA_FORECAST_MAX_ENTITY = os.getenv("BRIEFING_HA_FORECAST_MAX_ENTITY", "sensor.aemet_daily_forecast_temperature")
+HA_FORECAST_MIN_ENTITY = os.getenv("BRIEFING_HA_FORECAST_MIN_ENTITY", "sensor.aemet_daily_forecast_temperature_low")
 RUTA_BACKUP_JSON    = os.getenv("BACKUP_JSON", "/app/data/backup_estado.json")
 
 _DIAS_ES   = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
@@ -79,32 +81,33 @@ def _obtener_polar_semana() -> dict:
         return {}
 
 
+def _obtener_estado_ha(entity_id: str) -> float | None:
+    """Consulta el estado numérico de una entidad de Home Assistant."""
+    try:
+        url = f"http://{HA_HOST}:8123/api/states/{entity_id}"
+        cabeceras = {"Authorization": f"Bearer {HA_TOKEN}"}
+        resp = httpx.get(url, headers=cabeceras, timeout=5)
+        resp.raise_for_status()
+        estado = resp.json().get("state")
+        return float(estado) if estado not in (None, "unknown", "unavailable") else None
+    except Exception as e:
+        logger.warning(f"No se pudo consultar {entity_id} en Home Assistant: {e}")
+        return None
+
+
 def _obtener_temperatura() -> dict:
     """
-    Consulta Home Assistant: temperatura actual y previsión min/max de hoy.
-    Usa la entidad weather configurada en BRIEFING_HA_WEATHER_ENTITY.
-    El primer elemento del forecast corresponde al día actual.
+    Consulta Home Assistant: temperatura actual (estación meteorológica real)
+    y previsión min/max de hoy (sensores diarios de AEMET).
     """
     if not HA_TOKEN:
         logger.warning("HA_TOKEN no configurado, temperatura no disponible")
         return {}
-    try:
-        url = f"http://{HA_HOST}:8123/api/states/{HA_WEATHER_ENTITY}"
-        cabeceras = {"Authorization": f"Bearer {HA_TOKEN}"}
-        resp = httpx.get(url, headers=cabeceras, timeout=5)
-        resp.raise_for_status()
-        datos = resp.json()
-        atributos = datos.get("attributes", {})
-        temp_actual = atributos.get("temperature")
-        forecast = atributos.get("forecast", [])
-        temp_min = temp_max = None
-        if forecast:
-            temp_max = forecast[0].get("temperature")
-            temp_min = forecast[0].get("templow")
-        return {"actual": temp_actual, "min": temp_min, "max": temp_max}
-    except Exception as e:
-        logger.warning(f"No se pudo consultar Home Assistant: {e}")
-        return {}
+    return {
+        "actual": _obtener_estado_ha(HA_TEMP_ACTUAL_ENTITY),
+        "max":    _obtener_estado_ha(HA_FORECAST_MAX_ENTITY),
+        "min":    _obtener_estado_ha(HA_FORECAST_MIN_ENTITY),
+    }
 
 
 # ── Composición del mensaje ───────────────────────────────────────────────────

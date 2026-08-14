@@ -35,7 +35,9 @@ services:
       - HA_HOST=192.168.31.132
       - NTFY_URL=https://ntfy.sh
       - NTFY_TOPIC_ALERTAS=${NTFY_TOPIC_ALERTAS}
-      - BRIEFING_HA_WEATHER_ENTITY=${BRIEFING_HA_WEATHER_ENTITY:-weather.forecast_home}
+      - BRIEFING_HA_TEMP_ENTITY=${BRIEFING_HA_TEMP_ENTITY:-sensor.huelva_f_montenegro_huelva_temperature}
+      - BRIEFING_HA_FORECAST_MAX_ENTITY=${BRIEFING_HA_FORECAST_MAX_ENTITY:-sensor.aemet_daily_forecast_temperature}
+      - BRIEFING_HA_FORECAST_MIN_ENTITY=${BRIEFING_HA_FORECAST_MIN_ENTITY:-sensor.aemet_daily_forecast_temperature_low}
       - BRIEFING_HORA=${BRIEFING_HORA:-8}
       - BRIEFING_MINUTO=${BRIEFING_MINUTO:-30}
     restart: unless-stopped

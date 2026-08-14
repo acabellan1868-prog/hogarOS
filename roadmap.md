@@ -1,9 +1,9 @@
 # HogarOS — Hoja de ruta
 
-> Estado actual: Fase 15 completada. Fase 16 (silenciado de alertas) desplegada en VM. **Monitor de Claude ✅ 100% operativo** — captura automática activa, tarjeta en portal funcional. Fix de backup MariaDB aplicado y pendiente de verificación.
-> Última actualización: 2026-05-28
+> Estado actual: Fase 16 (silenciado de alertas) ✅ completada y en producción. Fase 17 (DeDo) en producción, falta la tarjeta resumen en el portal — pendiente de ajustes en DeDo. **Monitor de Claude ✅ 100% operativo**.
+> Última actualización: 2026-08-14
 > **Próximo paso concreto:**
-> 1. 👤 Ejecutar `backup.sh` completo y verificar que el dump de Nextcloud se genera sin errores
+> 1. 🤖 Cerrar ajustes pendientes en DeDo antes de añadir la tarjeta "Despensa" al bento grid de `portal/index.html`
 
 ### Leyenda
 
@@ -497,9 +497,15 @@ Implementado en hogar-api como orquestador natural. Análisis en `analisis-mejor
 - [x] 👤 Ejecutar `actualizar.sh` en la VM ✅
 - [x] 👤 Probar: `curl -X POST http://192.168.31.131/api/briefing/enviar` → devuelve OK, datos correctos ✅
 - [x] 👤 Verificar llegada al móvil ✅ (tras 3 fixes de encoding NTFY)
-- [ ] 👤 Averiguar entity_id de la entidad weather en HA para obtener min/max del día
-- [ ] 👤 Añadir `BRIEFING_HA_WEATHER_ENTITY=<entity_id>` al `.env` de la VM
-- [ ] 👤 Verificar que llega automáticamente a las 8:30
+
+**Fix min/max (2026-08-14):** la entidad `weather.*` ya no expone `forecast` como atributo de estado en versiones recientes de HA (cambio de arquitectura: ahora requiere llamada a servicio). Se sustituye por 3 sensores directos: temperatura actual (estación real Meteoclimatic) + máxima/mínima previstas (sensores diarios de la integración AEMET). Ver `hogar-api/app/briefing.py`.
+
+- [x] 🤖 Reescribir `_obtener_temperatura()` para leer `BRIEFING_HA_TEMP_ENTITY` + `BRIEFING_HA_FORECAST_MAX_ENTITY` + `BRIEFING_HA_FORECAST_MIN_ENTITY`
+- [x] 🤖 `docker-compose.yml` y `.env.example` actualizados con las 3 nuevas variables (con defaults que coinciden con los sensores AEMET reales del usuario)
+- [ ] 👤 Instalar la integración AEMET en HA (API key gratuita) si aún no está instalada
+- [ ] 👤 Push de hogarOS + `actualizar.sh` en la VM
+- [ ] 👤 Si el `.env` de la VM tiene `BRIEFING_HA_WEATHER_ENTITY` de la versión antigua, se puede eliminar (ya no se usa)
+- [ ] 👤 Verificar que el briefing de las 8:30 trae ↓mín ↑máx correctos
 
 ---
 
@@ -568,8 +574,27 @@ Mejora del Centro de Alertas: silenciado individual por aviso, con supresión de
 - [x] 🤖 `MediDo/app/rutas/alertas.py`: ídem + helper `_esta_silenciada()`
 - [x] 🤖 `MediDo/app/alertador.py`: `_crear_alerta()` respeta alertas silenciadas (no crea nuevas ni envía NTFY)
 - [x] 🤖 `portal/alertas.html`: filtro SILENCIADAS, botones ⏸ / ⊘ / ↺, etiqueta visual
-- [ ] 👤 Push ReDo, MediDo y hogarOS + ejecutar `actualizar.sh` en la VM
-- [ ] 👤 Verificar en producción: silenciar JupyterLab y confirmar que desaparece de alertas y no llegan NTFY
+- [x] 👤 Push ReDo, MediDo y hogarOS + ejecutar `actualizar.sh` en la VM
+- [x] 👤 Verificar en producción: silenciar JupyterLab y confirmar que desaparece de alertas y no llegan NTFY
+
+---
+
+## Fase 17 — Integración de DeDo (2026-06-22/23)
+
+Nueva app satélite: **DeDo**, gestión de la despensa doméstica (inventario, lista de la
+compra, caducidades, tickets). Desarrollo interno propio en su repo — ver
+`DeDo/roadmap.md` para el detalle de fases. Aquí solo las tareas de integración
+en el ecosistema hogarOS, mismo patrón que Kryptonite (Fase 9).
+
+- [x] 🤖 `docker-compose.yml`: nuevo servicio `dedo` (puerto 8085:8080, `/mnt/datos/dedo-build`)
+- [x] 🤖 `actualizar.sh`: añadido `dedo-build` al ciclo de actualización
+- [x] 🤖 `nginx.conf`: upstream `dedo` + `location /despensa/` con `sub_filter` (mismo patrón que FiDo/ReDo/MediDo)
+- [x] 🤖 `.env.example`: documentadas variables de DeDo
+- [x] 🤖 `portal/index.html`: enlace DESPENSA en nav superior y drawer
+- [ ] 🤖 `portal/index.html`: tarjeta resumen "Despensa" en el bento grid, consumiendo `GET /despensa/api/resumen`
+- [x] 👤 Ejecutar `actualizar.sh` en la VM
+- [x] 👤 Verificar acceso desde red local: `http://192.168.31.131/despensa/` ✅
+- [ ] 👤 Verificar tarjeta resumen en el portal con datos reales
 
 ---
 
