@@ -1,5 +1,26 @@
 # Bitácora — hogarOS
 
+## 2026-08-16 — Luces: iconos por tipo de dispositivo + tooltip
+
+**Petición:** en la zona "Luces · Dispositivos" del panel, cada chip mostraba solo un
+punto de color (estado) y el nombre, a veces cortado con ellipsis — costaba identificar
+qué dispositivo era.
+
+**Cambios en `portal/index.html`:**
+- `HA_LUCES`: cada entidad lleva ahora un campo `tipo` (`bombilla` / `interruptor` / `enchufe`)
+  además del nombre.
+- Nuevo mapa `ICONO_LUZ`: `bombilla → lightbulb`, `interruptor → light`, `enchufe → power`
+  (iconos Material Symbols, ya cargados globalmente desde `hogar.css`).
+- El punto de color (`.ck-luz-dot`) se sustituye por un icono (`.ck-luz-icono`) que
+  conserva la misma función de indicar estado: gris apagado, color de acento + glow
+  encendido (mismo patrón que el punto anterior).
+- Añadido `title="<nombre completo>"` al chip — tooltip nativo del navegador al pasar
+  el ratón, para ver el nombre completo cuando aparece cortado.
+
+**Commits:** `1322f3b` (iconos por tipo), `871b834` (tooltip nombre completo)
+
+---
+
 ## 2026-08-14 — Fix briefing: temperatura min/max con sensores AEMET
 
 ### Contexto
