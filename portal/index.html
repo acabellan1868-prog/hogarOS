@@ -977,7 +977,7 @@
               var on = e.state === "on";
               if (on) enc++;
               var icono = ICONO_LUZ[info.tipo] || "lightbulb";
-              hLuces += '<div class="ck-luz' + (on ? " ck-luz--on" : "") + '">' +
+              hLuces += '<div class="ck-luz' + (on ? " ck-luz--on" : "") + '" title="' + info.nombre + '">' +
                 '<span class="material-symbols-outlined ck-luz-icono ' + (on ? "ck-luz-icono--on" : "") + '">' + icono + '</span>' +
                 '<span class="ck-luz-nom">' + info.nombre + '</span>' +
               '</div>';
