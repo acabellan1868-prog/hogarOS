@@ -316,10 +316,12 @@
     [data-tema-cockpit="light"] .ck-luz--on {
       border-color: rgba(26,106,96,0.25); background: rgba(26,106,96,0.05);
     }
-    .ck-luz-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-    .ck-luz-dot--on  { background: var(--ck-accent); box-shadow: 0 0 6px var(--ck-accent); }
-    [data-tema-cockpit="light"] .ck-luz-dot--on { box-shadow: none; }
-    .ck-luz-dot--off { background: var(--ck-on-variant); }
+    .ck-luz-icono {
+      font-size: 0.7rem; flex-shrink: 0; color: var(--ck-on-variant);
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .ck-luz-icono--on { color: var(--ck-accent); text-shadow: 0 0 6px var(--ck-accent); }
+    [data-tema-cockpit="light"] .ck-luz-icono--on { text-shadow: none; }
     .ck-luz-nom  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* Red — métricas */
@@ -903,16 +905,17 @@
       "sensor.temperature_158d000425161b":     "Dormitorio"
     };
     var HA_LUCES = {
-      "light.smart_bulb_msl120d_main_channel":           { nombre: "Bombilla"    },
-      "switch.0xa4c138c23ca59c24":                       { nombre: "Cocina"      },
-      "switch.0xa4c138d738bb72c1_left":                  { nombre: "Salón izq."  },
-      "switch.0xa4c138d738bb72c1_right":                 { nombre: "Salón der."  },
-      "switch.0xa4c1385fa998b01e":                       { nombre: "Entrada"     },
-      "switch.0xa4c1384e3242935e":                       { nombre: "Pasillo"     },
-      "switch.enchufe_001_lavadero_mss310_main_channel": { nombre: "Lavadero"    },
-      "switch.enchufe_002_antonio_mss310_main_channel":  { nombre: "Enc.Antonio" },
-      "switch.enchufe_003_cocina_mss310_main_channel":   { nombre: "Enc.Cocina"  }
+      "light.smart_bulb_msl120d_main_channel":           { nombre: "Bombilla",    tipo: "bombilla"    },
+      "switch.0xa4c138c23ca59c24":                       { nombre: "Cocina",      tipo: "interruptor" },
+      "switch.0xa4c138d738bb72c1_left":                  { nombre: "Salón izq.",  tipo: "interruptor" },
+      "switch.0xa4c138d738bb72c1_right":                 { nombre: "Salón der.",  tipo: "interruptor" },
+      "switch.0xa4c1385fa998b01e":                       { nombre: "Entrada",     tipo: "interruptor" },
+      "switch.0xa4c1384e3242935e":                       { nombre: "Pasillo",     tipo: "interruptor" },
+      "switch.enchufe_001_lavadero_mss310_main_channel": { nombre: "Lavadero",    tipo: "enchufe"     },
+      "switch.enchufe_002_antonio_mss310_main_channel":  { nombre: "Enc.Antonio", tipo: "enchufe"     },
+      "switch.enchufe_003_cocina_mss310_main_channel":   { nombre: "Enc.Cocina",  tipo: "enchufe"     }
     };
+    var ICONO_LUZ = { bombilla: "lightbulb", interruptor: "light", enchufe: "power" };
 
     /* ============================================================
        Cargar Home Assistant
@@ -973,8 +976,9 @@
               total++;
               var on = e.state === "on";
               if (on) enc++;
+              var icono = ICONO_LUZ[info.tipo] || "lightbulb";
               hLuces += '<div class="ck-luz' + (on ? " ck-luz--on" : "") + '">' +
-                '<div class="ck-luz-dot ' + (on ? "ck-luz-dot--on" : "ck-luz-dot--off") + '"></div>' +
+                '<span class="material-symbols-outlined ck-luz-icono ' + (on ? "ck-luz-icono--on" : "") + '">' + icono + '</span>' +
                 '<span class="ck-luz-nom">' + info.nombre + '</span>' +
               '</div>';
             }
